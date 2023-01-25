@@ -1,0 +1,26 @@
+{
+  "include": ["src"],
+  "exclude": [
+    ".dist",
+    "_out",
+  ],
+  "compilerOptions": {
+      "declaration": true,
+      //"declaration???EXPLAIN": "WHY?!?!?!",
+      "outDir": "web/_script",
+      "rootDir": "src",
+      "paths": {
+        "customary/*": ["./src/*"]
+      },
+      // ---- CODING STANDARDS TYPICAL FOR ALL PROJECTS START HERE ----
+      "allowJs": false,
+      //"baseUrl": ".",
+      //"baseUrl???EXPLAIN": "WHY?!?!?",
+      "module": "esnext",
+      "noImplicitAny": true,
+      "noImplicitReturns": true,
+      "sourceMap": true,
+      "strict": true,
+      "target": "es2017"
+  }
+}
