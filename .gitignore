@@ -4,6 +4,6 @@
 /package-lock.json
 /web/_script/
 /.dist/
-/src/*.d.ts
-/src/*.js
-/src/*.js.map
+/src/**/*.d.ts
+/src/**/*.js
+/src/**/*.js.map

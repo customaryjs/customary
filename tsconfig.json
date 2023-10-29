@@ -1,12 +1,7 @@
 {
-  "include": ["src"],
-  "exclude": [
-    ".dist",
-    "_out",
-  ],
+  "include": ["src/**/*"],
   "compilerOptions": {
       "declaration": true,
-      //"declaration???EXPLAIN": "WHY?!?!?!",
       "outDir": "web/_script",
       "rootDir": "src",
       "paths": {
@@ -14,8 +9,6 @@
       },
       // ---- CODING STANDARDS TYPICAL FOR ALL PROJECTS START HERE ----
       "allowJs": false,
-      //"baseUrl": ".",
-      //"baseUrl???EXPLAIN": "WHY?!?!?",
       "module": "esnext",
       "noImplicitAny": true,
       "noImplicitReturns": true,

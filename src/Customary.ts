@@ -1,45 +1,44 @@
 // @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
-import {CustomElementDefiner} from "customary/CustomElementDefiner.js";
+import {CustomaryDefine} from "customary/CustomaryDefine.js";
 // @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
-import {CustomElementAssemblyInstruction} from "customary/CustomElementAssemblyInstruction.js";
+import {CustomaryDefinition} from "customary/CustomaryDefinition.js";
 // @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
-import {CustomElementAssembler} from "customary/CustomElementAssembler.js";
+import {CustomaryConstruct} from "customary/CustomaryConstruct.js";
+// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
+import {CustomarySpec} from "customary/CustomarySpec.js";
 
 export class Customary {
 
     static async define(
-        name: string,
         constructor: CustomElementConstructor,
-        import_meta: ImportMeta,
-        options: {
-            elementDefinitionOptions?: ElementDefinitionOptions,
-            fontLocations?: string[],
-        } = {}
+        spec?: CustomarySpec
     ): Promise<CustomElementConstructor> {
-        const customElementAssemblyInstruction = await new CustomElementDefiner().define(
-            name, constructor, import_meta, options
-        );
-        Customary.registry.set(constructor, customElementAssemblyInstruction);
-        customElements.define(name, constructor, options.elementDefinitionOptions ?? {extends: 'div'});
+        const customarySpec = spec || (constructor as any).customary as CustomarySpec;
+        if (!customarySpec) {
+            throw new Error(
+                'Customary needs a spec. ' +
+                'You can pass it to this function as a second argument, ' +
+                'or declare it in your custom element class as a "customary" static attribute.')
+        }
+        const {name, defineOptions} = customarySpec;
+        const customElementDefiner = new CustomaryDefine(
+            name, customarySpec.import_meta, defineOptions, customarySpec.constructOptions);
+        const customaryDefinition = await customElementDefiner.define();
+        Customary.registry.set(constructor, customaryDefinition);
+        customElements.define(name, constructor, defineOptions?.elementDefinitionOptions ?? {extends: 'div'});
         return await customElements.whenDefined(name);
     }
 
-    private static readonly registry = new Map<CustomElementConstructor, CustomElementAssemblyInstruction>();
-
-    static async construct(
-        element: Element,
-        options: {
-            adoptStylesheetDont?: boolean;
-            attachShadowDont?: boolean;
-            replaceChildrenDont?: boolean;
-            onDocumentFragment?: (documentFragment: DocumentFragment) => void;
-        } = {}
+    static construct(
+        element: Element
     ){
-        return await new CustomElementAssembler().assemble(
-            element, 
-            Customary.registry.get(
-                element.constructor as CustomElementConstructor)!,
-            options
-        );
+        const customaryDefinition =
+            Customary.registry.get(element.constructor as CustomElementConstructor)!;
+        new CustomaryConstruct().construct(element, customaryDefinition);
     }
+
+    private static readonly registry = new Map<CustomElementConstructor, CustomaryDefinition>();
+
 }
+
+export {CustomarySpec};
