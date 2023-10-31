@@ -17,6 +17,7 @@
     "dist": "copyfiles --error --all \"web/**/*\" \"src/**/*\" .dist",
     "help:dist": "echo we copy src because it lets browsers step debug .ts files",
     "clean": "rimraf web/_script .dist",
+    "clean-src": "rimraf --glob src/**/*.d.ts src/**/*.js.map src/**/*.js",
     "compile-watch": "tsc --build --verbose --watch",
     "compile": "tsc --build --verbose"
   },

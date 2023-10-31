@@ -18,6 +18,10 @@ import {CSSStyleSheetAdopter} from "customary/cssstylesheet/CSSStyleSheetAdopter
 import {CustomaryConstructOptions} from "customary/CustomaryConstructOptions.js";
 // @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
 import {FetchText, FetchText_DOM_singleton} from "customary/fetch/FetchText.js";
+// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
+import {CustomaryAttributeOptions} from "customary/CustomaryAttributeOptions.js";
+// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
+import {CustomarySlotOptions} from "customary/CustomarySlotOptions.js";
 
 export class CustomaryDefine {
 
@@ -27,12 +31,14 @@ export class CustomaryDefine {
         return {
             documentFragment: resources[0],
             cssStylesheet: resources[1],
-            constructOptions: this.constructOptions
+            constructOptions: this.constructOptions,
+            slotOptions: this.slotOptions,
+            attributeOptions: this.attributeOptions,
         };
     }
 
     private adopt_font_cssStyleSheets() {
-        const {fontLocations} = this.defineOptions;
+        const fontLocations = this.defineOptions?.fontLocations;
         if (!fontLocations) return;
         this.cssStyleSheetAdopter.adoptCSSStylesheets(fontLocations).then(/*fire and forget*/);
     }
@@ -46,7 +52,7 @@ export class CustomaryDefine {
     }
 
     private getResourceLocationResolver() {
-        const {resourceLocationResolution} = this.defineOptions;
+        const resourceLocationResolution = this.defineOptions?.resourceLocationResolution;
         switch (resourceLocationResolution?.kind) {
             case "relative": return new RelativeResourceLocationResolver(resourceLocationResolution.pathPrefix);
             case "flat":
@@ -74,8 +80,10 @@ export class CustomaryDefine {
     constructor(
         private readonly name: string,
         private readonly import_meta: ImportMeta,
-        private readonly defineOptions: CustomaryDefineOptions = {},
-        private readonly constructOptions: CustomaryConstructOptions = {},
+        private readonly defineOptions: CustomaryDefineOptions | undefined,
+        private readonly constructOptions: CustomaryConstructOptions<any> | undefined,
+        private readonly slotOptions: CustomarySlotOptions<any> | undefined,
+        private readonly attributeOptions: CustomaryAttributeOptions<any> | undefined,
     ) {
         const fetchText: FetchText = FetchText_DOM_singleton;
         const cssStyleSheetImporter = new CSSStyleSheetImporter(fetchText);

@@ -1,7 +1,7 @@
-export interface CustomaryDefineOptions {
-    elementDefinitionOptions?: ElementDefinitionOptions,
-    fontLocations?: string[],
-    resourceLocationResolution?: ResourceLocationResolution,
+export type CustomaryDefineOptions = {
+    elementDefinitionOptions?: ElementDefinitionOptions;
+    fontLocations?: string[];
+    resourceLocationResolution?: ResourceLocationResolution;
 }
 
 type ResourceLocationResolution = FlatResourceLocationResolution | RelativeResourceLocationResolution;
