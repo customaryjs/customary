@@ -5,26 +5,28 @@ import {CustomaryDefinition} from "customary/CustomaryDefinition.js";
 // @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
 import {CustomaryConstruct} from "customary/CustomaryConstruct.js";
 // @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
-import {CustomarySpec} from "customary/CustomarySpec.js";
+import {CustomaryOptions} from "customary/CustomaryOptions.js";
+
+interface CustomaryCustomElementConstructor<T extends HTMLElement> extends CustomElementConstructor {
+    customary?: CustomaryOptions<T>;
+}
 
 export class Customary {
 
-    static async define(
-        constructor: CustomElementConstructor,
-        spec?: CustomarySpec<any>
+    static async define<T extends HTMLElement>(
+        constructor: CustomaryCustomElementConstructor<T>,
+        options?: CustomaryOptions<T>
     ): Promise<CustomElementConstructor> {
-        const customarySpec = spec || (constructor as any).customary as CustomarySpec<any>;
-        if (!customarySpec) {
+        const customaryOptions = options || constructor.customary;
+        if (!customaryOptions) {
             throw new Error(
-                'Customary needs a spec. ' +
-                'You can pass it to this function as a second argument, ' +
-                'or declare it in your custom element class as a "customary" static attribute.')
+                'Customary needs options. ' +
+                'You can pass them to this function as a second argument, ' +
+                'or declare them in your custom element class as a "customary" static attribute.')
         }
-        const {name, defineOptions} = customarySpec;
-        const customElementDefiner = new CustomaryDefine(
-            name, customarySpec.import_meta, defineOptions,
-            customarySpec.constructOptions, customarySpec.slotOptions, customarySpec.attributeOptions);
-        const customaryDefinition = await customElementDefiner.define();
+        const {name, defineOptions} = customaryOptions;
+        const customaryDefine = new CustomaryDefine<T>(customaryOptions);
+        const customaryDefinition = await customaryDefine.define();
         Customary.registry.set(constructor, customaryDefinition);
         customElements.define(name, constructor, defineOptions?.elementDefinitionOptions ?? {extends: 'div'});
         return await customElements.whenDefined(name);
@@ -53,4 +55,4 @@ export class Customary {
 
 }
 
-export {CustomarySpec};
+export {CustomaryOptions};

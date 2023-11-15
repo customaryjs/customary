@@ -7,7 +7,7 @@ import {CustomaryAttributeOptions} from "customary/CustomaryAttributeOptions.js"
 // @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
 import {CustomarySlotOptions} from "customary/CustomarySlotOptions.js";
 
-export type CustomarySpec<T extends HTMLElement> = {
+export type CustomaryOptions<T extends HTMLElement> = {
     name: string;
     import_meta: ImportMeta;
     defineOptions?: CustomaryDefineOptions;
