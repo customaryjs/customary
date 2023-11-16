@@ -16,19 +16,25 @@ import {CSSStyleSheetAdopter} from "customary/cssstylesheet/CSSStyleSheetAdopter
 import {FetchText, FetchText_DOM_singleton} from "customary/fetch/FetchText.js";
 // @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
 import {CustomaryOptions} from "customary/CustomaryOptions.js";
+import {CustomaryRegistry} from "customary/CustomaryRegistry.js";
+import {CustomaryCustomElementConstructor} from "customary/CustomaryCustomElementConstructor.js";
 
 export class CustomaryDefine<T extends HTMLElement> {
 
-    async define(): Promise<CustomaryDefinition> {
+    async define(): Promise<CustomElementConstructor> {
         this.adopt_font_cssStyleSheets();
         const resources: [DocumentFragment, (CSSStyleSheet | undefined)] = await this.importResources();
-        return {
+        const customaryDefinition: CustomaryDefinition = {
             documentFragment: resources[0],
             cssStylesheet: resources[1],
             constructOptions: this.options.constructOptions,
             slotOptions: this.options.slotOptions,
             attributeOptions: this.options.attributeOptions,
         };
+        this.customaryRegistry.set(this.customElementConstructor, customaryDefinition);
+        const {name, defineOptions} = this.options;
+        customElements.define(name, this.customElementConstructor, defineOptions?.elementDefinitionOptions ?? {extends: 'div'});
+        return await customElements.whenDefined(name);
     }
 
     private adopt_font_cssStyleSheets() {
@@ -72,15 +78,24 @@ export class CustomaryDefine<T extends HTMLElement> {
     }
 
     constructor(
-        private readonly options: CustomaryOptions<T>
+        private readonly customaryRegistry: CustomaryRegistry,
+        private readonly customElementConstructor: CustomaryCustomElementConstructor<any>,
     ) {
+        const customaryOptions = customElementConstructor.customary;
+        if (!customaryOptions) {
+            throw new Error(
+                'Customary needs options. ' +
+                'Declare them in your custom element class as a "customary" static attribute.')
+        }
         const fetchText: FetchText = FetchText_DOM_singleton;
         const cssStyleSheetImporter = new CSSStyleSheetImporter(fetchText);
         this.cssStyleSheetImporter = cssStyleSheetImporter;
         this.cssStyleSheetAdopter = new CSSStyleSheetAdopter(cssStyleSheetImporter);
         this.documentFragmentImporter = new DocumentFragmentImporter(fetchText);
+        this.options = customaryOptions;
     }
 
+    private readonly options: CustomaryOptions<T>
     private readonly documentFragmentImporter: DocumentFragmentImporter;
     private readonly cssStyleSheetAdopter: CSSStyleSheetAdopter;
     private readonly cssStyleSheetImporter: CSSStyleSheetImporter;
