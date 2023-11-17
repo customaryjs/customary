@@ -7,7 +7,7 @@ import {CustomaryAttributeOptions} from "customary/CustomaryAttributeOptions.js"
 
 export type CustomaryDefinition = {
     documentFragment: DocumentFragment;
-    cssStylesheet: CSSStyleSheet | undefined;
+    cssStyleSheet: CSSStyleSheet | undefined;
     constructOptions: CustomaryConstructOptions<any> | undefined;
     slotOptions: CustomarySlotOptions<any> | undefined;
     attributeOptions: CustomaryAttributeOptions<any> | undefined;

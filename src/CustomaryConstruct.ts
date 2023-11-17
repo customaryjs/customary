@@ -21,7 +21,7 @@ export class CustomaryConstruct {
             parent.replaceChildren(documentFragment);
         }
 
-        this.adoptStylesheet(element, customaryDefinition.cssStylesheet, options?.adoptStylesheetDont);
+        this.adoptStylesheet(element, customaryDefinition.cssStyleSheet, options?.adoptStylesheetDont);
 
         this.addEventListener_slotChange(element, customaryDefinition.slotOptions);
     }

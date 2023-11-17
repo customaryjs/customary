@@ -4,7 +4,12 @@ export interface FetchText {
 
 class FetchText_DOM implements FetchText {
     public async fetchText(input: RequestInfo | URL): Promise<string> {
-        return await (await fetch(input)).text();
+        console.log('fetch: ' + input);
+        const response = await fetch(input);
+        if (!response.ok) {
+            throw new Error(response.statusText, {cause:response});
+        }
+        return await response.text();
     }
 }
 

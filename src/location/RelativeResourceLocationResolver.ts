@@ -3,7 +3,7 @@ import {ResourceLocationResolver} from "customary/location/ResourceLocationResol
 
 export class RelativeResourceLocationResolver implements ResourceLocationResolver {
 
-    constructor(private readonly pathPrefix: string = '../') {}
+    constructor(private readonly pathPrefix: string) {}
 
     async resolveResourceLocation(name: string): Promise<string> {
         return `${this.pathPrefix}${name}`;

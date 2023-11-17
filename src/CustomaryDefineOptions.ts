@@ -1,5 +1,6 @@
 export type CustomaryDefineOptions = {
     elementDefinitionOptions?: ElementDefinitionOptions;
+    detileDont?: boolean;
     fontLocations?: string[];
     resourceLocationResolution?: ResourceLocationResolution;
 }
@@ -12,5 +13,5 @@ type FlatResourceLocationResolution = {
 
 type RelativeResourceLocationResolution = {
     kind: 'relative';
-    pathPrefix?: string;
+    pathPrefix: string;
 }
