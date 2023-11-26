@@ -12,10 +12,11 @@ import {CustomaryCustomElementConstructor} from "customary/CustomaryCustomElemen
 export class Customary {
 
     static async define<T extends HTMLElement>(
-        ...constructors: CustomaryCustomElementConstructor<any>[]
+        constructor: CustomaryCustomElementConstructor<any>,
+        options?: Partial<CustomaryOptions<T>>
     ): Promise<CustomElementConstructor> {
         const customaryDefine = new CustomaryDefine<T>(
-            this.registry, constructors[0]);
+            this.registry, constructor, options);
         return await customaryDefine.define();
     }
 

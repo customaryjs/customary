@@ -1,3 +1,5 @@
+import {NotFound404Error} from "customary/fetch/NotFound404Error.js";
+
 export interface FetchText {
     fetchText(input: RequestInfo | URL): Promise<string>;
 }
@@ -7,7 +9,10 @@ class FetchText_DOM implements FetchText {
         console.log('fetch: ' + input);
         const response = await fetch(input);
         if (!response.ok) {
-            throw new Error(response.statusText, {cause:response});
+            if (response.status === 404)
+                throw new NotFound404Error(response.statusText, {cause:response});
+            else
+                throw new Error(response.statusText, {cause:response});
         }
         return await response.text();
     }

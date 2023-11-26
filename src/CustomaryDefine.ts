@@ -18,6 +18,8 @@ import {FetchText, FetchText_DOM_singleton} from "customary/fetch/FetchText.js";
 import {CustomaryOptions} from "customary/CustomaryOptions.js";
 // @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
 import {CustomaryCustomElementConstructor} from "customary/CustomaryCustomElementConstructor.js";
+// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
+import {NotFound404Error} from "customary/fetch/NotFound404Error.js";
 
 export class CustomaryDefine<T extends HTMLElement> {
 
@@ -25,13 +27,8 @@ export class CustomaryDefine<T extends HTMLElement> {
         this.adopt_font_cssStyleSheets();
 
         const resourceLocationResolver = this.getResourceLocationResolver();
-
-        const tilesetHtml = await this.getTilesetHtml(resourceLocationResolver);
+        const documentFragment = await this.getDocumentFragment(resourceLocationResolver);
         const cssStyleSheet = await this.getCssStyleSheet(resourceLocationResolver);
-
-        const tile: string = this.options.defineOptions?.detileDont ?
-            tilesetHtml : this.detile(tilesetHtml, '<!--customary-->');
-        const documentFragment = this.toDocumentFragment(tile);
 
         const customaryDefinition: CustomaryDefinition = {
             documentFragment,
@@ -61,21 +58,56 @@ export class CustomaryDefine<T extends HTMLElement> {
         }
     }
 
+    private async getDocumentFragment(resourceLocationResolver: ResourceLocationResolver) {
+        const tileset = this.options.tileset || await this.getTileset(resourceLocationResolver);
+        const tile = await this.getTile(tileset);
+        return this.toDocumentFragment(tile);
+    }
+
+    private async getTileset(resourceLocationResolver: ResourceLocationResolver): Promise<string> {
+        const location = await this.resolveResourceLocation('html', resourceLocationResolver);
+        try {
+            return await this.fetchText.fetchText(location);
+        }
+        catch (error) {
+            if (error instanceof NotFound404Error) {
+                // TODO re-wrap as an instructive error
+                throw error;
+            }
+            else
+                throw error;
+        }
+    }
+
+    private async getTile(tileset: string) {
+        if (this.options.defineOptions?.detileDont) {
+            return tileset;
+        }
+        const delimiters = ['customary', this.options.name].map(s => `<!--${s}-->`);
+        for (const delimiter of delimiters) {
+            const tile: string | undefined = this.detile(tileset, delimiter);
+            if (tile) {
+                await this.options.defineOptions?.onTile?.(tile);
+                return tile;
+            }
+        }
+        throw new Error(
+            'Delimited tile not found.' +
+            ' Customary looks for delimiters in your html tileset' +
+            ' to read the tile your custom component will display.' +
+            ` Try using one of these delimiters: ${delimiters}`);
+    }
+
     private toDocumentFragment(innerHtml: string): DocumentFragment {
         const templateElement: HTMLTemplateElement = document.createElement('template');
         templateElement.innerHTML = innerHtml;
         return templateElement.content;
     }
 
-    private async getTilesetHtml(resourceLocationResolver: ResourceLocationResolver): Promise<string> {
-        const location = await this.resolveResourceLocation('html', resourceLocationResolver);
-        return await this.fetchText.fetchText(location);
-    }
-
-    private detile(text: string, delimiter: string): string
+    private detile(text: string, delimiter: string): string | undefined
     {
         const strings = text.split(delimiter);
-        if (strings.length < 3) throw new Error('Need two delimiters');
+        if (strings.length < 3) return undefined;
         const string = strings[1];
         const split = string?.split(delimiter);
         const string1 = split?.[0];
@@ -84,7 +116,16 @@ export class CustomaryDefine<T extends HTMLElement> {
 
     private async getCssStyleSheet(resourceLocationResolver: ResourceLocationResolver) {
         const location = await this.resolveResourceLocation('css', resourceLocationResolver);
-        return await this.cssStyleSheetImporter.getCSSStyleSheet(location);
+        try {
+            return await this.cssStyleSheetImporter.getCSSStyleSheet(location);
+        }
+        catch (error) {
+            if (error instanceof NotFound404Error) {
+                // TODO re-wrap instructive error
+                return undefined;
+            }
+            throw error;
+        }
     }
 
     private async resolveResourceLocation(
@@ -97,16 +138,19 @@ export class CustomaryDefine<T extends HTMLElement> {
     constructor(
         private readonly customaryRegistry: CustomaryRegistry,
         private readonly customElementConstructor: CustomaryCustomElementConstructor<any>,
+        options?: Partial<CustomaryOptions<T>>
     ) {
         const fetchText: FetchText = FetchText_DOM_singleton;
         const cssStyleSheetImporter = new CSSStyleSheetImporter(fetchText);
         this.cssStyleSheetImporter = cssStyleSheetImporter;
         this.cssStyleSheetAdopter = new CSSStyleSheetAdopter(cssStyleSheetImporter);
         this.fetchText = fetchText;
-        this.options = this.getCustomaryOptions(customElementConstructor);
+        this.options = this.getCustomaryOptions(customElementConstructor, options);
     }
 
-    private getCustomaryOptions(customElementConstructor: CustomaryCustomElementConstructor<any>) {
+    private getCustomaryOptions(
+        customElementConstructor: CustomaryCustomElementConstructor<any>,
+        options?: Partial<CustomaryOptions<T>>) {
         const customaryOptions = customElementConstructor.customary;
         if (!customaryOptions) {
             throw new Error(
@@ -119,6 +163,9 @@ export class CustomaryDefine<T extends HTMLElement> {
                 kind: "relative",
                 pathPrefix: '../',
             };
+        }
+        if (options) {
+            Object.assign(customaryOptions, options);
         }
         return customaryOptions;
     }

@@ -8,16 +8,10 @@ export class CSSStyleSheetImporter {
     }
 
     async getCSSStyleSheet(location: string): Promise<CSSStyleSheet | undefined> {
-        try {
             if (this.importFn) {
                 return await this.importCSSStyleSheet(location, this.importFn);
             }
             return await this.fetchCSSStyleSheet(location);
-        }
-        catch (error) {
-            console.log(error);
-            return undefined;
-        }
     }
 
     private async importCSSStyleSheet(location: string, importFn: ImportFn) {
@@ -27,7 +21,6 @@ export class CSSStyleSheetImporter {
     }
 
     private async fetchCSSStyleSheet(location: string) {
-        console.log('fetch: ' + location);
         const text: string = await this.fetchText.fetchText(location);
         const cssStyleSheet = new CSSStyleSheet({baseURL: location});
         return cssStyleSheet.replace(text);

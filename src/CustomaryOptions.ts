@@ -13,6 +13,7 @@ export type CustomaryOptions<T extends HTMLElement> = {
     name: string;
     import_meta: ImportMeta;
     preset?: CustomaryPreset;
+    tileset?: string;
     defineOptions?: CustomaryDefineOptions;
     constructOptions?: CustomaryConstructOptions<T>;
     attributeOptions?: CustomaryAttributeOptions<T>;

@@ -2,6 +2,7 @@ export type CustomaryDefineOptions = {
     elementDefinitionOptions?: ElementDefinitionOptions;
     detileDont?: boolean;
     fontLocations?: string[];
+    onTile?: (tile: string) => Promise<any>;
     resourceLocationResolution?: ResourceLocationResolution;
 }
 
