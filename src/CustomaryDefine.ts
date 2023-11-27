@@ -38,9 +38,14 @@ export class CustomaryDefine<T extends HTMLElement> {
             attributeOptions: this.options.attributeOptions,
         };
         this.customaryRegistry.set(this.customElementConstructor, customaryDefinition);
-        const {name, defineOptions} = this.options;
-        customElements.define(name, this.customElementConstructor, defineOptions?.elementDefinitionOptions ?? {extends: 'div'});
+        const {name} = this.options;
+        customElements.define(name, this.customElementConstructor, this.getElementDefinitionOptions());
         return await customElements.whenDefined(name);
+    }
+
+    private getElementDefinitionOptions(): ElementDefinitionOptions | undefined {
+        return this.options.defineOptions?.elementDefinitionOptions ??
+            (this.options.defineOptions?.autonomous ? undefined : {extends: 'div'});
     }
 
     private adopt_font_cssStyleSheets() {

@@ -26,9 +26,10 @@ export class Customary {
         new CustomaryConstruct().construct(element, customaryDefinition);
     }
 
-    static observedAttributes(constructor: CustomElementConstructor): string[] {
+    static observedAttributes(constructor: CustomElementConstructor): string[] | undefined {
         const customaryDefinition = this.registry.get(constructor)!;
-        return Object.keys(customaryDefinition.attributeOptions!.attributes);
+        const {attributeOptions} = customaryDefinition;
+        return attributeOptions ? Object.keys(attributeOptions.attributes) : undefined;
     }
 
     static attributeChangedCallback(
