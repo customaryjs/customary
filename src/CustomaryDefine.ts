@@ -44,9 +44,13 @@ export class CustomaryDefine<T extends HTMLElement> {
     }
 
     private adopt_font_cssStyleSheets() {
+        const locations: string[] = [];
+        const fontLocation = this.options.defineOptions?.fontLocation;
+        if (fontLocation) locations.push(fontLocation);
         const fontLocations = this.options.defineOptions?.fontLocations;
-        if (!fontLocations) return;
-        this.cssStyleSheetAdopter.adoptCSSStylesheets(fontLocations).then(/*fire and forget*/);
+        if (fontLocations) locations.push(...fontLocations);
+        if (locations.length === 0) return;
+        this.cssStyleSheetAdopter.adoptCSSStylesheets(...locations).then(/*fire and forget*/);
     }
 
     private getResourceLocationResolver() {
@@ -59,12 +63,15 @@ export class CustomaryDefine<T extends HTMLElement> {
     }
 
     private async getDocumentFragment(resourceLocationResolver: ResourceLocationResolver) {
-        const tileset = this.options.tileset || await this.getTileset(resourceLocationResolver);
+        const tileset = await this.getTileset(resourceLocationResolver);
         const tile = await this.getTile(tileset);
         return this.toDocumentFragment(tile);
     }
 
-    private async getTileset(resourceLocationResolver: ResourceLocationResolver): Promise<string> {
+    private async getTileset(resourceLocationResolver: ResourceLocationResolver) {
+        if (this.options.tilesetLookup) {
+            return await this.options.tilesetLookup();
+        }
         const location = await this.resolveResourceLocation('html', resourceLocationResolver);
         try {
             return await this.fetchText.fetchText(location);

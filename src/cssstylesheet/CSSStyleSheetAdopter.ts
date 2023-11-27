@@ -6,7 +6,7 @@ export class CSSStyleSheetAdopter {
         private readonly cssStyleSheetImporter: CSSStyleSheetImporter
     ) {}
 
-    public async adoptCSSStylesheets(locations: string[]) {
+    public async adoptCSSStylesheets(...locations: string[]) {
         const cssStyleSheets = await this.getCSSStyleSheets(locations);
         this.adoptedStyleSheets_push(cssStyleSheets);
     }
