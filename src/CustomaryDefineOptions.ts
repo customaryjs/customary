@@ -1,6 +1,5 @@
 export type CustomaryDefineOptions = {
-    elementDefinitionOptions?: ElementDefinitionOptions;
-    autonomous?: boolean;
+    extends?: string;
     detileDont?: boolean;
     fontLocation?: string;
     fontLocations?: string[];

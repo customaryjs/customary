@@ -20,6 +20,7 @@ import {CustomaryOptions} from "customary/CustomaryOptions.js";
 import {CustomaryCustomElementConstructor} from "customary/CustomaryCustomElementConstructor.js";
 // @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
 import {NotFound404Error} from "customary/fetch/NotFound404Error.js";
+import {CustomaryHTMLElement} from "customary/CustomaryHTMLElement.js";
 
 export class CustomaryDefine<T extends HTMLElement> {
 
@@ -44,8 +45,28 @@ export class CustomaryDefine<T extends HTMLElement> {
     }
 
     private getElementDefinitionOptions(): ElementDefinitionOptions | undefined {
-        return this.options.defineOptions?.elementDefinitionOptions ??
-            (this.options.defineOptions?.autonomous ? undefined : {extends: 'div'});
+        const {defineOptions} = this.options;
+        const superclass = Object.getPrototypeOf(this.customElementConstructor);
+        if (!defineOptions?.extends) {
+            const superclasses = [HTMLElement, CustomaryHTMLElement];
+            if (!superclasses.includes(superclass)) {
+                const supername = superclass.name;
+                const supernames = superclasses.map(superclass => superclass.name);
+                throw new Error(
+                    `Your custom element is autonomous, but` +
+                    ` your custom element class extends superclass ${supername}, which is a mismatch. You ` +
+                    `need to extend one of: ${supernames.join(", ")}`);
+            }
+            return undefined;
+        }
+        const supername = superclass.name;
+        if (!supername.toLowerCase().includes(defineOptions?.extends)) {
+            throw new Error(
+                `Your custom element definition declares 'extends' as "${defineOptions?.extends}", but` +
+                ` your custom element class extends superclass ${supername}, which is a mismatch. You ` +
+                `need to use a matching 'extends' declaration.`);
+        }
+        return {extends: defineOptions?.extends};
     }
 
     private adopt_font_cssStyleSheets() {
@@ -74,8 +95,8 @@ export class CustomaryDefine<T extends HTMLElement> {
     }
 
     private async getTileset(resourceLocationResolver: ResourceLocationResolver) {
-        if (this.options.tilesetLookup) {
-            return await this.options.tilesetLookup();
+        if (this.options.getTileset) {
+            return await this.options.getTileset();
         }
         const location = await this.resolveResourceLocation('html', resourceLocationResolver);
         try {

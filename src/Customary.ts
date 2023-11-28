@@ -6,6 +6,7 @@ import {CustomaryDefinition} from "customary/CustomaryDefinition.js";
 import {CustomaryConstruct} from "customary/CustomaryConstruct.js";
 // @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
 import {CustomaryOptions} from "customary/CustomaryOptions.js";
+import {CustomaryHTMLElement} from "customary/CustomaryHTMLElement.js";
 import {CustomaryRegistry} from "customary/CustomaryRegistry.js";
 import {CustomaryCustomElementConstructor} from "customary/CustomaryCustomElementConstructor.js";
 
@@ -44,4 +45,4 @@ export class Customary {
 
 }
 
-export {CustomaryOptions};
+export {CustomaryOptions, CustomaryHTMLElement};
