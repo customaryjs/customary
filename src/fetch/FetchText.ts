@@ -1,3 +1,4 @@
+// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
 import {NotFound404Error} from "customary/fetch/NotFound404Error.js";
 
 export interface FetchText {

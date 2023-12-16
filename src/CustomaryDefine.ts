@@ -20,6 +20,7 @@ import {CustomaryOptions} from "customary/CustomaryOptions.js";
 import {CustomaryCustomElementConstructor} from "customary/CustomaryCustomElementConstructor.js";
 // @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
 import {NotFound404Error} from "customary/fetch/NotFound404Error.js";
+// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
 import {CustomaryHTMLElement} from "customary/CustomaryHTMLElement.js";
 
 export class CustomaryDefine<T extends HTMLElement> {
