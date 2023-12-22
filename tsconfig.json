@@ -10,6 +10,7 @@
       // ---- CODING STANDARDS TYPICAL FOR ALL PROJECTS START HERE ----
       "allowJs": false,
       "module": "esnext",
+      "moduleResolution": "node",
       "noImplicitAny": true,
       "noImplicitReturns": true,
       "sourceMap": true,
