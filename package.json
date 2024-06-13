@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "devDependencies": {
     "@types/mocha": "^10.0.1",
+    "@types/node": "^20.14.2",
     "copyfiles": "^2.4.1",
     "http-server": "^14.1.1",
     "mocha": "^10.2.0",
@@ -21,6 +22,9 @@
     "compile-watch": "tsc --build --verbose --watch",
     "compile": "tsc --build --verbose"
   },
-  "author": "Andre de Oliveira",
-  "license": "Apache-2.0"
+  "engines": {
+    "node": "20.14.0"
+  },
+  "license": "Apache-2.0",
+  "author": "Andre de Oliveira"
 }
