@@ -32,11 +32,12 @@ export class CSSStyleSheetImporter {
 type ImportFn = (location: string) => Promise<CSSStyleSheet>;
 
 /**
- * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules#javascript.statements.import
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import/with
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules#loading_non-javascript_resources
  */
 function getImportFn(): ImportFn | undefined {
     try {
-        return eval('location => import(location, {assert: {type: "css"}})');
+        return eval('location => import(location, {with: {type: "css"}})');
     }
     catch (error) {
         if (error instanceof SyntaxError) {
