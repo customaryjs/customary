@@ -1,25 +1,23 @@
-// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
-import {CSSStyleSheetImporter} from "customary/cssstylesheet/CSSStyleSheetImporter.js";
+interface CSSStyleSheetImporter {
+    getCSSStyleSheet(location: string): Promise<CSSStyleSheet | undefined>
+}
 
 export class CSSStyleSheetAdopter {
     constructor(
-        private readonly cssStyleSheetImporter: CSSStyleSheetImporter
+        private readonly cssStyleSheetImporter: CSSStyleSheetImporter,
+        private readonly document: Document,
     ) {}
 
     public async adoptCSSStylesheets(...locations: string[]) {
-        const cssStyleSheets = await this.getCSSStyleSheets(locations);
-        this.adoptedStyleSheets_push(cssStyleSheets);
-    }
-    private async getCSSStyleSheets(locations: string[]): Promise<CSSStyleSheet[]> {
-        return (await Promise.all(
-            locations
-                .map(location => this.getCSSStyleSheet(location))
-                .filter(cssStyleSheet => !!cssStyleSheet)
-        )) as CSSStyleSheet[];
-    }
-
-    private async getCSSStyleSheet(location: string): Promise<CSSStyleSheet | undefined> {
-        return await this.cssStyleSheetImporter.getCSSStyleSheet(location);
+        const cssStyleSheetsMaybe: (CSSStyleSheet | undefined)[] = await Promise.all(
+            locations.map(location => this.cssStyleSheetImporter.getCSSStyleSheet(location))
+        );
+        const cssStyleSheets: CSSStyleSheet[] = cssStyleSheetsMaybe.filter(
+            cssStyleSheet => !!cssStyleSheet
+        );
+        if (cssStyleSheets.length > 0) {
+            this.adoptedStyleSheets_push(cssStyleSheets);
+        }
     }
 
     /**
@@ -27,9 +25,8 @@ export class CSSStyleSheetAdopter {
      * @see https://github.com/microsoft/vscode/issues/159877#issuecomment-1262843952
      * @see https://github.com/mdn/interactive-examples/issues/887#issuecomment-432606925
      */
-    private adoptedStyleSheets_push(cssStyleSheets?: CSSStyleSheet[]) {
-        if (!cssStyleSheets) return;
-        document.adoptedStyleSheets.push(...cssStyleSheets);
+    private adoptedStyleSheets_push(cssStyleSheets: CSSStyleSheet[]) {
+        this.document.adoptedStyleSheets.push(...cssStyleSheets);
     }
 
 }

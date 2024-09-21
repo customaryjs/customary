@@ -1,116 +1,72 @@
 // @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
 import {CustomaryDefinition} from "customary/CustomaryDefinition.js";
 // @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
-import {CSSStyleSheetImporter} from "customary/cssstylesheet/CSSStyleSheetImporter.js";
-// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
-import {CustomaryRegistry} from "customary/CustomaryRegistry.js";
-// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
-import {ResourceLocationResolver} from "customary/location/ResourceLocationResolver.js";
-// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
-import {RelativeResourceLocationResolver} from "customary/location/RelativeResourceLocationResolver.js";
-// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
-import {FlatResourceLocationResolver} from "customary/location/FlatResourceLocationResolver.js";
-// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
-import {CSSStyleSheetAdopter} from "customary/cssstylesheet/CSSStyleSheetAdopter.js";
-// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
-import {FetchText, FetchText_DOM_singleton} from "customary/fetch/FetchText.js";
-// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
 import {CustomaryOptions} from "customary/CustomaryOptions.js";
-// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
-import {CustomaryCustomElementConstructor} from "customary/CustomaryCustomElementConstructor.js";
-// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
-import {NotFound404Error} from "customary/fetch/NotFound404Error.js";
-// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
-import {CustomaryHTMLElement} from "customary/CustomaryHTMLElement.js";
 
-export class CustomaryDefine<T extends HTMLElement> {
+export class CustomaryDefine {
 
-    async define(): Promise<CustomElementConstructor> {
-        this.adopt_font_cssStyleSheets();
+    async define() {
+        const [definition, ] = await Promise.all([
+            this.buildCustomaryDefinition(),
+            this.adopt_font_cssStyleSheets(),
+        ])
+        return definition;
+    }
 
-        const resourceLocationResolver = this.getResourceLocationResolver();
-        const documentFragment = await this.getDocumentFragment(resourceLocationResolver);
-        const cssStyleSheet = await this.getCssStyleSheet(resourceLocationResolver);
+    private async buildCustomaryDefinition(): Promise<CustomaryDefinition> {
+        const templateDefinition = await this.getTemplateDefinition();
 
-        const customaryDefinition: CustomaryDefinition = {
-            documentFragment,
-            cssStyleSheet,
+        return {
+            documentFragment: templateDefinition.template.content,
+            cssStyleSheet: templateDefinition.cssStyleSheet,
             constructOptions: this.options.constructOptions,
             slotOptions: this.options.slotOptions,
             attributeOptions: this.options.attributeOptions,
         };
-        this.customaryRegistry.set(this.customElementConstructor, customaryDefinition);
-        const {name} = this.options;
-        customElements.define(name, this.customElementConstructor, this.getElementDefinitionOptions());
-        return await customElements.whenDefined(name);
     }
 
-    private getElementDefinitionOptions(): ElementDefinitionOptions | undefined {
-        const {defineOptions} = this.options;
-        const superclass = Object.getPrototypeOf(this.customElementConstructor);
-        if (!defineOptions?.extends) {
-            const superclasses = [HTMLElement, CustomaryHTMLElement];
-            if (!superclasses.includes(superclass)) {
-                const supername = superclass.name;
-                const supernames = superclasses.map(superclass => superclass.name);
-                throw new Error(
-                    `Your custom element is autonomous, but` +
-                    ` your custom element class extends superclass ${supername}, which is a mismatch. You ` +
-                    `need to extend one of: ${supernames.join(", ")}`);
-            }
-            return undefined;
+    private async getTemplateDefinition(): Promise<TemplateDefinition> {
+        const templates: HTMLCollectionOf<HTMLTemplateElement> = document.getElementsByTagName("template");
+        const template = templates.namedItem(this.options.name) ?? templates[0];
+
+        if (template) {
+            return {template, cssStyleSheet: undefined};
         }
-        const supername = superclass.name;
-        if (!supername.toLowerCase().includes(defineOptions?.extends)) {
-            throw new Error(
-                `Your custom element definition declares 'extends' as "${defineOptions?.extends}", but` +
-                ` your custom element class extends superclass ${supername}, which is a mismatch. You ` +
-                `need to use a matching 'extends' declaration.`);
+
+        if (this.options.fromHtml) {
+            return {
+                template: await this.toTemplate(await this.options.fromHtml()),
+                cssStyleSheet: await this.loadCssStyleSheet(),
+            };
         }
-        return {extends: defineOptions?.extends};
+
+        return {
+            template: await this.toTemplate(await (await this.externalLoader).loadHtml()),
+            cssStyleSheet: await this.loadCssStyleSheet(),
+        };
     }
 
-    private adopt_font_cssStyleSheets() {
-        const locations: string[] = [];
-        const fontLocation = this.options.defineOptions?.fontLocation;
-        if (fontLocation) locations.push(fontLocation);
-        const fontLocations = this.options.defineOptions?.fontLocations;
-        if (fontLocations) locations.push(...fontLocations);
-        if (locations.length === 0) return;
-        this.cssStyleSheetAdopter.adoptCSSStylesheets(...locations).then(/*fire and forget*/);
+    private async loadCssStyleSheet() {
+        return await (await this.externalLoader).loadCssStyleSheet();
     }
 
-    private getResourceLocationResolver() {
-        const resourceLocationResolution = this.options.defineOptions?.resourceLocationResolution;
-        switch (resourceLocationResolution?.kind) {
-            case "relative": return new RelativeResourceLocationResolver(resourceLocationResolution.pathPrefix);
-            case "flat":
-            default: return new FlatResourceLocationResolver();
-        }
+    private async adopt_font_cssStyleSheets() {
+        const locations = ((a: string[]) => a.length > 0 ? a : undefined)(
+            [
+                this.options.defineOptions?.fontLocation,
+                ...(this.options.defineOptions?.fontLocations ?? []),
+            ]
+                .filter(location => location != undefined)
+        );
+        if (!locations) return;
+        return await (await this.cssStyleSheetAdopter).adoptCSSStylesheets(...locations);
     }
 
-    private async getDocumentFragment(resourceLocationResolver: ResourceLocationResolver) {
-        const tileset = await this.getTileset(resourceLocationResolver);
-        const tile = await this.getTile(tileset);
-        return this.toDocumentFragment(tile);
-    }
-
-    private async getTileset(resourceLocationResolver: ResourceLocationResolver) {
-        if (this.options.getTileset) {
-            return await this.options.getTileset();
-        }
-        const location = await this.resolveResourceLocation('html', resourceLocationResolver);
-        try {
-            return await this.fetchText.fetchText(location);
-        }
-        catch (error) {
-            if (error instanceof NotFound404Error) {
-                // TODO re-wrap as an instructive error
-                throw error;
-            }
-            else
-                throw error;
-        }
+    private async toTemplate(tileset: string) {
+        const tile: string = await this.getTile(tileset);
+        const template: HTMLTemplateElement = document.createElement('template');
+        template.innerHTML = tile;
+        return template;
     }
 
     private async getTile(tileset: string) {
@@ -132,12 +88,6 @@ export class CustomaryDefine<T extends HTMLElement> {
             ` Try using one of these delimiters: ${delimiters}`);
     }
 
-    private toDocumentFragment(innerHtml: string): DocumentFragment {
-        const templateElement: HTMLTemplateElement = document.createElement('template');
-        templateElement.innerHTML = innerHtml;
-        return templateElement.content;
-    }
-
     private detile(text: string, delimiter: string): string | undefined
     {
         const strings = text.split(delimiter);
@@ -148,65 +98,99 @@ export class CustomaryDefine<T extends HTMLElement> {
         return string1 ?? text;
     }
 
-    private async getCssStyleSheet(resourceLocationResolver: ResourceLocationResolver) {
-        const location = await this.resolveResourceLocation('css', resourceLocationResolver);
-        try {
-            return await this.cssStyleSheetImporter.getCSSStyleSheet(location);
-        }
-        catch (error) {
-            if (error instanceof NotFound404Error) {
-                // TODO re-wrap instructive error
-                return undefined;
-            }
-            throw error;
-        }
-    }
-
-    private async resolveResourceLocation(
-        extension: string, resourceLocationResolver: ResourceLocationResolver
-    ): Promise<string> {
-        const specified = await resourceLocationResolver.resolveResourceLocation(`${this.options.name}.${extension}`);
-        return await this.options.import_meta.resolve!(specified);
-    }
-
     constructor(
-        private readonly customaryRegistry: CustomaryRegistry,
-        private readonly customElementConstructor: CustomaryCustomElementConstructor<any>,
-        options?: Partial<CustomaryOptions<T>>
-    ) {
-        const fetchText: FetchText = FetchText_DOM_singleton;
-        const cssStyleSheetImporter = new CSSStyleSheetImporter(fetchText);
-        this.cssStyleSheetImporter = cssStyleSheetImporter;
-        this.cssStyleSheetAdopter = new CSSStyleSheetAdopter(cssStyleSheetImporter);
-        this.fetchText = fetchText;
-        this.options = this.getCustomaryOptions(customElementConstructor, options);
+        private readonly options: CustomaryOptions<any>
+    ) {}
+
+    private get cssStyleSheetImporter(): Promise<CSSStyleSheetImporter> {
+        return this._cssStyleSheetImporter ??= loadCssStyleSheetImporter(this.fetchText);
     }
 
-    private getCustomaryOptions(
-        customElementConstructor: CustomaryCustomElementConstructor<any>,
-        options?: Partial<CustomaryOptions<T>>) {
-        const customaryOptions = customElementConstructor.customary;
-        if (!customaryOptions) {
-            throw new Error(
-                'Customary needs options. ' +
-                'Declare them in your custom element class as a "customary" static attribute.')
-        }
-        if (customaryOptions.preset === "recommended") {
-            customaryOptions.defineOptions ??= {};
-            customaryOptions.defineOptions.resourceLocationResolution ??= {
-                kind: "relative",
-                pathPrefix: '../',
-            };
-        }
-        if (options) {
-            Object.assign(customaryOptions, options);
-        }
-        return customaryOptions;
+    private _cssStyleSheetImporter: Promise<CSSStyleSheetImporter> | undefined;
+
+    private get cssStyleSheetAdopter(): Promise<CSSStyleSheetAdopter> {
+        return this._cssStyleSheetAdopter ??= loadCssStyleSheetAdopter(this.cssStyleSheetImporter);
     }
 
-    private readonly options: CustomaryOptions<T>
-    private readonly fetchText: FetchText;
-    private readonly cssStyleSheetAdopter: CSSStyleSheetAdopter;
-    private readonly cssStyleSheetImporter: CSSStyleSheetImporter;
+    private _cssStyleSheetAdopter: Promise<CSSStyleSheetAdopter> | undefined;
 
+    private get externalLoader(): Promise<ExternalLoader> {
+        return this._externalLoader ??= loadTilesetLoader(
+            this.options.defineOptions?.resourceLocationResolution,
+            this.fetchText,
+            this.cssStyleSheetImporter,
+            {
+                name: this.options.name,
+                import_meta: this.options.import_meta ?? (()=>{throw new Error()})(),
+            }
+        );
+    }
+
+    private _externalLoader: Promise<ExternalLoader> | undefined;
+
+    private get fetchText(): Promise<FetchText> {
+        return this._fetchText ??= loadFetchText();
+    }
+
+    private _fetchText: Promise<FetchText> | undefined;
+}
+
+async function loadCssStyleSheetAdopter(cssStyleSheetImporter: Promise<CSSStyleSheetImporter>): Promise<CSSStyleSheetAdopter> {
+    const {CSSStyleSheetAdopter} = await import("customary/cssstylesheet/CSSStyleSheetAdopter.js");
+    return new CSSStyleSheetAdopter(await cssStyleSheetImporter, document);
+}
+
+async function loadCssStyleSheetImporter(fetchText: Promise<FetchText>): Promise<CSSStyleSheetImporter> {
+    const {CSSStyleSheetImporter} = await import("customary/cssstylesheet/CSSStyleSheetImporter.js");
+    return new CSSStyleSheetImporter(await fetchText);
+}
+
+interface CSSStyleSheetImporter {
+    getCSSStyleSheet(location: string): Promise<CSSStyleSheet | undefined>;
+}
+
+interface CSSStyleSheetAdopter {
+    adoptCSSStylesheets(...locations: string[]): Promise<void>;
+}
+
+type TemplateDefinition = {
+    template: HTMLTemplateElement;
+    cssStyleSheet: CSSStyleSheet | undefined;
+}
+
+async function loadTilesetLoader(
+    resourceLocationResolution: {
+        kind: 'flat';
+    } | {
+        kind: 'relative';
+        pathPrefix: string;
+    } | undefined,
+    fetchText: Promise<FetchText>,
+    cssStyleSheetImporter: Promise<CSSStyleSheetImporter>,
+    options: {
+    name: string,
+        import_meta: ImportMeta;
+}
+): Promise<ExternalLoader> {
+    const {ExternalLoader} = await import("customary/external/ExternalLoader.js");
+    return new ExternalLoader(
+        resourceLocationResolution,
+        await fetchText,
+        await cssStyleSheetImporter,
+        options
+    );
+}
+
+interface ExternalLoader {
+    loadHtml(): Promise<string>;
+    loadCssStyleSheet(): Promise<undefined | CSSStyleSheet>;
+}
+
+export interface FetchText {
+    fetchText(input: RequestInfo | URL): Promise<string>;
+}
+
+async function loadFetchText(): Promise<FetchText> {
+    const {FetchText_DOM_singleton} = await import("customary/fetch/FetchText.js");
+    return FetchText_DOM_singleton;
 }
