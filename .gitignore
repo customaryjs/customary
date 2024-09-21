@@ -7,3 +7,4 @@
 /src/**/*.d.ts
 /src/**/*.js
 /src/**/*.js.map
+/web/tsconfig.tsbuildinfo
