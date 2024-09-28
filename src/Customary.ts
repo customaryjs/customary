@@ -25,24 +25,35 @@ class CustomaryRegistry {
 
 export class Customary {
 
-    static async define<T extends HTMLElement>(name: string): Promise<CustomElementConstructor>
+    static async define(): Promise<CustomElementConstructor[]>
+    static async define<T extends HTMLElement>(
+        name: string,
+        options?: Partial<CustomaryOptions<T>>
+    ): Promise<CustomElementConstructor>
     static async define<T extends HTMLElement>(
         constructor: CustomaryCustomElementConstructor<any>,
         options?: Partial<CustomaryOptions<T>>
     ): Promise<CustomElementConstructor>
     static async define<T extends HTMLElement>(
-        nameOrConstructor: string | CustomaryCustomElementConstructor<any>,
+        nameOrConstructor?: string | CustomaryCustomElementConstructor<any>,
         options?: Partial<CustomaryOptions<T>>
-    ): Promise<CustomElementConstructor>
+    ): Promise<CustomElementConstructor | CustomElementConstructor[]>
     {
-        const {constructor, customaryOptions} = typeof nameOrConstructor === 'string' ? {
-                constructor: CustomaryHTMLElement,
-                customaryOptions: {name: nameOrConstructor}
+        if (nameOrConstructor === undefined) {
+            const templates: HTMLCollectionOf<HTMLTemplateElement> = document.getElementsByTagName("template");
+            const promises: Promise<CustomElementConstructor>[] = [];
+            for (const template of templates) {
+                if (template.id) {
+                    promises.push(Customary.define(template.id));
+                }
             }
-            : {
-                constructor: nameOrConstructor,
-                customaryOptions: options
-            };
+            return await Promise.all(promises);
+        }
+
+        const constructor = typeof nameOrConstructor === 'string'
+            ? class EphemeralCustomaryHTMLElement extends CustomaryHTMLElement {}
+            : nameOrConstructor;
+        const customaryOptions = typeof nameOrConstructor === 'string' ? {name: nameOrConstructor} : options;
 
         const combinedOptions: CustomaryOptions<T> = Customary.getCustomaryOptions(constructor, customaryOptions);
 
