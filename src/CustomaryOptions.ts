@@ -9,8 +9,8 @@ export type CustomaryPreset = 'recommended';
 
 export type CustomaryOptions<T extends HTMLElement> = {
     name: string;
-    import_meta?: ImportMeta;
     preset?: CustomaryPreset;
+    state?: object;
     fromHtml?: () => Promise<string>;
     defineOptions?: {
         extends?: string;
@@ -28,4 +28,7 @@ export type CustomaryOptions<T extends HTMLElement> = {
     constructOptions?: CustomaryConstructOptions<T>;
     attributeOptions?: CustomaryAttributeOptions<T>;
     slotOptions?: CustomarySlotOptions<T>;
+    externalLoaderOptions?: {
+        import_meta?: ImportMeta;
+    }
 }

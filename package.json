@@ -14,6 +14,9 @@
     "compile-watch": "tsc --build --verbose --watch",
     "compile": "tsc --build --verbose"
   },
+  "dependencies": {
+    "knockout": "^3.5.1"
+  },
   "devDependencies": {
     "@types/mocha": "^10.0.8",
     "@types/node": "^20.16.5",

@@ -16,10 +16,13 @@ export class CustomaryConstruct {
 
         options?.onConstruct?.(element, documentFragment);
 
+        const parent: ParentNode = element.shadowRoot ?? element;
+
         if (!options?.replaceChildrenDont) {
-            const parent: ParentNode = element.shadowRoot ?? element;
             parent.replaceChildren(documentFragment);
         }
+
+        void this.bindState(parent, customaryDefinition.state);
 
         this.adoptStylesheet(element, customaryDefinition.cssStyleSheet, options?.adoptStylesheetDont);
 
@@ -35,6 +38,12 @@ export class CustomaryConstruct {
         if (!cssStylesheet) return;
         const adopter: DocumentOrShadowRoot = element.shadowRoot ?? document;
         adopter.adoptedStyleSheets.push(cssStylesheet);
+    }
+
+    private async bindState(parent: ParentNode, state: object | undefined) {
+        if (!state) return;
+        const {KnockoutBridge} = await import("customary/knockoutjs/KnockoutBridge.js");
+        new KnockoutBridge().applyBindings(state, parent);
     }
 
     private addEventListener_slotChange(element: Element, slotOptions?: CustomarySlotOptions<any>) {

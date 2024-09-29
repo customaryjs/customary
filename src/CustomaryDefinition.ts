@@ -11,4 +11,5 @@ export type CustomaryDefinition = {
     constructOptions: CustomaryConstructOptions<any> | undefined;
     slotOptions: CustomarySlotOptions<any> | undefined;
     attributeOptions: CustomaryAttributeOptions<any> | undefined;
+    state: object | undefined;
 }

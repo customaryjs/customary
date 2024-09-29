@@ -14,40 +14,63 @@ export class CustomaryDefine {
     }
 
     private async buildCustomaryDefinition(): Promise<CustomaryDefinition> {
-        const templateDefinition = await this.getTemplateDefinition();
+        const documentTemplate: HTMLTemplateElement | undefined = this.findHTMLTemplateElementInDOMDocument();
+
+        const template: HTMLTemplateElement | undefined =
+            documentTemplate
+            ?? await this.getHTMLTemplateElementFromHtmlFunction()
+            ?? await this.loadHTMLTemplateElementFromExternalHtml();
+
+        const cssStyleSheet: CSSStyleSheet | undefined =
+            documentTemplate
+                ? undefined
+                : await this.loadExternalCssStyleSheet();
+
+        const documentFragment: DocumentFragment = template?.content ?? (()=>{throw Error})();
+
+        const state = this.options.state ?? this.findStateScriptApplicationJsonInDOMDocument();
+
+        await this.injectStateBindings(state, documentFragment);
 
         return {
-            documentFragment: templateDefinition.template.content,
-            cssStyleSheet: templateDefinition.cssStyleSheet,
+            documentFragment,
+            cssStyleSheet,
             constructOptions: this.options.constructOptions,
             slotOptions: this.options.slotOptions,
             attributeOptions: this.options.attributeOptions,
+            state,
         };
     }
 
-    private async getTemplateDefinition(): Promise<TemplateDefinition> {
-        const templates: HTMLCollectionOf<HTMLTemplateElement> = document.getElementsByTagName("template");
-        const template = templates.namedItem(this.options.name) ?? templates[0];
-
-        if (template) {
-            return {template, cssStyleSheet: undefined};
-        }
-
-        if (this.options.fromHtml) {
-            return {
-                template: await this.toTemplate(await this.options.fromHtml()),
-                cssStyleSheet: await this.loadCssStyleSheet(),
-            };
-        }
-
-        return {
-            template: await this.toTemplate(await (await this.externalLoader).loadHtml()),
-            cssStyleSheet: await this.loadCssStyleSheet(),
-        };
+    private async injectStateBindings(state: object | undefined, documentFragment: DocumentFragment) {
+        if (!state) return;
+        const {KnockoutBridge} = await import("customary/knockoutjs/KnockoutBridge.js");
+        new KnockoutBridge().injectStateBindings(documentFragment);
     }
 
-    private async loadCssStyleSheet() {
+    private findHTMLTemplateElementInDOMDocument(): HTMLTemplateElement | undefined {
+        return document.querySelector(
+            `template[data-customary-name='${this.options.name}']`
+        ) as HTMLTemplateElement ?? undefined;
+    }
+
+    private async getHTMLTemplateElementFromHtmlFunction() {
+        return await this.toTemplate(await this.options.fromHtml?.());
+    }
+
+    private async loadHTMLTemplateElementFromExternalHtml() {
+        return await this.toTemplate(await (await this.externalLoader).loadHtml());
+    }
+
+    private async loadExternalCssStyleSheet() {
         return await (await this.externalLoader).loadCssStyleSheet();
+    }
+
+    private findStateScriptApplicationJsonInDOMDocument(): object | undefined {
+        const element = document.querySelector(
+            `script[type="application/json"][data-customary-name='${this.options.name}']`
+        );
+        return element?.textContent ? JSON.parse(element.textContent) : undefined;
     }
 
     private async adopt_font_cssStyleSheets() {
@@ -62,8 +85,9 @@ export class CustomaryDefine {
         return await (await this.cssStyleSheetAdopter).adoptCSSStylesheets(...locations);
     }
 
-    private async toTemplate(tileset: string) {
-        const tile: string = await this.getTile(tileset);
+    private async toTemplate(htmlString?: string) {
+        if (!htmlString) return undefined;
+        const tile: string = await this.getTile(htmlString);
         const template: HTMLTemplateElement = document.createElement('template');
         template.innerHTML = tile;
         return template;
@@ -121,7 +145,7 @@ export class CustomaryDefine {
             this.cssStyleSheetImporter,
             {
                 name: this.options.name,
-                import_meta: this.options.import_meta ?? (()=>{throw new Error()})(),
+                import_meta: this.options.externalLoaderOptions?.import_meta ?? (()=>{throw Error})(),
             }
         );
     }
@@ -133,6 +157,7 @@ export class CustomaryDefine {
     }
 
     private _fetchText: Promise<FetchText> | undefined;
+
 }
 
 async function loadCssStyleSheetAdopter(cssStyleSheetImporter: Promise<CSSStyleSheetImporter>): Promise<CSSStyleSheetAdopter> {
@@ -153,11 +178,6 @@ interface CSSStyleSheetAdopter {
     adoptCSSStylesheets(...locations: string[]): Promise<void>;
 }
 
-type TemplateDefinition = {
-    template: HTMLTemplateElement;
-    cssStyleSheet: CSSStyleSheet | undefined;
-}
-
 async function loadTilesetLoader(
     resourceLocationResolution: {
         kind: 'flat';
@@ -168,9 +188,9 @@ async function loadTilesetLoader(
     fetchText: Promise<FetchText>,
     cssStyleSheetImporter: Promise<CSSStyleSheetImporter>,
     options: {
-    name: string,
+        name: string,
         import_meta: ImportMeta;
-}
+    }
 ): Promise<ExternalLoader> {
     const {ExternalLoader} = await import("customary/external/ExternalLoader.js");
     return new ExternalLoader(

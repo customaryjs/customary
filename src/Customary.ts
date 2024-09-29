@@ -40,12 +40,10 @@ export class Customary {
     ): Promise<CustomElementConstructor | CustomElementConstructor[]>
     {
         if (nameOrConstructor === undefined) {
-            const templates: HTMLCollectionOf<HTMLTemplateElement> = document.getElementsByTagName("template");
+            const templates: NodeListOf<HTMLTemplateElement> = document.querySelectorAll("template[data-customary-name]");
             const promises: Promise<CustomElementConstructor>[] = [];
             for (const template of templates) {
-                if (template.id) {
-                    promises.push(Customary.define(template.id));
-                }
+                promises.push(Customary.define(template.getAttribute('data-customary-name')!));
             }
             return await Promise.all(promises);
         }
@@ -53,7 +51,11 @@ export class Customary {
         const constructor = typeof nameOrConstructor === 'string'
             ? class EphemeralCustomaryHTMLElement extends CustomaryHTMLElement {}
             : nameOrConstructor;
-        const customaryOptions = typeof nameOrConstructor === 'string' ? {name: nameOrConstructor} : options;
+
+        const customaryOptions: Partial<CustomaryOptions<T>> = {
+            ...(typeof nameOrConstructor === 'string' ? {name: nameOrConstructor} : {}),
+            ...options,
+        };
 
         const combinedOptions: CustomaryOptions<T> = Customary.getCustomaryOptions(constructor, customaryOptions);
 
