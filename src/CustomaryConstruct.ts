@@ -1,7 +1,6 @@
-// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
-import {CustomaryDefinition} from "./CustomaryDefinition.js";
-// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
+import {CustomaryDefinition} from "customary/CustomaryDefinition.js";
 import {CustomarySlotOptions} from "customary/CustomarySlotOptions.js";
+import {CustomaryHTMLElement} from "customary/CustomaryHTMLElement.js";
 
 export class CustomaryConstruct {
 
@@ -22,11 +21,17 @@ export class CustomaryConstruct {
             parent.replaceChildren(documentFragment);
         }
 
-        void this.bindState(parent, customaryDefinition.state);
+        this.setStateAndBind(element, customaryDefinition.state);
 
         this.adoptStylesheet(element, customaryDefinition.cssStyleSheet, options?.adoptStylesheetDont);
 
         this.addEventListener_slotChange(element, customaryDefinition.slotOptions);
+    }
+
+    private setStateAndBind(element: Element, state: object | object[] | undefined) {
+        if (element instanceof CustomaryHTMLElement) {
+            void element.stateful.setStateAndBind(element, state);
+        }
     }
 
     private adoptStylesheet(
@@ -38,12 +43,6 @@ export class CustomaryConstruct {
         if (!cssStylesheet) return;
         const adopter: DocumentOrShadowRoot = element.shadowRoot ?? document;
         adopter.adoptedStyleSheets.push(cssStylesheet);
-    }
-
-    private async bindState(parent: ParentNode, state: object | undefined) {
-        if (!state) return;
-        const {KnockoutBridge} = await import("customary/knockoutjs/KnockoutBridge.js");
-        new KnockoutBridge().applyBindings(state, parent);
     }
 
     private addEventListener_slotChange(element: Element, slotOptions?: CustomarySlotOptions<any>) {

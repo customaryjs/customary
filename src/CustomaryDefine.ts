@@ -44,8 +44,8 @@ export class CustomaryDefine {
 
     private async injectStateBindings(state: object | undefined, documentFragment: DocumentFragment) {
         if (!state) return;
-        const {KnockoutBridge} = await import("customary/knockoutjs/KnockoutBridge.js");
-        new KnockoutBridge().injectStateBindings(documentFragment);
+        const {KnockoutBridge: ko} = await import("customary/knockoutjs/KnockoutBridge.js");
+        ko.injectStateBindings(documentFragment);
     }
 
     private findHTMLTemplateElementInDOMDocument(): HTMLTemplateElement | undefined {

@@ -1,11 +1,9 @@
-// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
 import {CustomaryDefine} from "customary/CustomaryDefine.js";
-// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
 import {CustomaryConstruct} from "customary/CustomaryConstruct.js";
-// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
 import {CustomaryOptions} from "customary/CustomaryOptions.js";
 import {CustomaryCustomElementConstructor} from "customary/CustomaryCustomElementConstructor.js";
 import {CustomaryDefinition} from "customary/CustomaryDefinition.js";
+import {CustomaryHTMLElement} from "customary/CustomaryHTMLElement.js";
 
 class CustomaryRegistry {
     constructor(private readonly customElementRegistry: CustomElementRegistry) {}
@@ -31,11 +29,11 @@ export class Customary {
         options?: Partial<CustomaryOptions<T>>
     ): Promise<CustomElementConstructor>
     static async define<T extends HTMLElement>(
-        constructor: CustomaryCustomElementConstructor<any>,
+        constructor: CustomElementConstructor,
         options?: Partial<CustomaryOptions<T>>
     ): Promise<CustomElementConstructor>
     static async define<T extends HTMLElement>(
-        nameOrConstructor?: string | CustomaryCustomElementConstructor<any>,
+        nameOrConstructor?: string | CustomElementConstructor,
         options?: Partial<CustomaryOptions<T>>
     ): Promise<CustomElementConstructor | CustomElementConstructor[]>
     {
@@ -138,24 +136,6 @@ export class Customary {
     }
 
     private static readonly customaryRegistry = new CustomaryRegistry(customElements);
-
-}
-
-export class CustomaryHTMLElement extends HTMLElement {
-
-    constructor() {
-        super();
-        Customary.construct(this);
-    }
-
-    static get observedAttributes() {
-        return Customary.observedAttributes(this);
-    }
-
-    // noinspection JSUnusedLocalSymbols,JSUnusedGlobalSymbols
-    attributeChangedCallback(property: string, oldValue: string, newValue: string) {
-        Customary.attributeChangedCallback(this, property, oldValue, newValue);
-    }
 
 }
 
