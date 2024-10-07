@@ -5,7 +5,7 @@ import {CustomaryOptions} from "customary/CustomaryOptions.js";
 
 export class CustomaryDefine {
 
-    async define() {
+    async define(): Promise<CustomaryDefinition> {
         const [definition, ] = await Promise.all([
             this.buildCustomaryDefinition(),
             this.adopt_font_cssStyleSheets(),
@@ -38,6 +38,7 @@ export class CustomaryDefine {
             constructOptions: this.options.constructOptions,
             slotOptions: this.options.slotOptions,
             attributeOptions: this.options.attributeOptions,
+            events: this.options.events,
             state,
         };
     }

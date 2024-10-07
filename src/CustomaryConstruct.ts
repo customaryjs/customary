@@ -1,6 +1,6 @@
 import {CustomaryDefinition} from "customary/CustomaryDefinition.js";
-import {CustomarySlotOptions} from "customary/CustomarySlotOptions.js";
 import {CustomaryHTMLElement} from "customary/CustomaryHTMLElement.js";
+import {CustomaryEvent, CustomarySlotOptions} from "customary/CustomaryTypes.js";
 
 export class CustomaryConstruct {
 
@@ -26,6 +26,8 @@ export class CustomaryConstruct {
         this.adoptStylesheet(element, customaryDefinition.cssStyleSheet, options?.adoptStylesheetDont);
 
         this.addEventListener_slotChange(element, customaryDefinition.slotOptions);
+
+        this.addEvents(element, customaryDefinition.events);
     }
 
     private setStateAndBind(element: Element, state: object | object[] | undefined) {
@@ -55,5 +57,29 @@ export class CustomaryConstruct {
         */
         element.shadowRoot!.addEventListener(
             'slotchange', event => slotOptions.slotchange(element, event));
+    }
+
+    private addEvents(customElement: Element, customaryEvents: CustomaryEvent[] | undefined) {
+        if (!customaryEvents) return;
+
+        const parent: ParentNode = customElement.shadowRoot ?? customElement;
+
+        for (const customaryEvent of customaryEvents) {
+            const elements: NodeListOf<Element> = parent.querySelectorAll(customaryEvent.selector);
+            for (const element of elements) {
+                element.addEventListener(
+                    this.getEventType(customaryEvent, element)!,
+                    (event) => customaryEvent.listener(customElement, event)
+                );
+            }
+        }
+    }
+
+    private getEventType(customaryEvent: CustomaryEvent, element: Element): string | undefined {
+        if (customaryEvent.type) return customaryEvent.type;
+        switch (element.tagName) {
+            case 'BUTTON': return 'click';
+        }
+        throw new Error(`${element.tagName} elements require an event type as Customary hasn't defined a default yet`);
     }
 }

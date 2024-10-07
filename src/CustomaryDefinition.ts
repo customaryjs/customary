@@ -1,9 +1,9 @@
-// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
-import {CustomaryConstructOptions} from "customary/CustomaryConstructOptions.js";
-// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
-import {CustomarySlotOptions} from "customary/CustomarySlotOptions.js";
-// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
-import {CustomaryAttributeOptions} from "customary/CustomaryAttributeOptions.js";
+import {
+    CustomaryAttributeOptions,
+    CustomaryConstructOptions,
+    CustomaryEvent,
+    CustomarySlotOptions
+} from "customary/CustomaryTypes.js";
 
 export type CustomaryDefinition = {
     documentFragment: DocumentFragment;
@@ -11,5 +11,6 @@ export type CustomaryDefinition = {
     constructOptions: CustomaryConstructOptions<any> | undefined;
     slotOptions: CustomarySlotOptions<any> | undefined;
     attributeOptions: CustomaryAttributeOptions<any> | undefined;
+    events: CustomaryEvent[] | undefined,
     state: object | object[] | undefined;
 }
