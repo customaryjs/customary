@@ -40,24 +40,60 @@ export class KnockoutBridge {
         }
     }
 
+    // noinspection JSUnusedLocalSymbols,JSUnusedGlobalSymbols
     static observable<T = any>(value: T): Observable<T> {
         return this.ko.observable(value);
     }
 
+    // noinspection JSUnusedLocalSymbols,JSUnusedGlobalSymbols
     static observableArray<T = any>(initialValue: T[]): ObservableArray<T> {
         return this.ko.observableArray(initialValue);
     }
 
-    static putAllAsObservables(o1: object, o2: object) {
-        for (const [k, v] of Object.entries(o2)) {
-            if (k in o1) {
-                ((o1 as any)[k] as Observable)(v);
+    static merge(bindingContext: any, values: object | Array<any>) {
+        if (values instanceof Array) return this.mergeArray(bindingContext ?? this.ko.observableArray([]), values);
+        return this.mergeObject(bindingContext, values);
+    }
+
+    static snapshot(bindingContext: any): object | Array<any> {
+        if ('indexOf' in bindingContext) return this.snapshotArray(bindingContext);
+        return this.snapshotObject(bindingContext);
+    }
+
+    private static snapshotArray(bindingContext: ObservableArray): Array<any> {
+        return bindingContext();
+    }
+
+    private static snapshotObject(bindingContext: object): object {
+        const record: Record<string, any> = {};
+        for (const [k, v] of Object.entries(bindingContext)) {
+            record[k] = (v as Observable)();
+        }
+        return record;
+    }
+
+    private static mergeArray(bindingContext: any, values: Array<any>) {
+        if (!bindingContext) return this.ko.observableArray(values);
+        (bindingContext as ObservableArray)(values);
+        return bindingContext;
+    }
+
+    private static mergeObject(bindingContext: any, values: object) {
+        if (!bindingContext) {
+            const record: Record<string, any> = {};
+            for (const [k, v] of Object.entries(values)) {
+                record[k] = this.ko.observable(v);
             }
-            else {
-                (o1 as any)[k] = this.ko.observable(v);
+            return record;
+        }
+        for (const [k, v] of Object.entries(values)) {
+            if (k in bindingContext) {
+                (bindingContext[k] as Observable)(v);
+            } else {
+                bindingContext[k] = this.ko.observable(v);
             }
         }
-        return o1;
+        return bindingContext;
     }
 
     private static replaceStateBindings(htmlString: string) {

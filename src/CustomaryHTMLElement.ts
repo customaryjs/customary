@@ -24,8 +24,11 @@ export class CustomaryHTMLElement extends HTMLElement {
     }
 
     // noinspection JSUnusedLocalSymbols,JSUnusedGlobalSymbols
-    setState(state: object | undefined): void {
-        void this.stateful.setState(state);
+    setState(state: any): void;
+    setState(fn: (state: any) => any): void;
+    setState(state_or_fn: any | ((state: any) => any)): void
+    {
+        void this.stateful.setState(state_or_fn);
     }
 
     get stateful(): Stateful {
