@@ -146,9 +146,17 @@ export class CustomaryDefine {
             this.cssStyleSheetImporter,
             {
                 name: this.options.name,
-                import_meta: this.options.externalLoaderOptions?.import_meta ?? (()=>{throw Error})(),
+                import_meta: this.get_import_meta(),
             }
         );
+    }
+
+    private get_import_meta() {
+        return this.options.externalLoaderOptions?.import_meta ?? (() => {
+            throw new Error('Customary needs "import.meta" if the custom element template ' +
+                'is to be loaded from an external file. ' +
+                '(document did not have a named template element, and an html string was not provided.)')
+        })();
     }
 
     private _externalLoader: Promise<ExternalLoader> | undefined;
