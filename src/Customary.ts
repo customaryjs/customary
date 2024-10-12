@@ -2,28 +2,21 @@ import {CustomaryDefine} from "customary/CustomaryDefine.js";
 import {CustomaryConstruct} from "customary/CustomaryConstruct.js";
 import {CustomaryOptions} from "customary/CustomaryOptions.js";
 import {CustomaryCustomElementConstructor} from "customary/CustomaryCustomElementConstructor.js";
-import {CustomaryDefinition} from "customary/CustomaryDefinition.js";
 import {CustomaryHTMLElement} from "customary/CustomaryHTMLElement.js";
-
-class CustomaryRegistry {
-    constructor(private readonly customElementRegistry: CustomElementRegistry) {}
-
-    async define(name: string, customElementConstructor: CustomElementConstructor, definition: CustomaryDefinition, options?: ElementDefinitionOptions): Promise<CustomElementConstructor> {
-        this.map.set(customElementConstructor, definition);
-        this.customElementRegistry.define(name, customElementConstructor, options);
-        return await this.customElementRegistry.whenDefined(name);
-    }
-
-    get(customElementConstructor: CustomElementConstructor): CustomaryDefinition {
-        return this.map.get(customElementConstructor) ?? (()=>{throw new Error()})();
-    }
-
-    private readonly map: Map<CustomElementConstructor, CustomaryDefinition> = new Map();
-}
+import {CustomaryRegistry} from "customary/CustomaryRegistry.js";
+import {CustomaryDefinition} from "customary/CustomaryDefinition";
 
 export class Customary {
 
-    static async define(): Promise<CustomElementConstructor[]>
+    static async detect(): Promise<CustomElementConstructor[]> {
+        const templates: NodeListOf<HTMLTemplateElement> = document.querySelectorAll("template[data-customary-name]");
+        const promises: Promise<CustomElementConstructor>[] = [];
+        for (const template of templates) {
+            promises.push(this.define(template.getAttribute('data-customary-name')!));
+        }
+        return await Promise.all(promises);
+    }
+
     static async define<T extends HTMLElement>(
         name: string,
         options?: Partial<CustomaryOptions<T>>
@@ -33,58 +26,54 @@ export class Customary {
         options?: Partial<CustomaryOptions<T>>
     ): Promise<CustomElementConstructor>
     static async define<T extends HTMLElement>(
-        nameOrConstructor?: string | CustomElementConstructor,
+        nameOrConstructor: string | CustomElementConstructor,
         options?: Partial<CustomaryOptions<T>>
     ): Promise<CustomElementConstructor | CustomElementConstructor[]>
     {
-        if (nameOrConstructor === undefined) {
-            const templates: NodeListOf<HTMLTemplateElement> = document.querySelectorAll("template[data-customary-name]");
-            const promises: Promise<CustomElementConstructor>[] = [];
-            for (const template of templates) {
-                promises.push(Customary.define(template.getAttribute('data-customary-name')!));
-            }
-            return await Promise.all(promises);
-        }
-
         const constructor = typeof nameOrConstructor === 'string'
             ? class EphemeralCustomaryHTMLElement extends CustomaryHTMLElement {}
             : nameOrConstructor;
 
-        const customaryOptions: Partial<CustomaryOptions<T>> = {
-            ...(typeof nameOrConstructor === 'string' ? {name: nameOrConstructor} : {}),
-            ...options,
-        };
-
-        const combinedOptions: CustomaryOptions<T> = Customary.getCustomaryOptions(constructor, customaryOptions);
-
-        const definition = await new CustomaryDefine(combinedOptions).define();
-
-        const elementDefinitionOptions = this.getElementDefinitionOptions(
-            {extends: combinedOptions.defineOptions?.extends}, constructor
+        const customaryOptions = this.combineCustomaryOptions(
+            typeof nameOrConstructor === 'string' ? nameOrConstructor : undefined,
+            options,
+            (constructor as CustomaryCustomElementConstructor<any>).customary
         );
 
-        return await this.customaryRegistry.define(
-            combinedOptions.name, constructor, definition, elementDefinitionOptions);
+        const name = customaryOptions.name ??
+            (()=>{throw new Error('A name must be provided to define a custom element.')})();
+
+        const definition: CustomaryDefinition = await new CustomaryDefine(
+            customaryOptions as CustomaryOptions<any>
+        ).define();
+
+        const elementDefinitionOptions: ElementDefinitionOptions | undefined = this.getElementDefinitionOptions(
+            {extends: customaryOptions.defineOptions?.extends}, constructor
+        );
+
+        return await this.customaryRegistry.define(name, constructor, definition, elementDefinitionOptions);
     }
 
-    private static getCustomaryOptions(
-        customElementConstructor: CustomElementConstructor,
-        options?: Partial<CustomaryOptions<any>>) {
-        const classOptions = (customElementConstructor as CustomaryCustomElementConstructor<any>).customary;
-        if (!classOptions && !options) {
-            throw new Error(
-                'Customary needs options. ' +
-                'Declare them in your custom element class as a "customary" static attribute.')
+    private static combineCustomaryOptions(
+        nameFromDefine: string | undefined,
+        customaryOptionsFromDefine: Partial<CustomaryOptions<any>> | undefined,
+        customaryOptionsFromClass: Partial<CustomaryOptions<any>> | undefined
+    ): Partial<CustomaryOptions<any>> {
+        return {
+            ...customaryOptionsFromClass,
+            ...customaryOptionsFromDefine,
+            ...(typeof nameFromDefine === 'string' ? {name: nameFromDefine} : {}),
+        };
+
+        /*
+        if (!Object.keys(customaryOptions).length) {
+            throw new Error(`
+Customary needs options. You can provide them:
+- as a parameter when calling "Customary.define()"
+- as a static attribute "customary" of a custom element class.
+`);
         }
-        const customaryOptions: CustomaryOptions<any> = Object.assign({}, classOptions, options);
-        if (customaryOptions.preset === "recommended") {
-            customaryOptions.defineOptions ??= {};
-            customaryOptions.defineOptions.resourceLocationResolution ??= {
-                kind: "relative",
-                pathPrefix: '../',
-            };
-        }
-        return customaryOptions;
+         */
     }
 
     private static getElementDefinitionOptions(

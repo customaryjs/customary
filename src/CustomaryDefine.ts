@@ -141,7 +141,7 @@ export class CustomaryDefine {
 
     private get externalLoader(): Promise<ExternalLoader> {
         return this._externalLoader ??= loadTilesetLoader(
-            this.options.defineOptions?.resourceLocationResolution,
+            this.getResourceLocationResolution(this.options),
             this.fetchText,
             this.cssStyleSheetImporter,
             {
@@ -149,6 +149,18 @@ export class CustomaryDefine {
                 import_meta: this.get_import_meta(),
             }
         );
+    }
+
+    private getResourceLocationResolution(
+        customaryOptions: CustomaryOptions<any>
+    ): ResourceLocationResolution | undefined {
+        return customaryOptions.defineOptions?.resourceLocationResolution ??
+            customaryOptions.preset === "recommended" ?
+            {
+                kind: "relative",
+                pathPrefix: '../',
+            }
+            : undefined;
     }
 
     private get_import_meta() {
@@ -187,13 +199,15 @@ interface CSSStyleSheetAdopter {
     adoptCSSStylesheets(...locations: string[]): Promise<void>;
 }
 
+type ResourceLocationResolution = {
+    kind: 'flat';
+} | {
+    kind: 'relative';
+    pathPrefix: string;
+};
+
 async function loadTilesetLoader(
-    resourceLocationResolution: {
-        kind: 'flat';
-    } | {
-        kind: 'relative';
-        pathPrefix: string;
-    } | undefined,
+    resourceLocationResolution: ResourceLocationResolution | undefined,
     fetchText: Promise<FetchText>,
     cssStyleSheetImporter: Promise<CSSStyleSheetImporter>,
     options: {
