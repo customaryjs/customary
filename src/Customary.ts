@@ -1,10 +1,10 @@
 import {CustomaryDefine} from "customary/CustomaryDefine.js";
 import {CustomaryConstruct} from "customary/CustomaryConstruct.js";
 import {CustomaryOptions} from "customary/CustomaryOptions.js";
-import {CustomaryCustomElementConstructor} from "customary/CustomaryCustomElementConstructor.js";
 import {CustomaryHTMLElement} from "customary/CustomaryHTMLElement.js";
 import {CustomaryRegistry} from "customary/CustomaryRegistry.js";
 import {CustomaryDefinition} from "customary/CustomaryDefinition";
+import {CustomaryHooks} from "customary/CustomaryHooks";
 
 export class Customary {
 
@@ -17,34 +17,53 @@ export class Customary {
         return await Promise.all(promises);
     }
 
+    private static detectState(name: string): object | object[] | undefined {
+        const element = document.querySelector(
+            `script[type="application/json"][data-customary-name='${name}']`
+        );
+        return element?.textContent ? JSON.parse(element.textContent) : undefined;
+    }
+
+    private static detectHooks<T extends HTMLElement>(name: string): CustomaryHooks<T> | undefined {
+        const customaryHooksByName = (globalThis as any).customaryHooks as Record<string, CustomaryHooks<T>>;
+        return customaryHooksByName?.[name];
+    }
+
     static async define<T extends HTMLElement>(
         name: string,
-        options?: Partial<CustomaryOptions<T>>
+        options?: Partial<CustomaryOptions>,
+        hooks?: Partial<CustomaryHooks<T>>
     ): Promise<CustomElementConstructor>
     static async define<T extends HTMLElement>(
         constructor: CustomElementConstructor,
-        options?: Partial<CustomaryOptions<T>>
+        options?: Partial<CustomaryOptions>,
+        hooks?: Partial<CustomaryHooks<T>>
     ): Promise<CustomElementConstructor>
     static async define<T extends HTMLElement>(
         nameOrConstructor: string | CustomElementConstructor,
-        options?: Partial<CustomaryOptions<T>>
+        options?: Partial<CustomaryOptions>,
+        hooks?: Partial<CustomaryHooks<T>>
     ): Promise<CustomElementConstructor | CustomElementConstructor[]>
     {
-        const constructor = typeof nameOrConstructor === 'string'
+        const constructor: CustomElementConstructor = typeof nameOrConstructor === 'string'
             ? class EphemeralCustomaryHTMLElement extends CustomaryHTMLElement {}
             : nameOrConstructor;
 
         const customaryOptions = this.combineCustomaryOptions(
             typeof nameOrConstructor === 'string' ? nameOrConstructor : undefined,
             options,
-            (constructor as CustomaryCustomElementConstructor<any>).customary
+            (constructor as any)?.customary as CustomaryOptions
         );
 
         const name = customaryOptions.name ??
             (()=>{throw new Error('A name must be provided to define a custom element.')})();
 
-        const definition: CustomaryDefinition = await new CustomaryDefine(
-            customaryOptions as CustomaryOptions<any>
+        customaryOptions.state = this.combineState(name, customaryOptions?.state);
+
+        const customaryHooks: CustomaryHooks<T> = this.combineHooks(name, hooks);
+
+        const definition: CustomaryDefinition<T> = await new CustomaryDefine(
+            customaryOptions as CustomaryOptions, customaryHooks
         ).define();
 
         const elementDefinitionOptions: ElementDefinitionOptions | undefined = this.getElementDefinitionOptions(
@@ -54,11 +73,37 @@ export class Customary {
         return await this.customaryRegistry.define(name, constructor, definition, elementDefinitionOptions);
     }
 
+    private static combineState(
+        name: string,
+        stateFromDefine: object | object[] | undefined,
+    ): object | object[] | undefined {
+        const stateDetected: object | object[] | undefined = this.detectState(name);
+        const state = stateFromDefine ?? stateDetected;
+        return state instanceof Array
+            ? state
+            : state && Object.keys(state).length
+                ? state : undefined;
+    }
+
+    private static combineHooks<T extends HTMLElement>(
+        name: string,
+        customaryHooksFromDefine: Partial<CustomaryHooks<T>> | undefined
+    ): CustomaryHooks<T> {
+        const customaryHooksDetected: CustomaryHooks<T> | undefined = this.detectHooks(name);
+        return {
+            attributes: customaryHooksFromDefine?.attributes ?? customaryHooksDetected?.attributes,
+            constructHooks: customaryHooksFromDefine?.constructHooks ?? customaryHooksDetected?.constructHooks,
+            defineHooks: customaryHooksFromDefine?.defineHooks ?? customaryHooksDetected?.defineHooks,
+            events: customaryHooksFromDefine?.events ?? customaryHooksDetected?.events,
+            slotHooks: customaryHooksFromDefine?.slotHooks ?? customaryHooksDetected?.slotHooks,
+        };
+    }
+
     private static combineCustomaryOptions(
         nameFromDefine: string | undefined,
-        customaryOptionsFromDefine: Partial<CustomaryOptions<any>> | undefined,
-        customaryOptionsFromClass: Partial<CustomaryOptions<any>> | undefined
-    ): Partial<CustomaryOptions<any>> {
+        customaryOptionsFromDefine: Partial<CustomaryOptions> | undefined,
+        customaryOptionsFromClass: Partial<CustomaryOptions> | undefined
+    ): Partial<CustomaryOptions> {
         return {
             ...customaryOptionsFromClass,
             ...customaryOptionsFromDefine,
@@ -104,7 +149,7 @@ Customary needs options. You can provide them:
         return {extends: options.extends};
     }
 
-    static construct(element: Element){
+    static construct<T extends HTMLElement>(element: T) {
         const customaryDefinition =
             this.customaryRegistry.get(element.constructor as CustomElementConstructor)!;
         new CustomaryConstruct().construct(element, customaryDefinition);
@@ -112,16 +157,18 @@ Customary needs options. You can provide them:
 
     static observedAttributes(constructor: CustomElementConstructor): string[] | undefined {
         const customaryDefinition = this.customaryRegistry.get(constructor)!;
-        const {attributeOptions} = customaryDefinition;
-        return attributeOptions ? Object.keys(attributeOptions.attributes) : undefined;
+        const attributes = customaryDefinition.hooks?.attributes;
+        return attributes ? Object.keys(attributes) : undefined;
     }
 
-    static attributeChangedCallback(
-        element: Element, property: string, oldValue: string, newValue: string) {
+    static attributeChangedCallback<T extends HTMLElement>(
+        element: T, property: string, oldValue: string, newValue: string
+    ) {
         const customaryDefinition =
             this.customaryRegistry.get(element.constructor as CustomElementConstructor)!;
-        customaryDefinition.attributeOptions!.attributes[property]?.attributeChangedCallback(
-            element, property, oldValue, newValue);
+        const attributes = customaryDefinition.hooks?.attributes;
+        if (!attributes) return;
+        attributes[property]?.(element, property, oldValue, newValue);
     }
 
     private static readonly customaryRegistry = new CustomaryRegistry(customElements);

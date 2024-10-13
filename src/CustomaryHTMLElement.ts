@@ -8,6 +8,10 @@ export class CustomaryHTMLElement extends HTMLElement {
         Customary.construct(this);
     }
 
+    // TODO static connectedCallback()
+    // TODO static disconnectedCallback()
+    // TODO static adoptedCallback()
+
     // noinspection JSUnusedLocalSymbols,JSUnusedGlobalSymbols
     static get observedAttributes() {
         return Customary.observedAttributes(this);

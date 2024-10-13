@@ -2,10 +2,11 @@
 import {CustomaryDefinition} from "customary/CustomaryDefinition.js";
 // @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
 import {CustomaryOptions} from "customary/CustomaryOptions.js";
+import {CustomaryHooks} from "customary/CustomaryHooks.js";
 
-export class CustomaryDefine {
+export class CustomaryDefine<T extends HTMLElement> {
 
-    async define(): Promise<CustomaryDefinition> {
+    async define(): Promise<CustomaryDefinition<T>> {
         const [definition, ] = await Promise.all([
             this.buildCustomaryDefinition(),
             this.adopt_font_cssStyleSheets(),
@@ -13,7 +14,7 @@ export class CustomaryDefine {
         return definition;
     }
 
-    private async buildCustomaryDefinition(): Promise<CustomaryDefinition> {
+    private async buildCustomaryDefinition(): Promise<CustomaryDefinition<T>> {
         const documentTemplate: HTMLTemplateElement | undefined = this.findHTMLTemplateElementInDOMDocument();
 
         const template: HTMLTemplateElement | undefined =
@@ -28,18 +29,27 @@ export class CustomaryDefine {
 
         const documentFragment: DocumentFragment = template?.content ?? (()=>{throw Error})();
 
-        const state = this.options.state ?? this.findStateScriptApplicationJsonInDOMDocument();
-
-        await this.injectStateBindings(state, documentFragment);
+        await this.injectStateBindings(this.options.state, documentFragment);
 
         return {
+            constructOptions: {
+                adoptStylesheetDont: this.options.constructOptions?.adoptStylesheetDont,
+                attachShadowDont: this.options.constructOptions?.attachShadowDont,
+                replaceChildrenDont: this.options.constructOptions?.replaceChildrenDont,
+            },
             documentFragment,
             cssStyleSheet,
-            constructOptions: this.options.constructOptions,
-            slotOptions: this.options.slotOptions,
-            attributeOptions: this.options.attributeOptions,
-            events: this.options.events,
-            state,
+            hooks: {
+                attributes: this.hooks?.attributes,
+                constructHooks: {
+                    onConstruct: this.hooks?.constructHooks?.onConstruct,
+                },
+                events: this.hooks?.events,
+                slotHooks: {
+                    slotchange: this.hooks?.slotHooks?.slotchange,
+                }
+            },
+            state: this.options.state,
         };
     }
 
@@ -56,7 +66,7 @@ export class CustomaryDefine {
     }
 
     private async getHTMLTemplateElementFromHtmlFunction() {
-        return await this.toTemplate(await this.options.fromHtml?.());
+        return await this.toTemplate(await this.hooks?.defineHooks?.fromHtml?.());
     }
 
     private async loadHTMLTemplateElementFromExternalHtml() {
@@ -65,13 +75,6 @@ export class CustomaryDefine {
 
     private async loadExternalCssStyleSheet() {
         return await (await this.externalLoader).loadCssStyleSheet();
-    }
-
-    private findStateScriptApplicationJsonInDOMDocument(): object | undefined {
-        const element = document.querySelector(
-            `script[type="application/json"][data-customary-name='${this.options.name}']`
-        );
-        return element?.textContent ? JSON.parse(element.textContent) : undefined;
     }
 
     private async adopt_font_cssStyleSheets() {
@@ -102,7 +105,7 @@ export class CustomaryDefine {
         for (const delimiter of delimiters) {
             const tile: string | undefined = this.detile(tileset, delimiter);
             if (tile) {
-                await this.options.defineOptions?.onTile?.(tile);
+                await this.hooks?.defineHooks?.onTile?.(tile);
                 return tile;
             }
         }
@@ -124,7 +127,8 @@ export class CustomaryDefine {
     }
 
     constructor(
-        private readonly options: CustomaryOptions<any>
+        private readonly options: CustomaryOptions,
+        private readonly hooks: CustomaryHooks<any>
     ) {}
 
     private get cssStyleSheetImporter(): Promise<CSSStyleSheetImporter> {
@@ -151,9 +155,7 @@ export class CustomaryDefine {
         );
     }
 
-    private getResourceLocationResolution(
-        customaryOptions: CustomaryOptions<any>
-    ): ResourceLocationResolution | undefined {
+    private getResourceLocationResolution(customaryOptions: CustomaryOptions): ResourceLocationResolution | undefined {
         return customaryOptions.defineOptions?.resourceLocationResolution ??
             customaryOptions.preset === "recommended" ?
             {

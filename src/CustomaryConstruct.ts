@@ -1,23 +1,23 @@
-import {CustomaryDefinition} from "customary/CustomaryDefinition.js";
+import {CustomaryDefinition, SlotHooks} from "customary/CustomaryDefinition.js";
 import {CustomaryHTMLElement} from "customary/CustomaryHTMLElement.js";
-import {CustomaryEvent, CustomarySlotOptions} from "customary/CustomaryTypes.js";
+import {CustomaryEvent} from "customary/CustomaryTypes.js";
 
-export class CustomaryConstruct {
+export class CustomaryConstruct<T extends HTMLElement> {
 
-    construct(element: Element, customaryDefinition: CustomaryDefinition){
+    construct(element: T, customaryDefinition: CustomaryDefinition<T>){
         const options = customaryDefinition.constructOptions;
 
-        if (!options?.attachShadowDont) {
+        if (!customaryDefinition.constructOptions?.attachShadowDont) {
             element.attachShadow({mode: "open"});
         }
 
         const documentFragment = customaryDefinition.documentFragment.cloneNode(true) as DocumentFragment;
 
-        options?.onConstruct?.(element, documentFragment);
+        customaryDefinition.hooks?.constructHooks?.onConstruct?.(element, documentFragment);
 
         const parent: ParentNode = element.shadowRoot ?? element;
 
-        if (!options?.replaceChildrenDont) {
+        if (!customaryDefinition.constructOptions?.replaceChildrenDont) {
             parent.replaceChildren(documentFragment);
         }
 
@@ -25,9 +25,9 @@ export class CustomaryConstruct {
 
         this.adoptStylesheet(element, customaryDefinition.cssStyleSheet, options?.adoptStylesheetDont);
 
-        this.addEventListener_slotChange(element, customaryDefinition.slotOptions);
+        this.addEventListener_slotChange(element, customaryDefinition.hooks?.slotHooks);
 
-        this.addEvents(element, customaryDefinition.events);
+        this.addEvents(element, customaryDefinition.hooks?.events);
     }
 
     private setStateAndBind(element: Element, state: object | object[] | undefined) {
@@ -47,19 +47,19 @@ export class CustomaryConstruct {
         adopter.adoptedStyleSheets.push(cssStylesheet);
     }
 
-    private addEventListener_slotChange(element: Element, slotOptions?: CustomarySlotOptions<any>) {
-        if (!slotOptions) return;
+    private addEventListener_slotChange(element: Element, slotHooks?: SlotHooks<any>) {
+        const slotchange = slotHooks?.slotchange;
+        if (!slotchange) return;
 
-        slotOptions.slotchange(element);
+        slotchange(element);
 
         /*
         https://stackoverflow.com/questions/67332635/slots-does-not-work-on-a-html-web-component-without-shadow-dom
         */
-        element.shadowRoot!.addEventListener(
-            'slotchange', event => slotOptions.slotchange(element, event));
+        element.shadowRoot!.addEventListener('slotchange', event => slotchange(element, event));
     }
 
-    private addEvents(customElement: Element, customaryEvents: CustomaryEvent[] | undefined) {
+    private addEvents(customElement: T, customaryEvents: CustomaryEvent<T>[] | undefined) {
         if (!customaryEvents) return;
 
         const parent: ParentNode = customElement.shadowRoot ?? customElement;
@@ -69,13 +69,13 @@ export class CustomaryConstruct {
             for (const element of elements) {
                 element.addEventListener(
                     this.getEventType(customaryEvent, element)!,
-                    (event) => customaryEvent.listener(customElement, event)
+                    (event: Event) => customaryEvent.listener(customElement, event)
                 );
             }
         }
     }
 
-    private getEventType(customaryEvent: CustomaryEvent, element: Element): string | undefined {
+    private getEventType(customaryEvent: CustomaryEvent<T>, element: Element): string | undefined {
         if (customaryEvent.type) return customaryEvent.type;
         switch (element.tagName) {
             case 'BUTTON': return 'click';

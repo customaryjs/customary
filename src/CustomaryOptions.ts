@@ -1,24 +1,14 @@
-import {
-    CustomaryAttributeOptions,
-    CustomaryConstructOptions,
-    CustomaryEvent,
-    CustomarySlotOptions
-} from "customary/CustomaryTypes.js";
-
 export type CustomaryPreset = 'recommended';
 
-export type CustomaryOptions<T extends HTMLElement> = {
+export type CustomaryOptions = {
     name: string;
     preset?: CustomaryPreset;
-    events?: CustomaryEvent[];
     state?: object;
-    fromHtml?: () => Promise<string>;
     defineOptions?: {
         extends?: string;
         detileDont?: boolean;
         fontLocation?: string;
         fontLocations?: string[];
-        onTile?: (tile: string) => Promise<any>;
         resourceLocationResolution?: {
             kind: 'flat';
         } | {
@@ -26,9 +16,11 @@ export type CustomaryOptions<T extends HTMLElement> = {
             pathPrefix: string;
         };
     };
-    constructOptions?: CustomaryConstructOptions<T>;
-    attributeOptions?: CustomaryAttributeOptions<T>;
-    slotOptions?: CustomarySlotOptions<T>;
+    constructOptions?: {
+        adoptStylesheetDont?: boolean;
+        attachShadowDont?: boolean;
+        replaceChildrenDont?: boolean;
+    };
     externalLoaderOptions?: {
         import_meta?: ImportMeta;
     }
