@@ -7,7 +7,7 @@ export interface FetchText {
 
 class FetchText_DOM implements FetchText {
     public async fetchText(input: RequestInfo | URL): Promise<string> {
-        console.log('fetch: ' + input);
+        console.debug('fetch: ' + input);
         const response = await fetch(input);
         if (!response.ok) {
             if (response.status === 404)

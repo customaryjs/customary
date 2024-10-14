@@ -15,7 +15,7 @@ export class CSSStyleSheetImporter {
     }
 
     private async importCSSStyleSheet(location: string, importFn: ImportFn) {
-        console.log('import: ' + location);
+        console.debug('import: ' + location);
         try {
             const cssModule: any = await importFn(location);
             return cssModule.default;
