@@ -31,25 +31,15 @@ export class CustomaryDefine<T extends HTMLElement> {
 
         await this.injectStateBindings(this.options.state, documentFragment);
 
+        const {constructOptions, state} = this.options;
+        const hooks = this.hooks;
+
         return {
-            constructOptions: {
-                adoptStylesheetDont: this.options.constructOptions?.adoptStylesheetDont,
-                attachShadowDont: this.options.constructOptions?.attachShadowDont,
-                replaceChildrenDont: this.options.constructOptions?.replaceChildrenDont,
-            },
             documentFragment,
-            cssStyleSheet,
-            hooks: {
-                attributes: this.hooks?.attributes,
-                constructHooks: {
-                    onConstruct: this.hooks?.constructHooks?.onConstruct,
-                },
-                events: this.hooks?.events,
-                slotHooks: {
-                    slotchange: this.hooks?.slotHooks?.slotchange,
-                }
-            },
-            state: this.options.state,
+            ...(constructOptions ? {constructOptions} : {}),
+            ...(cssStyleSheet ? {cssStyleSheet} : {}),
+            ...(hooks ? {hooks} : {}),
+            ...(state ? {state} : {}),
         };
     }
 
@@ -128,7 +118,7 @@ export class CustomaryDefine<T extends HTMLElement> {
 
     constructor(
         private readonly options: CustomaryOptions,
-        private readonly hooks: CustomaryHooks<any>
+        private readonly hooks: CustomaryHooks<any> | undefined
     ) {}
 
     private get cssStyleSheetImporter(): Promise<CSSStyleSheetImporter> {

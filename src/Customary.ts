@@ -60,7 +60,7 @@ export class Customary {
 
         customaryOptions.state = this.combineState(name, customaryOptions?.state);
 
-        const customaryHooks: CustomaryHooks<T> = this.combineHooks(name, hooks);
+        const customaryHooks: CustomaryHooks<T> | undefined = this.combineHooks(name, hooks);
 
         const definition: CustomaryDefinition<T> = await new CustomaryDefine(
             customaryOptions as CustomaryOptions, customaryHooks
@@ -88,15 +88,23 @@ export class Customary {
     private static combineHooks<T extends HTMLElement>(
         name: string,
         customaryHooksFromDefine: Partial<CustomaryHooks<T>> | undefined
-    ): CustomaryHooks<T> {
+    ): CustomaryHooks<T> | undefined {
         const customaryHooksDetected: CustomaryHooks<T> | undefined = this.detectHooks(name);
-        return {
-            attributes: customaryHooksFromDefine?.attributes ?? customaryHooksDetected?.attributes,
-            constructHooks: customaryHooksFromDefine?.constructHooks ?? customaryHooksDetected?.constructHooks,
-            defineHooks: customaryHooksFromDefine?.defineHooks ?? customaryHooksDetected?.defineHooks,
-            events: customaryHooksFromDefine?.events ?? customaryHooksDetected?.events,
-            slotHooks: customaryHooksFromDefine?.slotHooks ?? customaryHooksDetected?.slotHooks,
-        };
+        function o(data: Record<string, any>): object {
+            const [, value] = Object.entries(data)[0];
+            return value ? data : {};
+        }
+        function u(data: any): object | undefined {
+            return Object.keys(data).length ? data: undefined;
+        }
+        return u({
+            ...o({attributes: customaryHooksFromDefine?.attributes ?? customaryHooksDetected?.attributes}),
+            ...o({constructHooks: customaryHooksFromDefine?.constructHooks ?? customaryHooksDetected?.constructHooks}),
+            ...o({defineHooks: customaryHooksFromDefine?.defineHooks ?? customaryHooksDetected?.defineHooks}),
+            ...o({events: customaryHooksFromDefine?.events ?? customaryHooksDetected?.events}),
+            ...o({lifecycle: customaryHooksFromDefine?.lifecycle ?? customaryHooksDetected?.lifecycle}),
+            ...o({slotHooks: customaryHooksFromDefine?.slotHooks ?? customaryHooksDetected?.slotHooks}),
+        });
     }
 
     private static combineCustomaryOptions(
@@ -109,16 +117,6 @@ export class Customary {
             ...customaryOptionsFromDefine,
             ...(typeof nameFromDefine === 'string' ? {name: nameFromDefine} : {}),
         };
-
-        /*
-        if (!Object.keys(customaryOptions).length) {
-            throw new Error(`
-Customary needs options. You can provide them:
-- as a parameter when calling "Customary.define()"
-- as a static attribute "customary" of a custom element class.
-`);
-        }
-         */
     }
 
     private static getElementDefinitionOptions(
@@ -155,6 +153,24 @@ Customary needs options. You can provide them:
         new CustomaryConstruct().construct(element, customaryDefinition);
     }
 
+    static connectedCallback<T extends HTMLElement>(element: T) {
+        const constructor = element.constructor as CustomElementConstructor;
+        const customaryDefinition = this.customaryRegistry.get(constructor)!;
+        customaryDefinition.hooks?.lifecycle?.connected?.(element);
+    }
+
+    static disconnectedCallback<T extends HTMLElement>(element: T) {
+        const constructor = element.constructor as CustomElementConstructor;
+        const customaryDefinition = this.customaryRegistry.get(constructor)!;
+        customaryDefinition.hooks?.lifecycle?.disconnected?.(element);
+    }
+
+    static adoptedCallback<T extends HTMLElement>(element: T) {
+        const constructor = element.constructor as CustomElementConstructor;
+        const customaryDefinition = this.customaryRegistry.get(constructor)!;
+        customaryDefinition.hooks?.lifecycle?.adopted?.(element);
+    }
+
     static observedAttributes(constructor: CustomElementConstructor): string[] | undefined {
         const customaryDefinition = this.customaryRegistry.get(constructor)!;
         const attributes = customaryDefinition.hooks?.attributes;
@@ -164,11 +180,10 @@ Customary needs options. You can provide them:
     static attributeChangedCallback<T extends HTMLElement>(
         element: T, property: string, oldValue: string, newValue: string
     ) {
-        const customaryDefinition =
-            this.customaryRegistry.get(element.constructor as CustomElementConstructor)!;
-        const attributes = customaryDefinition.hooks?.attributes;
-        if (!attributes) return;
-        attributes[property]?.(element, property, oldValue, newValue);
+        const constructor = element.constructor as CustomElementConstructor;
+        const customaryDefinition = this.customaryRegistry.get(constructor)!;
+        customaryDefinition.hooks?.attributes?.[property]?.(
+            element, property, oldValue, newValue);
     }
 
     private static readonly customaryRegistry = new CustomaryRegistry(customElements);

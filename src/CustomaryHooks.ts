@@ -10,6 +10,11 @@ export type CustomaryHooks<T extends HTMLElement> = {
         onTile?: (tile: string) => Promise<any>;
     };
     events?: CustomaryEvent<T>[];
+    lifecycle?: {
+        connected?: (element: T) => void;
+        disconnected?: (element: T) => void;
+        adopted?: (element: T) => void;
+    }
     slotHooks?: {
         slotchange: (element: T, event?: Event) => void;
     }

@@ -8,13 +8,24 @@ export class CustomaryHTMLElement extends HTMLElement {
         Customary.construct(this);
     }
 
-    // TODO static connectedCallback()
-    // TODO static disconnectedCallback()
-    // TODO static adoptedCallback()
-
     // noinspection JSUnusedLocalSymbols,JSUnusedGlobalSymbols
     static get observedAttributes() {
         return Customary.observedAttributes(this);
+    }
+
+    // noinspection JSUnusedLocalSymbols,JSUnusedGlobalSymbols
+    connectedCallback() {
+        Customary.connectedCallback(this);
+    }
+
+    // noinspection JSUnusedLocalSymbols,JSUnusedGlobalSymbols
+    disconnectedCallback() {
+        Customary.disconnectedCallback(this);
+    }
+
+    // noinspection JSUnusedLocalSymbols,JSUnusedGlobalSymbols
+    adoptedCallback() {
+        Customary.adoptedCallback(this);
     }
 
     // noinspection JSUnusedLocalSymbols,JSUnusedGlobalSymbols
