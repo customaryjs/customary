@@ -35,7 +35,7 @@ export class CustomaryHTMLElement extends HTMLElement {
 
     // noinspection JSUnusedLocalSymbols,JSUnusedGlobalSymbols
     get state(): any {
-        return this.stateful.getStateRawShouldIt();
+        return this.stateful.getState();
     }
 
     // noinspection JSUnusedLocalSymbols,JSUnusedGlobalSymbols
