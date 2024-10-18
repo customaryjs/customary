@@ -11,7 +11,3 @@ export type CustomaryDefinition<T extends HTMLElement> = {
     hooks?: CustomaryHooks<T>;
     state?: object | object[];
 }
-
-export type SlotHooks<T extends HTMLElement> = {
-    slotchange?: ((element: T, event?: Event) => void);
-}

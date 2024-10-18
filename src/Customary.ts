@@ -8,6 +8,8 @@ import {CustomaryHooks} from "customary/CustomaryHooks";
 
 export class Customary {
 
+    static readonly hooks: Record<string, CustomaryHooks<any>> = {};
+
     static async detect(): Promise<CustomElementConstructor[]> {
         const templates: NodeListOf<HTMLTemplateElement> = document.querySelectorAll("template[data-customary-name]");
         const promises: Promise<CustomElementConstructor>[] = [];
@@ -25,8 +27,7 @@ export class Customary {
     }
 
     private static detectHooks<T extends HTMLElement>(name: string): CustomaryHooks<T> | undefined {
-        const customaryHooksByName = (globalThis as any).customaryHooks as Record<string, CustomaryHooks<T>>;
-        return customaryHooksByName?.[name];
+        return this.hooks[name];
     }
 
     static async define<T extends HTMLElement>(
