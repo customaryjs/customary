@@ -1,5 +1,10 @@
-interface CSSStyleSheetImporter {
-    getCSSStyleSheet(location: string): Promise<CSSStyleSheet | undefined>
+import {CSSStyleSheetImporter} from "customary/cssstylesheet/CSSStyleSheetImporter.js";
+import {FetchText_DOM_singleton} from "customary/fetch/FetchText.js";
+
+export async function adoptCSSStylesheets(...locations: string[]) {
+    await new CSSStyleSheetAdopter(
+        new CSSStyleSheetImporter(FetchText_DOM_singleton), document
+    ).adoptCSSStylesheets(...locations);
 }
 
 export class CSSStyleSheetAdopter {
