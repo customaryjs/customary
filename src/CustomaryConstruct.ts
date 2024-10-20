@@ -5,29 +5,44 @@ import {CustomaryEventListener, CustomaryEvents, SlotHooks} from "customary/Cust
 export class CustomaryConstruct<T extends HTMLElement> {
 
     construct(element: T, customaryDefinition: CustomaryDefinition<T>){
-        const options = customaryDefinition.constructOptions;
+        const {config, documentFragment, hooks, state, cssStyleSheet}
+            = customaryDefinition;
 
-        if (!customaryDefinition.constructOptions?.attachShadowDont) {
+        if (!config?.construct?.attachShadowDont) {
             element.attachShadow({mode: "open"});
         }
 
-        const documentFragment = customaryDefinition.documentFragment.cloneNode(true) as DocumentFragment;
+        this.useDocumentFragment(
+            element,
+            documentFragment.cloneNode(true) as DocumentFragment,
+            {
+                onConstruct: hooks?.construct?.onConstruct,
+                replaceChildrenDont: config?.construct?.replaceChildrenDont
+            });
 
-        customaryDefinition.hooks?.constructHooks?.onConstruct?.(element, documentFragment);
+        this.setStateAndBind(element, state);
 
-        const parent: ParentNode = element.shadowRoot ?? element;
+        this.adoptStylesheet(element, cssStyleSheet, config?.construct?.adoptStylesheetDont);
 
-        if (!customaryDefinition.constructOptions?.replaceChildrenDont) {
+        this.addEventListener_slotChange(element, hooks?.slots);
+
+        this.addEvents(element, hooks?.events);
+    }
+
+    private useDocumentFragment(
+        element: T,
+        documentFragment: DocumentFragment,
+        options: {
+            onConstruct? : (element: T, documentFragment: DocumentFragment) => void;
+            replaceChildrenDont?: boolean;
+        }
+    ) {
+        options.onConstruct?.(element, documentFragment);
+
+        if (!options.replaceChildrenDont) {
+            const parent: ParentNode = element.shadowRoot ?? element;
             parent.replaceChildren(documentFragment);
         }
-
-        this.setStateAndBind(element, customaryDefinition.state);
-
-        this.adoptStylesheet(element, customaryDefinition.cssStyleSheet, options?.adoptStylesheetDont);
-
-        this.addEventListener_slotChange(element, customaryDefinition.hooks?.slotHooks);
-
-        this.addEvents(element, customaryDefinition.hooks?.events);
     }
 
     private setStateAndBind(element: Element, state: object | object[] | undefined) {

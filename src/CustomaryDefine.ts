@@ -1,231 +1,237 @@
-// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
 import {CustomaryDefinition} from "customary/CustomaryDefinition.js";
-// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
-import {CustomaryOptions} from "customary/CustomaryOptions.js";
-import {CustomaryHooks} from "customary/CustomaryHooks.js";
+import {CustomaryConfig, CustomaryOptions} from "customary/CustomaryOptions.js";
 
 export class CustomaryDefine<T extends HTMLElement> {
 
-    async define(): Promise<CustomaryDefinition<T>> {
-        const [definition, ] = await Promise.all([
-            this.buildCustomaryDefinition(),
-            this.adopt_font_cssStyleSheets(),
-        ])
-        return definition;
-    }
+	async define(): Promise<CustomaryDefinition<T>> {
+		const [definition, ] = await Promise.all([
+			this.buildCustomaryDefinition(),
+			this.adopt_font_cssStyleSheets(),
+		])
+		return definition;
+	}
 
-    private async buildCustomaryDefinition(): Promise<CustomaryDefinition<T>> {
-        const documentTemplate: HTMLTemplateElement | undefined = this.findHTMLTemplateElementInDOMDocument();
+	private async buildCustomaryDefinition(): Promise<CustomaryDefinition<T>> {
+		const documentTemplate: HTMLTemplateElement | undefined = this.findHTMLTemplateElementInDOMDocument();
 
-        const template: HTMLTemplateElement | undefined =
-            documentTemplate
-            ?? await this.getHTMLTemplateElementFromHtmlFunction()
-            ?? await this.loadHTMLTemplateElementFromExternalHtml();
+		const template: HTMLTemplateElement | undefined =
+				documentTemplate
+				?? await this.getHTMLTemplateElementFromHtmlFunction()
+				?? await this.loadHTMLTemplateElementFromExternalHtml();
 
-        const cssStyleSheet: CSSStyleSheet | undefined =
-            documentTemplate
-                ? undefined
-                : await this.loadExternalCssStyleSheet();
+		const cssStyleSheet: CSSStyleSheet | undefined =
+				documentTemplate
+						? undefined
+						: await this.loadExternalCssStyleSheet();
 
-        const documentFragment: DocumentFragment = template?.content ?? (()=>{throw Error})();
+		const documentFragment: DocumentFragment = template?.content ?? (()=>{throw Error})();
 
-        await this.injectStateBindings(this.options.state, documentFragment);
+		await this.injectStateBindings(this.options.state, documentFragment);
 
-        const {constructOptions, state} = this.options;
-        const hooks = this.hooks;
+		const config_construct = this.options.config?.construct;
+		const config = config_construct ? {construct: config_construct} : undefined;
+		const {hooks, state} = this.options;
 
-        return {
-            documentFragment,
-            ...(constructOptions ? {constructOptions} : {}),
-            ...(cssStyleSheet ? {cssStyleSheet} : {}),
-            ...(hooks ? {hooks} : {}),
-            ...(state ? {state} : {}),
-        };
-    }
+		const definition: CustomaryDefinition<T> = {
+			config,
+			cssStyleSheet,
+			documentFragment,
+			hooks,
+			state,
+		};
 
-    private async injectStateBindings(state: object | undefined, documentFragment: DocumentFragment) {
-        if (!state) return;
-        const {KnockoutBridge: ko} = await import("customary/knockoutjs/KnockoutBridge.js");
-        ko.injectStateBindings(documentFragment);
-    }
+		return prune(definition);
+	}
 
-    private findHTMLTemplateElementInDOMDocument(): HTMLTemplateElement | undefined {
-        return document.querySelector(
-            `template[data-customary-name='${this.options.name}']`
-        ) as HTMLTemplateElement ?? undefined;
-    }
+	private async injectStateBindings(state: object | undefined, documentFragment: DocumentFragment) {
+		if (!state) return;
+		const {KnockoutBridge: ko} = await import("customary/knockoutjs/KnockoutBridge.js");
+		ko.injectStateBindings(documentFragment);
+	}
 
-    private async getHTMLTemplateElementFromHtmlFunction() {
-        return await this.toTemplate(await this.hooks?.defineHooks?.fromHtml?.());
-    }
+	private findHTMLTemplateElementInDOMDocument(): HTMLTemplateElement | undefined {
+		return document.querySelector(
+				`template[data-customary-name='${this.options.config.name}']`
+		) as HTMLTemplateElement ?? undefined;
+	}
 
-    private async loadHTMLTemplateElementFromExternalHtml() {
-        return await this.toTemplate(await (await this.externalLoader).loadHtml());
-    }
+	private async getHTMLTemplateElementFromHtmlFunction() {
+		return await this.toTemplate(await this.options.hooks?.define?.fromHtml?.());
+	}
 
-    private async loadExternalCssStyleSheet() {
-        return await (await this.externalLoader).loadCssStyleSheet();
-    }
+	private async loadHTMLTemplateElementFromExternalHtml() {
+		return await this.toTemplate(await (await this.externalLoader).loadHtml());
+	}
 
-    private async adopt_font_cssStyleSheets() {
-        const locations = ((a: string[]) => a.length > 0 ? a : undefined)(
-            [
-                this.options.defineOptions?.fontLocation,
-                ...(this.options.defineOptions?.fontLocations ?? []),
-            ]
-                .filter(location => location != undefined)
-        );
-        if (!locations) return;
-        return await (await this.cssStyleSheetAdopter).adoptCSSStylesheets(...locations);
-    }
+	private async loadExternalCssStyleSheet() {
+		return await (await this.externalLoader).loadCssStyleSheet();
+	}
 
-    private async toTemplate(htmlString?: string) {
-        if (!htmlString) return undefined;
-        const tile: string = await this.getTile(htmlString);
-        const template: HTMLTemplateElement = document.createElement('template');
-        template.innerHTML = tile;
-        return template;
-    }
+	private async adopt_font_cssStyleSheets() {
+		const locations = ((a: string[]) => a.length > 0 ? a : undefined)(
+				[
+					this.options.config.define?.fontLocation,
+					...(this.options.config.define?.fontLocations ?? []),
+				]
+						.filter(location => location != undefined)
+		);
+		if (!locations) return;
+		return await (await this.cssStyleSheetAdopter).adoptCSSStylesheets(...locations);
+	}
 
-    private async getTile(tileset: string) {
-        if (this.options.defineOptions?.detileDont) {
-            return tileset;
-        }
-        const delimiters = ['customary', this.options.name].map(s => `<!--${s}-->`);
-        for (const delimiter of delimiters) {
-            const tile: string | undefined = this.detile(tileset, delimiter);
-            if (tile) {
-                await this.hooks?.defineHooks?.onTile?.(tile);
-                return tile;
-            }
-        }
-        throw new Error(
-            'Delimited tile not found.' +
-            ' Customary looks for delimiters in your html tileset' +
-            ' to read the tile your custom component will display.' +
-            ` Try using one of these delimiters: ${delimiters}`);
-    }
+	private async toTemplate(htmlString?: string) {
+		if (!htmlString) return undefined;
+		const tile: string = await this.getTile(htmlString);
+		const template: HTMLTemplateElement = document.createElement('template');
+		template.innerHTML = tile;
+		return template;
+	}
 
-    private detile(text: string, delimiter: string): string | undefined
-    {
-        const strings = text.split(delimiter);
-        if (strings.length < 3) return undefined;
-        const string = strings[1];
-        const split = string?.split(delimiter);
-        const string1 = split?.[0];
-        return string1 ?? text;
-    }
+	private async getTile(tileset: string) {
+		if (this.options.config.define?.detileDont) {
+			return tileset;
+		}
+		const delimiters = ['customary', this.options.config.name].map(s => `<!--${s}-->`);
+		for (const delimiter of delimiters) {
+			const tile: string | undefined = this.detile(tileset, delimiter);
+			if (tile) {
+				await this.options.hooks?.define?.onTile?.(tile);
+				return tile;
+			}
+		}
+		throw new Error(
+				'Delimited tile not found.' +
+				' Customary looks for delimiters in your html tileset' +
+				' to read the tile your custom component will display.' +
+				` Try using one of these delimiters: ${delimiters}`);
+	}
 
-    constructor(
-        private readonly options: CustomaryOptions,
-        private readonly hooks: CustomaryHooks<any> | undefined
-    ) {}
+	private detile(text: string, delimiter: string): string | undefined
+	{
+		const strings = text.split(delimiter);
+		if (strings.length < 3) return undefined;
+		const string = strings[1];
+		const split = string?.split(delimiter);
+		const string1 = split?.[0];
+		return string1 ?? text;
+	}
 
-    private get cssStyleSheetImporter(): Promise<CSSStyleSheetImporter> {
-        return this._cssStyleSheetImporter ??= loadCssStyleSheetImporter(this.fetchText);
-    }
+	constructor(
+			private readonly options: CustomaryOptions<any>
+	) {}
 
-    private _cssStyleSheetImporter: Promise<CSSStyleSheetImporter> | undefined;
+	private get cssStyleSheetImporter(): Promise<CSSStyleSheetImporter> {
+		return this._cssStyleSheetImporter ??= loadCssStyleSheetImporter(this.fetchText);
+	}
 
-    private get cssStyleSheetAdopter(): Promise<CSSStyleSheetAdopter> {
-        return this._cssStyleSheetAdopter ??= loadCssStyleSheetAdopter(this.cssStyleSheetImporter);
-    }
+	private _cssStyleSheetImporter: Promise<CSSStyleSheetImporter> | undefined;
 
-    private _cssStyleSheetAdopter: Promise<CSSStyleSheetAdopter> | undefined;
+	private get cssStyleSheetAdopter(): Promise<CSSStyleSheetAdopter> {
+		return this._cssStyleSheetAdopter ??= loadCssStyleSheetAdopter(this.cssStyleSheetImporter);
+	}
 
-    private get externalLoader(): Promise<ExternalLoader> {
-        return this._externalLoader ??= loadTilesetLoader(
-            this.getResourceLocationResolution(this.options),
-            this.fetchText,
-            this.cssStyleSheetImporter,
-            {
-                name: this.options.name,
-                import_meta: this.get_import_meta(),
-            }
-        );
-    }
+	private _cssStyleSheetAdopter: Promise<CSSStyleSheetAdopter> | undefined;
 
-    private getResourceLocationResolution(customaryOptions: CustomaryOptions): ResourceLocationResolution | undefined {
-        return customaryOptions.defineOptions?.resourceLocationResolution ??
-            customaryOptions.preset === "recommended" ?
-            {
-                kind: "relative",
-                pathPrefix: '../',
-            }
-            : undefined;
-    }
+	private get externalLoader(): Promise<ExternalLoader> {
+		return this._externalLoader ??= loadTilesetLoader(
+				this.getResourceLocationResolution(this.options.config),
+				this.fetchText,
+				this.cssStyleSheetImporter,
+				{
+					name: this.options.config.name,
+					import_meta: this.get_import_meta(),
+				}
+		);
+	}
 
-    private get_import_meta() {
-        return this.options.externalLoaderOptions?.import_meta ?? (() => {
-            throw new Error('Customary needs "import.meta" if the custom element template ' +
-                'is to be loaded from an external file. ' +
-                '(document did not have a named template element, and an html string was not provided.)')
-        })();
-    }
+	private getResourceLocationResolution(config: CustomaryConfig): ResourceLocationResolution | undefined {
+		return config.define?.resourceLocationResolution ??
+		config.preset === "recommended" ?
+				{
+					kind: "relative",
+					pathPrefix: '../',
+				}
+				: undefined;
+	}
 
-    private _externalLoader: Promise<ExternalLoader> | undefined;
+	private get_import_meta() {
+		return this.options.hooks?.externalLoader?.import_meta ?? (() => {
+			throw new Error('Customary needs "import.meta" if the custom element template ' +
+					'is to be loaded from an external file. ' +
+					'(document did not have a named template element, and an html string was not provided.)')
+		})();
+	}
 
-    private get fetchText(): Promise<FetchText> {
-        return this._fetchText ??= loadFetchText();
-    }
+	private _externalLoader: Promise<ExternalLoader> | undefined;
 
-    private _fetchText: Promise<FetchText> | undefined;
+	private get fetchText(): Promise<FetchText> {
+		return this._fetchText ??= loadFetchText();
+	}
+
+	private _fetchText: Promise<FetchText> | undefined;
 
 }
 
 async function loadCssStyleSheetAdopter(cssStyleSheetImporter: Promise<CSSStyleSheetImporter>): Promise<CSSStyleSheetAdopter> {
-    const {CSSStyleSheetAdopter} = await import("customary/cssstylesheet/CSSStyleSheetAdopter.js");
-    return new CSSStyleSheetAdopter(await cssStyleSheetImporter, document);
+	const {CSSStyleSheetAdopter} = await import("customary/cssstylesheet/CSSStyleSheetAdopter.js");
+	return new CSSStyleSheetAdopter(await cssStyleSheetImporter as any, document);
 }
 
 async function loadCssStyleSheetImporter(fetchText: Promise<FetchText>): Promise<CSSStyleSheetImporter> {
-    const {CSSStyleSheetImporter} = await import("customary/cssstylesheet/CSSStyleSheetImporter.js");
-    return new CSSStyleSheetImporter(await fetchText);
+	const {CSSStyleSheetImporter} = await import("customary/cssstylesheet/CSSStyleSheetImporter.js");
+	return new CSSStyleSheetImporter(await fetchText);
 }
 
 interface CSSStyleSheetImporter {
-    getCSSStyleSheet(location: string): Promise<CSSStyleSheet | undefined>;
+	getCSSStyleSheet(location: string): Promise<CSSStyleSheet | undefined>;
 }
 
 interface CSSStyleSheetAdopter {
-    adoptCSSStylesheets(...locations: string[]): Promise<void>;
+	adoptCSSStylesheets(...locations: string[]): Promise<void>;
 }
 
 type ResourceLocationResolution = {
-    kind: 'flat';
+	kind: 'flat';
 } | {
-    kind: 'relative';
-    pathPrefix: string;
+	kind: 'relative';
+	pathPrefix: string;
 };
 
 async function loadTilesetLoader(
-    resourceLocationResolution: ResourceLocationResolution | undefined,
-    fetchText: Promise<FetchText>,
-    cssStyleSheetImporter: Promise<CSSStyleSheetImporter>,
-    options: {
-        name: string,
-        import_meta: ImportMeta;
-    }
+		resourceLocationResolution: ResourceLocationResolution | undefined,
+		fetchText: Promise<FetchText>,
+		cssStyleSheetImporter: Promise<CSSStyleSheetImporter>,
+		options: {
+			name: string,
+			import_meta: ImportMeta;
+		}
 ): Promise<ExternalLoader> {
-    const {ExternalLoader} = await import("customary/external/ExternalLoader.js");
-    return new ExternalLoader(
-        resourceLocationResolution,
-        await fetchText,
-        await cssStyleSheetImporter,
-        options
-    );
+	const {ExternalLoader} = await import("customary/external/ExternalLoader.js");
+	return new ExternalLoader(
+			resourceLocationResolution,
+			await fetchText,
+			await cssStyleSheetImporter,
+			options
+	);
 }
 
 interface ExternalLoader {
-    loadHtml(): Promise<string>;
-    loadCssStyleSheet(): Promise<undefined | CSSStyleSheet>;
+	loadHtml(): Promise<string>;
+	loadCssStyleSheet(): Promise<undefined | CSSStyleSheet>;
 }
 
 export interface FetchText {
-    fetchText(input: RequestInfo | URL): Promise<string>;
+	fetchText(input: RequestInfo | URL): Promise<string>;
 }
 
 async function loadFetchText(): Promise<FetchText> {
-    const {FetchText_DOM_singleton} = await import("customary/fetch/FetchText.js");
-    return FetchText_DOM_singleton;
+	const {FetchText_DOM_singleton} = await import("customary/fetch/FetchText.js");
+	return FetchText_DOM_singleton;
+}
+
+function prune<T extends { [s: string]: any }>(o: T): T {
+	return Object.fromEntries(
+			Object.entries(o)
+					.filter(([, v]) => !!v)
+	) as T;
 }

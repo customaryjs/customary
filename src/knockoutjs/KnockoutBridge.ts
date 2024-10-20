@@ -51,7 +51,7 @@ export class KnockoutBridge {
     }
 
     static merge(bindingContext: any, values: object | Array<any>) {
-        if (values instanceof Array) return this.mergeArray(bindingContext ?? this.ko.observableArray([]), values);
+        if (values instanceof Array) return this.mergeArray(bindingContext, values);
         return this.mergeObject(bindingContext, values);
     }
 

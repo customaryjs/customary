@@ -1,19 +1,22 @@
 export type CustomaryHooks<T extends HTMLElement> = {
     attributes?: Record<string, Customary_attributeChangedCallback<T>>;
-    constructHooks?: {
+    construct?: {
         onConstruct? : (element: T, documentFragment: DocumentFragment) => void;
     };
-    defineHooks?: {
+    define?: {
         fromHtml?: () => Promise<string>;
         onTile?: (tile: string) => Promise<any>;
     };
+    externalLoader?: {
+        import_meta?: ImportMeta;
+    }
     events?: CustomaryEvents<T>;
     lifecycle?: {
         connected?: (element: T) => void;
         disconnected?: (element: T) => void;
         adopted?: (element: T) => void;
     }
-    slotHooks?: SlotHooks<T>;
+    slots?: SlotHooks<T>;
 }
 
 type Customary_attributeChangedCallback<T extends HTMLElement> =

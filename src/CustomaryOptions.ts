@@ -1,10 +1,18 @@
-export type CustomaryPreset = 'recommended';
+import {CustomaryHooks} from "customary/CustomaryHooks.js";
 
-export type CustomaryOptions = {
-    name: string;
-    preset?: CustomaryPreset;
-    state?: object;
-    defineOptions?: {
+export type CustomaryOptions<T extends HTMLElement> = {
+    config: {name: string} & CustomaryConfig;
+    hooks?: CustomaryHooks<T>;
+    state?: object | object[];
+};
+
+export type CustomaryConfig = {
+    construct?: {
+        adoptStylesheetDont?: boolean;
+        attachShadowDont?: boolean;
+        replaceChildrenDont?: boolean;
+    };
+    define?: {
         extends?: string;
         detileDont?: boolean;
         fontLocation?: string;
@@ -16,12 +24,7 @@ export type CustomaryOptions = {
             pathPrefix: string;
         };
     };
-    constructOptions?: {
-        adoptStylesheetDont?: boolean;
-        attachShadowDont?: boolean;
-        replaceChildrenDont?: boolean;
-    };
-    externalLoaderOptions?: {
-        import_meta?: ImportMeta;
-    }
+    preset?: CustomaryPreset;
 }
+
+export type CustomaryPreset = 'recommended';
