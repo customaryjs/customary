@@ -1,5 +1,5 @@
 import {Customary} from "customary/Customary.js";
-import {Stateful} from "customary/state/Stateful.js";
+import {CustomaryState} from "customary/CustomaryState.js";
 
 export class CustomaryHTMLElement extends HTMLElement {
 
@@ -8,48 +8,49 @@ export class CustomaryHTMLElement extends HTMLElement {
         Customary.construct(this);
     }
 
-    // noinspection JSUnusedLocalSymbols,JSUnusedGlobalSymbols
+    // noinspection JSUnusedGlobalSymbols
     static get observedAttributes() {
         return Customary.observedAttributes(this);
     }
 
-    // noinspection JSUnusedLocalSymbols,JSUnusedGlobalSymbols
+    // noinspection JSUnusedGlobalSymbols
     connectedCallback() {
         Customary.connectedCallback(this);
     }
 
-    // noinspection JSUnusedLocalSymbols,JSUnusedGlobalSymbols
+    // noinspection JSUnusedGlobalSymbols
     disconnectedCallback() {
         Customary.disconnectedCallback(this);
     }
 
-    // noinspection JSUnusedLocalSymbols,JSUnusedGlobalSymbols
+    // noinspection JSUnusedGlobalSymbols
     adoptedCallback() {
         Customary.adoptedCallback(this);
     }
 
-    // noinspection JSUnusedLocalSymbols,JSUnusedGlobalSymbols
+    // noinspection JSUnusedGlobalSymbols
     attributeChangedCallback(property: string, oldValue: string, newValue: string) {
         Customary.attributeChangedCallback(this, property, oldValue, newValue);
     }
 
-    // noinspection JSUnusedLocalSymbols,JSUnusedGlobalSymbols
+    // noinspection JSUnusedGlobalSymbols
     get state(): any {
-        return this.stateful.getState();
+        return this.customaryState.getState();
     }
 
-    // noinspection JSUnusedLocalSymbols,JSUnusedGlobalSymbols
+    // noinspection JSUnusedGlobalSymbols
     setState(state: any): void;
+    // noinspection JSUnusedGlobalSymbols
     setState(fn: (state: any) => any): void;
     setState(state_or_fn: any | ((state: any) => any)): void
     {
-        void this.stateful.setState(state_or_fn);
+        void this.customaryState.setState(state_or_fn);
     }
 
-    get stateful(): Stateful {
-        return this._stateful ??= new Stateful();
+    private get customaryState(): CustomaryState {
+        return this._customaryState ??= new CustomaryState(this);
     }
 
-    private _stateful: Stateful | undefined;
+    private _customaryState: CustomaryState | undefined;
 
 }

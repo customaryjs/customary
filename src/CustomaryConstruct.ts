@@ -20,7 +20,7 @@ export class CustomaryConstruct<T extends HTMLElement> {
                 replaceChildrenDont: config?.construct?.replaceChildrenDont
             });
 
-        this.setStateAndBind(element, state);
+        this.initStateBind(element, state);
 
         this.adoptStylesheet(element, cssStyleSheet, config?.construct?.adoptStylesheetDont);
 
@@ -45,10 +45,10 @@ export class CustomaryConstruct<T extends HTMLElement> {
         }
     }
 
-    private setStateAndBind(element: Element, state: object | object[] | undefined) {
-        if (element instanceof CustomaryHTMLElement) {
-            void element.stateful.setStateAndBind(element, state);
-        }
+    private initStateBind(element: Element, state: object | object[] | undefined) {
+        if (!(element instanceof CustomaryHTMLElement)) return;
+        if (state === undefined) return;
+        void element.setState(state);
     }
 
     private adoptStylesheet(

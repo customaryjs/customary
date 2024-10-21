@@ -18,28 +18,6 @@ export class KnockoutBridge {
         this.ko.applyBindings(bindingContext, rootNode);
     }
 
-    static injectStateBindings(node: Node) {
-        switch (node.nodeType) {
-            case Node.DOCUMENT_FRAGMENT_NODE:
-            {
-                node.childNodes.forEach(node => {
-                    this.injectStateBindings(node);
-                });
-                break;
-            }
-            case Node.ELEMENT_NODE:
-            {
-                if (node instanceof Element) {
-                    const htmlString_old = node.innerHTML;
-                    const htmlString_new = this.replaceStateBindings(htmlString_old);
-                    if (htmlString_new !== htmlString_old)
-                    node.innerHTML = htmlString_new;
-                }
-                break;
-            }
-        }
-    }
-
     // noinspection JSUnusedLocalSymbols,JSUnusedGlobalSymbols
     static observable<T = any>(value: T): Observable<T> {
         return this.ko.observable(value);
@@ -94,9 +72,5 @@ export class KnockoutBridge {
             }
         }
         return bindingContext;
-    }
-
-    private static replaceStateBindings(htmlString: string) {
-        return htmlString.replace(/\{this\.state\.(\w+)}/g, '<span data-bind="text: $1"></span>');
     }
 }

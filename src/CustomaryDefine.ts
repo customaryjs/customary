@@ -1,5 +1,7 @@
 import {CustomaryDefinition} from "customary/CustomaryDefinition.js";
-import {CustomaryConfig, CustomaryOptions} from "customary/CustomaryOptions.js";
+import {CustomaryOptions} from "customary/CustomaryOptions.js";
+import {CustomaryConfig} from "customary/CustomaryConfig.js";
+import {hydrateStateBindings} from "customary/CustomaryState.js";
 
 export class CustomaryDefine<T extends HTMLElement> {
 
@@ -26,7 +28,7 @@ export class CustomaryDefine<T extends HTMLElement> {
 
 		const documentFragment: DocumentFragment = template?.content ?? (()=>{throw Error})();
 
-		await this.injectStateBindings(this.options.state, documentFragment);
+		hydrateStateBindings(documentFragment);
 
 		const config_construct = this.options.config?.construct;
 		const config = config_construct ? {construct: config_construct} : undefined;
@@ -41,12 +43,6 @@ export class CustomaryDefine<T extends HTMLElement> {
 		};
 
 		return prune(definition);
-	}
-
-	private async injectStateBindings(state: object | undefined, documentFragment: DocumentFragment) {
-		if (!state) return;
-		const {KnockoutBridge: ko} = await import("customary/knockoutjs/KnockoutBridge.js");
-		ko.injectStateBindings(documentFragment);
 	}
 
 	private findHTMLTemplateElementInDOMDocument(): HTMLTemplateElement | undefined {
