@@ -3,10 +3,12 @@ import {CustomaryConstruct} from "customary/CustomaryConstruct.js";
 import {CustomaryOptions} from "customary/CustomaryOptions.js";
 import {CustomaryHTMLElement} from "customary/CustomaryHTMLElement.js";
 import {CustomaryRegistry} from "customary/CustomaryRegistry.js";
+import {CustomaryConfig} from "customary/CustomaryConfig.js";
 import {CustomaryHooks} from "customary/CustomaryHooks.js";
 
 export class Customary {
 
+	static readonly config: Record<string, CustomaryConfig> = {};
 	static readonly hooks: Record<string, CustomaryHooks<any>> = {};
 
 	static async detect(): Promise<CustomElementConstructor[]> {
@@ -21,11 +23,19 @@ export class Customary {
 		return await Promise.all([...names].map(name =>
 				this.define(
 				{
-					config: {name},
+					config: {...this.detectConfig(name), name},
 					hooks: this.detectHooks(name),
 					state: this.detectState(name)
 				})
 		));
+	}
+
+	private static detectConfig(name: string): CustomaryConfig | undefined {
+		return this.config[name];
+	}
+
+	private static detectHooks<T extends HTMLElement>(name: string): CustomaryHooks<T> | undefined {
+		return this.hooks[name];
 	}
 
 	private static detectState(name: string): object | object[] | undefined {
@@ -33,10 +43,6 @@ export class Customary {
 				`script[type="application/json"][data-customary-name='${name}']`
 		);
 		return element?.textContent ? JSON.parse(element.textContent) : undefined;
-	}
-
-    private static detectHooks<T extends HTMLElement>(name: string): CustomaryHooks<T> | undefined {
-		return this.hooks[name];
 	}
 
 	static async define<T extends HTMLElement>(
