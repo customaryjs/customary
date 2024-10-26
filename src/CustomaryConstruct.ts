@@ -112,6 +112,8 @@ function getDefaultEventType(element: Element) {
     switch (element.tagName) {
         case 'BUTTON':
             return 'click';
+        case 'FORM':
+            return 'submit';
     }
     throw new Error(`${element.tagName} elements require an event type as Customary hasn't defined a default yet`);
 }
