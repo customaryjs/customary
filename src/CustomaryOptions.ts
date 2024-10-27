@@ -1,5 +1,5 @@
 import {CustomaryHooks} from "customary/CustomaryHooks.js";
-import {CustomaryConfig} from "customary/CustomaryConfig";
+import {CustomaryConfig} from "customary/CustomaryConfig.js";
 
 export type CustomaryOptions<T extends HTMLElement> = {
     config: {name: string} & CustomaryConfig;
