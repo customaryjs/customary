@@ -1,7 +1,11 @@
+import {CSSStyleSheetAdopter} from "customary/cssstylesheet/CSSStyleSheetAdopter.js";
 import {CustomaryDefinition} from "customary/CustomaryDefinition.js";
 import {CustomaryOptions} from "customary/CustomaryOptions.js";
 import {CustomaryConfig} from "customary/CustomaryConfig.js";
 import {hydrateStateBindings} from "customary/CustomaryState.js";
+import {ExternalLoader} from "customary/external/ExternalLoader.js";
+import {FetchText, FetchText_DOM_singleton} from "customary/fetch/FetchText.js";
+import {CSSStyleSheetImporter} from "customary/cssstylesheet/CSSStyleSheetImporter.js";
 
 export class CustomaryDefine<T extends HTMLElement> {
 
@@ -169,21 +173,11 @@ export class CustomaryDefine<T extends HTMLElement> {
 }
 
 async function loadCssStyleSheetAdopter(cssStyleSheetImporter: Promise<CSSStyleSheetImporter>): Promise<CSSStyleSheetAdopter> {
-	const {CSSStyleSheetAdopter} = await import("customary/cssstylesheet/CSSStyleSheetAdopter.js");
 	return new CSSStyleSheetAdopter(await cssStyleSheetImporter as any, document);
 }
 
 async function loadCssStyleSheetImporter(fetchText: Promise<FetchText>): Promise<CSSStyleSheetImporter> {
-	const {CSSStyleSheetImporter} = await import("customary/cssstylesheet/CSSStyleSheetImporter.js");
 	return new CSSStyleSheetImporter(await fetchText);
-}
-
-interface CSSStyleSheetImporter {
-	getCSSStyleSheet(location: string): Promise<CSSStyleSheet | undefined>;
-}
-
-interface CSSStyleSheetAdopter {
-	adoptCSSStylesheets(...locations: string[]): Promise<void>;
 }
 
 type ResourceLocationResolution = {
@@ -202,7 +196,6 @@ async function loadTilesetLoader(
 			import_meta: ImportMeta;
 		}
 ): Promise<ExternalLoader> {
-	const {ExternalLoader} = await import("customary/external/ExternalLoader.js");
 	return new ExternalLoader(
 			resourceLocationResolution,
 			await fetchText,
@@ -211,17 +204,7 @@ async function loadTilesetLoader(
 	);
 }
 
-interface ExternalLoader {
-	loadHtml(): Promise<string>;
-	loadCssStyleSheet(): Promise<undefined | CSSStyleSheet>;
-}
-
-export interface FetchText {
-	fetchText(input: RequestInfo | URL): Promise<string>;
-}
-
 async function loadFetchText(): Promise<FetchText> {
-	const {FetchText_DOM_singleton} = await import("customary/fetch/FetchText.js");
 	return FetchText_DOM_singleton;
 }
 
