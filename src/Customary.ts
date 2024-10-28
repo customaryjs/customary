@@ -6,6 +6,10 @@ import {CustomaryRegistry} from "customary/CustomaryRegistry.js";
 import {CustomaryConfig} from "customary/CustomaryConfig.js";
 import {CustomaryHooks} from "customary/CustomaryHooks.js";
 
+export async function go() {
+	await Customary.detect();
+}
+
 export class Customary {
 
 	static readonly config: Record<string, CustomaryConfig> = {};

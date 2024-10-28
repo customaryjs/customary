@@ -1,3 +1,3 @@
-import {Customary} from "customary/Customary.js";
+import {go} from "customary/Customary.js";
 
-await Customary.detect();
+await go();
