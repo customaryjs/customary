@@ -156,7 +156,7 @@ export class CustomaryDefine<T extends HTMLElement> {
 
 	private get_import_meta() {
 		return this.options.hooks?.externalLoader?.import_meta ?? (() => {
-			throw new Error('Customary needs "import.meta" if the custom element template ' +
+			throw new Error(`${this.options.config.name}: Customary needs "import.meta" if the custom element template ` +
 					'is to be loaded from an external file. ' +
 					'(document did not have a named template element, and an html string was not provided.)')
 		})();
