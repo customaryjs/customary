@@ -1,3 +1,5 @@
+import {KnockoutBridge, KnockoutBridgeFactory} from "#customary/knockoutjs/KnockoutBridge.js";
+
 export class CustomaryState {
 	constructor (private readonly parentNode: ParentNode) {}
 
@@ -12,23 +14,24 @@ export class CustomaryState {
 
 		if (state === null || state === undefined) return undefined;
 
-		const {KnockoutBridge: ko} = await import("customary/knockoutjs/KnockoutBridge.js");
-		this._ko = ko;
+		const ko: KnockoutBridge = this._ko ??
+				(this._ko = await new KnockoutBridgeFactory().createKnockoutBridge());
 
-		const bindingContext = ko.merge(this._bindingContext, state);
-		if (!this._bindingContext) {
-			ko.applyBindings(bindingContext, this.parentNode);
+		const oldBindingContext = this._bindingContext;
+		const newBindingContext = ko.merge(oldBindingContext, state);
+		if (!oldBindingContext) {
+			ko.applyBindings(newBindingContext, this.parentNode);
 		}
-		this._bindingContext = bindingContext;
+		this._bindingContext = newBindingContext;
 	}
 
 	getState(): State {
 		if (this._bindingContext === null || this._bindingContext === undefined) return undefined;
-		return this._ko.snapshot(this._bindingContext);
+		return this._ko?.snapshot(this._bindingContext);
 	}
 
 	private _bindingContext: any;
-	private _ko: any;
+	private _ko: KnockoutBridge | undefined = undefined;
 }
 
 type State = any;

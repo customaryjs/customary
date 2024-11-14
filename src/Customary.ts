@@ -1,14 +1,10 @@
-import {CustomaryDefine} from "customary/CustomaryDefine.js";
-import {CustomaryConstruct} from "customary/CustomaryConstruct.js";
-import {CustomaryOptions} from "customary/CustomaryOptions.js";
-import {CustomaryHTMLElement} from "customary/CustomaryHTMLElement.js";
-import {CustomaryRegistry} from "customary/CustomaryRegistry.js";
-import {CustomaryConfig} from "customary/CustomaryConfig.js";
-import {CustomaryHooks} from "customary/CustomaryHooks.js";
-
-export async function go() {
-	await Customary.detect();
-}
+import {CustomaryDefine} from "#customary/CustomaryDefine.js";
+import {CustomaryConstruct} from "#customary/CustomaryConstruct.js";
+import {CustomaryOptions} from "#customary/CustomaryOptions.js";
+import {CustomaryHTMLElement} from "#customary/CustomaryHTMLElement.js";
+import {CustomaryRegistry} from "#customary/CustomaryRegistry.js";
+import {CustomaryConfig} from "#customary/CustomaryConfig.js";
+import {CustomaryHooks} from "#customary/CustomaryHooks.js";
 
 export class Customary {
 
@@ -39,7 +35,7 @@ export class Customary {
 	}
 
 	private static detectHooks<T extends HTMLElement>(name: string): CustomaryHooks<T> | undefined {
-		return this.hooks[name];
+		return (globalThis as any)[`customary:${name}`]?.hooks ?? this.hooks[name];
 	}
 
 	private static detectState(name: string): object | object[] | undefined {

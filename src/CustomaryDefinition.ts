@@ -1,4 +1,4 @@
-import {CustomaryHooks} from "customary/CustomaryHooks.js";
+import {CustomaryHooks} from "#customary/CustomaryHooks.js";
 
 export type CustomaryDefinition<T extends HTMLElement> = {
     config?: {

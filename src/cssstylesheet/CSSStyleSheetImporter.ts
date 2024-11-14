@@ -1,5 +1,4 @@
-// @ts-ignore JetBrains IntelliJ IDEA can Find Usages across dependencies, but must ts-ignore "'rootDir' is expected to contain all source files"
-import {FetchText, FetchText_DOM_singleton} from "customary/fetch/FetchText.js";
+import {FetchText, FetchText_DOM_singleton} from "#customary/fetch/FetchText.js";
 
 export class CSSStyleSheetImporter {
 

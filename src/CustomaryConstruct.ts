@@ -1,6 +1,6 @@
-import {CustomaryDefinition} from "customary/CustomaryDefinition.js";
-import {CustomaryHTMLElement} from "customary/CustomaryHTMLElement.js";
-import {CustomaryEventListener, CustomaryEvents, SlotHooks} from "customary/CustomaryHooks.js";
+import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
+import {CustomaryHTMLElement} from "#customary/CustomaryHTMLElement.js";
+import {CustomaryEventListener, CustomaryEvents, SlotHooks} from "#customary/CustomaryHooks.js";
 
 export class CustomaryConstruct<T extends HTMLElement> {
 

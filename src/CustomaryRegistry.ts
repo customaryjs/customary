@@ -1,5 +1,5 @@
-import {CustomaryDefinition} from "customary/CustomaryDefinition.js";
-import {CustomaryHTMLElement} from "customary/CustomaryHTMLElement.js";
+import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
+import {CustomaryHTMLElement} from "#customary/CustomaryHTMLElement.js";
 
 export class CustomaryRegistry {
     constructor(private readonly customElementRegistry: CustomElementRegistry) {}

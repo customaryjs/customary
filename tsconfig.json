@@ -5,7 +5,7 @@
       "outDir": "web/_script",
       "rootDir": "src",
       "paths": {
-        "customary/*": ["./src/*"],
+        "#customary/*": ["./src/*"],
         "knockout/": ["./node_modules/knockout/build/types/knockout/"],
       },
       // ---- CODING STANDARDS TYPICAL FOR ALL PROJECTS START HERE ----

@@ -1,5 +1,5 @@
-import {FetchText} from "customary/fetch/FetchText.js";
-import {NotFound404Error} from "customary/fetch/NotFound404Error.js";
+import {FetchText} from "#customary/fetch/FetchText.js";
+import {NotFound404Error} from "#customary/fetch/NotFound404Error.js";
 
 interface CSSStyleSheetImporter {
     getCSSStyleSheet(location: string): Promise<CSSStyleSheet | undefined>;

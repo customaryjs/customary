@@ -8,3 +8,5 @@
 /src/**/*.js
 /src/**/*.js.map
 /web/tsconfig.tsbuildinfo
+/.parcel-cache/
+/.parcel-dist/

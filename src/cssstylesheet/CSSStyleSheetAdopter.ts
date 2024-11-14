@@ -1,5 +1,5 @@
-import {CSSStyleSheetImporter} from "customary/cssstylesheet/CSSStyleSheetImporter.js";
-import {FetchText_DOM_singleton} from "customary/fetch/FetchText.js";
+import {CSSStyleSheetImporter} from "#customary/cssstylesheet/CSSStyleSheetImporter.js";
+import {FetchText_DOM_singleton} from "#customary/fetch/FetchText.js";
 
 // noinspection JSUnusedGlobalSymbols
 export async function adoptCSSStylesheets(...locations: string[]) {

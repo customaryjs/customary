@@ -1,10 +1,26 @@
-import 'knockout';
-import {Observable, ObservableArray} from "knockout";
+// https://github.com/parcel-bundler/parcel/issues/4148#issuecomment-1441326386
+const knockout_dynamic_import = 'knockout';
+
+interface Observable<T = any> {
+    (): T;
+    (value: T): any;
+}
+
+interface ObservableArray<T = any> extends Observable<T[]> {
+    (value: T[] | null | undefined): this;
+}
+
+export class KnockoutBridgeFactory {
+    async createKnockoutBridge() {
+        await import(knockout_dynamic_import);
+        return new KnockoutBridge((globalThis as any).ko);
+    }
+}
 
 export class KnockoutBridge {
-    private static readonly ko = globalThis.ko;
+    constructor(private readonly ko: any) {}
 
-    static applyBindings(bindingContext: any, rootNode: Node): void {
+    applyBindings(bindingContext: any, rootNode: Node): void {
         if (rootNode instanceof Element && rootNode.shadowRoot) {
             return this.applyBindings(bindingContext, rootNode.shadowRoot);
         }
@@ -18,31 +34,31 @@ export class KnockoutBridge {
         this.ko.applyBindings(bindingContext, rootNode);
     }
 
-    // noinspection JSUnusedLocalSymbols,JSUnusedGlobalSymbols
-    static observable<T = any>(value: T): Observable<T> {
+    // used by customary-tutorials > knockout
+    observable<T = any>(value: T): Observable<T> {
         return this.ko.observable(value);
     }
 
-    // noinspection JSUnusedLocalSymbols,JSUnusedGlobalSymbols
-    static observableArray<T = any>(initialValue: T[]): ObservableArray<T> {
+    // used by customary-tutorials > knockout
+    observableArray<T = any>(initialValue: T[]): ObservableArray<T> {
         return this.ko.observableArray(initialValue);
     }
 
-    static merge(bindingContext: any, values: object | Array<any>) {
+    merge(bindingContext: any, values: object | Array<any>) {
         if (values instanceof Array) return this.mergeArray(bindingContext, values);
         return this.mergeObject(bindingContext, values);
     }
 
-    static snapshot(bindingContext: any): object | Array<any> {
+    snapshot(bindingContext: any): object | Array<any> {
         if ('indexOf' in bindingContext) return this.snapshotArray(bindingContext);
         return this.snapshotObject(bindingContext);
     }
 
-    private static snapshotArray(bindingContext: ObservableArray): Array<any> {
+    private snapshotArray(bindingContext: ObservableArray): Array<any> {
         return bindingContext();
     }
 
-    private static snapshotObject(bindingContext: object): object {
+    private snapshotObject(bindingContext: object): object {
         const record: Record<string, any> = {};
         for (const [k, v] of Object.entries(bindingContext)) {
             record[k] = (v as Observable)();
@@ -50,13 +66,13 @@ export class KnockoutBridge {
         return record;
     }
 
-    private static mergeArray(bindingContext: any, values: Array<any>) {
+    private mergeArray(bindingContext: any, values: Array<any>) {
         if (!bindingContext) return this.ko.observableArray(values);
         (bindingContext as ObservableArray)(values);
         return bindingContext;
     }
 
-    private static mergeObject(bindingContext: any, values: object) {
+    private mergeObject(bindingContext: any, values: object) {
         if (!bindingContext) {
             const record: Record<string, any> = {};
             for (const [k, v] of Object.entries(values)) {

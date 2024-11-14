@@ -1,28 +1,36 @@
 {
   "name": "customary",
-  "version": "1.0.0",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
   "scripts": {
     "// ---- public ---- //": "",
     "dist": "copyfiles --error --all \"web/**/*\" \"src/**/*\" .dist",
     "help:dist": "echo we copy src because it lets browsers step debug .ts files",
-    "clean": "rimraf web/_script .dist",
+    "clean": "rimraf web/_script .dist .parcel-dist .parcel-cache",
     "clean-src": "rimraf --glob src/**/*.d.ts src/**/*.js.map src/**/*.js",
     "dev": "npm run compile-watch",
     "// ---- pre & post ---- //": "",
     "predist": "npm run clean && npm run compile",
     "// ---- private ---- //": "",
     "compile-watch": "tsc --build --verbose --watch",
-    "compile": "tsc --build --verbose"
+    "compile": "tsc --build --verbose",
+    "// ---- parcel ---- //": "",
+    "watch": "parcel watch",
+    "build": "parcel build"
   },
   "dependencies": {
     "knockout": "^3.5.1"
   },
   "devDependencies": {
+    "@parcel/transformer-typescript-tsc": "^2.12.0",
+    "@parcel/transformer-typescript-types": "^2.12.0",
     "@types/mocha": "^10.0.8",
     "@types/node": "^20.16.5",
     "copyfiles": "^2.4.1",
     "http-server": "^14.1.1",
     "mocha": "^10.7.3",
+    "parcel": "^2.12.0",
     "rimraf": "^6.0.1",
     "sinon": "^19.0.2",
     "ts-node": "^10.9.2",
@@ -31,6 +39,31 @@
   "engines": {
     "node": "^20.17.0"
   },
-  "license": "Apache-2.0",
+  "source": "./src/index.ts",
+  "imports": {
+    "#customary/*.js": "./src/*.ts"
+  },
+  "help:main": "https://parceljs.org/features/targets/#library-targets",
+  "main": ".parcel-dist/customary.mjs",
+  "main-now": ".parcel-dist/customary-now.mjs",
+  "targets": {
+    "main": {
+      "sourceMap": {
+        "inline": true
+      }
+    },
+    "main-now": {
+      "context": "browser",
+      "optimize": false,
+      "source":  "./src/now.ts",
+      "sourceMap": {
+        "inline": true
+      }
+    }
+  },
+  "@parcel/resolver-default": {
+    "packageExports": true
+  },
+  "license": "MIT",
   "author": "Andre de Oliveira"
 }

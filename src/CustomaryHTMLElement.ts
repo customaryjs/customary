@@ -1,5 +1,5 @@
-import {Customary} from "customary/Customary.js";
-import {CustomaryState} from "customary/CustomaryState.js";
+import {Customary} from "#customary/Customary.js";
+import {CustomaryState} from "#customary/CustomaryState.js";
 
 export class CustomaryHTMLElement extends HTMLElement {
 

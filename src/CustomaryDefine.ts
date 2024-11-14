@@ -1,11 +1,11 @@
-import {CSSStyleSheetAdopter} from "customary/cssstylesheet/CSSStyleSheetAdopter.js";
-import {CustomaryDefinition} from "customary/CustomaryDefinition.js";
-import {CustomaryOptions} from "customary/CustomaryOptions.js";
-import {CustomaryConfig} from "customary/CustomaryConfig.js";
-import {hydrateStateBindings} from "customary/CustomaryState.js";
-import {ExternalLoader} from "customary/external/ExternalLoader.js";
-import {FetchText, FetchText_DOM_singleton} from "customary/fetch/FetchText.js";
-import {CSSStyleSheetImporter} from "customary/cssstylesheet/CSSStyleSheetImporter.js";
+import {CSSStyleSheetAdopter} from "#customary/cssstylesheet/CSSStyleSheetAdopter.js";
+import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
+import {CustomaryOptions} from "#customary/CustomaryOptions.js";
+import {CustomaryConfig} from "#customary/CustomaryConfig.js";
+import {hydrateStateBindings} from "#customary/CustomaryState.js";
+import {ExternalLoader} from "#customary/external/ExternalLoader.js";
+import {FetchText, FetchText_DOM_singleton} from "#customary/fetch/FetchText.js";
+import {CSSStyleSheetImporter} from "#customary/cssstylesheet/CSSStyleSheetImporter.js";
 
 export class CustomaryDefine<T extends HTMLElement> {
 
