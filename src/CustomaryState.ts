@@ -60,5 +60,5 @@ export function hydrateStateBindings(node: Node) {
 }
 
 function replaceStateBindings(htmlString: string) {
-	return htmlString.replace(/\{this\.state\.(\w+)}/g, '<span data-bind="text: $1"></span>');
+	return htmlString.replace(/\$\{this\.state\.(\w+)}/g, '<span data-bind="text: $1"></span>');
 }

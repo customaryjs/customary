@@ -1,0 +1,1 @@
+export type dom_ElementDefinitionOptions = ElementDefinitionOptions;

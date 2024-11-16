@@ -1,10 +1,9 @@
 import {CustomaryDefine} from "#customary/CustomaryDefine.js";
-import {CustomaryConstruct} from "#customary/CustomaryConstruct.js";
 import {CustomaryOptions} from "#customary/CustomaryOptions.js";
-import {CustomaryHTMLElement} from "#customary/CustomaryHTMLElement.js";
-import {CustomaryRegistry} from "#customary/CustomaryRegistry.js";
+import {CustomaryHTMLElement} from "#customary/html/CustomaryHTMLElement.js";
 import {CustomaryConfig} from "#customary/CustomaryConfig.js";
 import {CustomaryHooks} from "#customary/CustomaryHooks.js";
+import {CustomaryRegistry} from "#customary/registry/CustomaryRegistry.js";
 
 export class Customary {
 
@@ -17,25 +16,29 @@ export class Customary {
 		for (const template of document.querySelectorAll(`template[${attribute}]`)) {
 				names.add(template.getAttribute(attribute)!);
 		}
+		for (const name of Object.keys(globalThis)) {
+			const s = 'customary:';
+			if (name.startsWith(s)) {
+				names.add(name.substring(s.length));
+			}
+		}
 		for (const name of Object.keys(this.hooks)) {
 			names.add(name);
 		}
-		return await Promise.all([...names].map(name =>
-				this.define(
-				{
-					config: {...this.detectConfig(name), name},
-					hooks: this.detectHooks(name),
-					state: this.detectState(name)
-				})
+		return await Promise.all([...names].map(name => {
+			const options = this.detectOptions(name);
+			return this.define(
+					{
+						config: {...(options?.config ?? this.config[name]), name},
+						hooks: (options?.hooks ?? this.hooks[name]),
+						state: (options?.state ?? this.detectState(name))
+					})
+			}
 		));
 	}
 
-	private static detectConfig(name: string): CustomaryConfig | undefined {
-		return this.config[name];
-	}
-
-	private static detectHooks<T extends HTMLElement>(name: string): CustomaryHooks<T> | undefined {
-		return (globalThis as any)[`customary:${name}`]?.hooks ?? this.hooks[name];
+	private static detectOptions<T extends HTMLElement>(name: string): CustomaryOptions<T> | undefined {
+		return (globalThis as any)[`customary:${name}`];
 	}
 
 	private static detectState(name: string): object | object[] | undefined {
@@ -57,9 +60,17 @@ export class Customary {
 	{
 		const isComponent = typeof optionsOrConstructor === 'function';
 
+		async function ephemeralLit(): Promise<CustomElementConstructor> {
+			const x = await import("#customary/lit/CustomaryLitElement.js");
+			const CustomaryLitElement = (x as any).CustomaryLitElement;
+			return class EphemeralCustomaryLitElement extends CustomaryLitElement {}
+		}
+
 		const constructor: CustomElementConstructor = isComponent
 				? optionsOrConstructor
-				: class EphemeralCustomaryHTMLElement extends CustomaryHTMLElement {};
+				: (globalThis as any).customaryLit
+						? await ephemeralLit()
+						: class EphemeralCustomaryHTMLElement extends CustomaryHTMLElement {};
 
 		const options: Partial<CustomaryOptions<T>> = isComponent
 				? (constructor as any)?.customary as CustomaryOptions<T>
@@ -78,46 +89,7 @@ export class Customary {
 		);
 	}
 
-	static construct<T extends HTMLElement>(element: T) {
-			const customaryDefinition =
-					this.customaryRegistry.get(element.constructor as CustomElementConstructor)!;
-			new CustomaryConstruct().construct(element, customaryDefinition);
-	}
-
-	static connectedCallback<T extends HTMLElement>(element: T) {
-			const constructor = element.constructor as CustomElementConstructor;
-			const customaryDefinition = this.customaryRegistry.get(constructor)!;
-			customaryDefinition.hooks?.lifecycle?.connected?.(element);
-	}
-
-	static disconnectedCallback<T extends HTMLElement>(element: T) {
-			const constructor = element.constructor as CustomElementConstructor;
-			const customaryDefinition = this.customaryRegistry.get(constructor)!;
-			customaryDefinition.hooks?.lifecycle?.disconnected?.(element);
-	}
-
-	static adoptedCallback<T extends HTMLElement>(element: T) {
-			const constructor = element.constructor as CustomElementConstructor;
-			const customaryDefinition = this.customaryRegistry.get(constructor)!;
-			customaryDefinition.hooks?.lifecycle?.adopted?.(element);
-	}
-
-	static observedAttributes(constructor: CustomElementConstructor): string[] | undefined {
-			const customaryDefinition = this.customaryRegistry.get(constructor)!;
-			const attributes = customaryDefinition.hooks?.attributes;
-			return attributes ? Object.keys(attributes) : undefined;
-	}
-
-	static attributeChangedCallback<T extends HTMLElement>(
-			element: T, property: string, oldValue: string, newValue: string
-	) {
-			const constructor = element.constructor as CustomElementConstructor;
-			const customaryDefinition = this.customaryRegistry.get(constructor)!;
-			customaryDefinition.hooks?.attributes?.[property]?.(
-					element, property, oldValue, newValue);
-	}
-
-	private static readonly customaryRegistry = new CustomaryRegistry(customElements);
+	private static readonly customaryRegistry = CustomaryRegistry.CustomaryRegistry_singleton;
 
 }
 

@@ -20,11 +20,16 @@
     "build": "parcel build"
   },
   "dependencies": {
-    "knockout": "^3.5.1"
+    "lit-for-customary": "file:../lit-for-customary",
+    "knockout": "^3.5.1",
+    "@lit/reactive-element": "2.0.4",
+    "lit": "^3.2.0",
+    "lit-html": "^3.2.1",
+    "@swc/helpers": "^0.5.15"
   },
   "devDependencies": {
-    "@parcel/transformer-typescript-tsc": "^2.12.0",
-    "@parcel/transformer-typescript-types": "^2.12.0",
+    "@parcel/transformer-typescript-tsc": "^2.13.0",
+    "@parcel/transformer-typescript-types": "^2.13.0",
     "@types/mocha": "^10.0.8",
     "@types/node": "^20.16.5",
     "copyfiles": "^2.4.1",
@@ -48,6 +53,16 @@
   "main-now": ".parcel-dist/customary-now.mjs",
   "targets": {
     "main": {
+      "includeNodeModules": [
+        "lit-for-customary",
+        "lit",
+        "lit-element",
+        "lit-html",
+        "@lit/reactive-element",
+        "@lit-labs/ssr-dom-shim",
+        "@swc/helpers",
+        "tslib"
+      ],
       "sourceMap": {
         "inline": true
       }
@@ -56,6 +71,16 @@
       "context": "browser",
       "optimize": false,
       "source":  "./src/now.ts",
+      "includeNodeModules": [
+        "lit-for-customary",
+        "lit",
+        "lit-element",
+        "lit-html",
+        "@lit/reactive-element",
+        "@lit-labs/ssr-dom-shim",
+        "@swc/helpers",
+        "tslib"
+      ],
       "sourceMap": {
         "inline": true
       }

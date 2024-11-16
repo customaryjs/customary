@@ -1,36 +1,36 @@
-import {Customary} from "#customary/Customary.js";
 import {CustomaryState} from "#customary/CustomaryState.js";
+import {CustomaryHTML} from "#customary/html/CustomaryHTML.js";
 
 export class CustomaryHTMLElement extends HTMLElement {
 
     constructor() {
         super();
-        Customary.construct(this);
+        CustomaryHTML.construct(this);
     }
 
     // noinspection JSUnusedGlobalSymbols
     static get observedAttributes() {
-        return Customary.observedAttributes(this);
+        return CustomaryHTML.observedAttributes(this);
     }
 
     // noinspection JSUnusedGlobalSymbols
     connectedCallback() {
-        Customary.connectedCallback(this);
+        CustomaryHTML.connectedCallback(this);
     }
 
     // noinspection JSUnusedGlobalSymbols
     disconnectedCallback() {
-        Customary.disconnectedCallback(this);
+        CustomaryHTML.disconnectedCallback(this);
     }
 
     // noinspection JSUnusedGlobalSymbols
     adoptedCallback() {
-        Customary.adoptedCallback(this);
+        CustomaryHTML.adoptedCallback(this);
     }
 
     // noinspection JSUnusedGlobalSymbols
     attributeChangedCallback(property: string, oldValue: string, newValue: string) {
-        Customary.attributeChangedCallback(this, property, oldValue, newValue);
+        CustomaryHTML.attributeChangedCallback(this, property, oldValue, newValue);
     }
 
     // noinspection JSUnusedGlobalSymbols

@@ -6,6 +6,7 @@ import {hydrateStateBindings} from "#customary/CustomaryState.js";
 import {ExternalLoader} from "#customary/external/ExternalLoader.js";
 import {FetchText, FetchText_DOM_singleton} from "#customary/fetch/FetchText.js";
 import {CSSStyleSheetImporter} from "#customary/cssstylesheet/CSSStyleSheetImporter.js";
+import {findHTMLTemplateElementInDOMDocument} from "#customary/CustomaryHTMLTemplates.js";
 
 export class CustomaryDefine<T extends HTMLElement> {
 
@@ -18,7 +19,8 @@ export class CustomaryDefine<T extends HTMLElement> {
 	}
 
 	private async buildCustomaryDefinition(): Promise<CustomaryDefinition<T>> {
-		const documentTemplate: HTMLTemplateElement | undefined = this.findHTMLTemplateElementInDOMDocument();
+		const documentTemplate: HTMLTemplateElement | undefined =
+				findHTMLTemplateElementInDOMDocument(this.options.config.name);
 
 		const template: HTMLTemplateElement | undefined =
 				documentTemplate
@@ -41,18 +43,13 @@ export class CustomaryDefine<T extends HTMLElement> {
 		const definition: CustomaryDefinition<T> = {
 			config,
 			cssStyleSheet,
+			template,
 			documentFragment,
 			hooks,
 			state,
 		};
 
 		return prune(definition);
-	}
-
-	private findHTMLTemplateElementInDOMDocument(): HTMLTemplateElement | undefined {
-		return document.querySelector(
-				`template[data-customary-name='${this.options.config.name}']`
-		) as HTMLTemplateElement ?? undefined;
 	}
 
 	private async getHTMLTemplateElementFromHtmlFunction() {

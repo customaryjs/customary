@@ -8,6 +8,9 @@
         "#customary/*": ["./src/*"],
         "knockout/": ["./node_modules/knockout/build/types/knockout/"],
       },
+      // https://lit.dev/docs/components/decorators/#decorators-typescript
+      "experimentalDecorators": true,
+      "useDefineForClassFields": false,
       // ---- CODING STANDARDS TYPICAL FOR ALL PROJECTS START HERE ----
       "allowJs": false,
       "module": "esnext",

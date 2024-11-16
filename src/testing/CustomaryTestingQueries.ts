@@ -17,6 +17,7 @@ export class CustomaryTestingQueries {
 }
 
 function collectAllTextContent(node: Node): string[] {
+    if (node.nodeType === Node.COMMENT_NODE) return [];
     if ((node as Element).tagName === 'SCRIPT') return [];
     if ((node as Element).shadowRoot) return collectAllTextContent((node as Element).shadowRoot!);
     const textContent = node.textContent?.replace(/\s+/g, ' ');

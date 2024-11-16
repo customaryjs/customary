@@ -1,6 +1,7 @@
 import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
-import {CustomaryHTMLElement} from "#customary/CustomaryHTMLElement.js";
-import {CustomaryEventListener, CustomaryEvents, SlotHooks} from "#customary/CustomaryHooks.js";
+import {CustomaryHTMLElement} from "#customary/html/CustomaryHTMLElement.js";
+import {SlotHooks} from "#customary/CustomaryHooks.js";
+import {EventConnector} from "#customary/events/EventConnector.js";
 
 export class CustomaryConstruct<T extends HTMLElement> {
 
@@ -26,7 +27,7 @@ export class CustomaryConstruct<T extends HTMLElement> {
 
         this.addEventListener_slotChange(element, hooks?.slots);
 
-        this.addEvents(element, hooks?.events);
+        new EventConnector<T>().addEvents(element, hooks?.events);
     }
 
     private useDocumentFragment(
@@ -74,58 +75,4 @@ export class CustomaryConstruct<T extends HTMLElement> {
         element.shadowRoot!.addEventListener('slotchange', event => slotchange(element, event));
     }
 
-    private addEvents(customElement: T, customaryEvents: CustomaryEvents<T> | undefined) {
-        if (!customaryEvents) return;
-        if (customaryEvents instanceof Array) {
-            for (const customaryEvent of customaryEvents) {
-                const selector = customaryEvent.selector;
-                const type = customaryEvent.type;
-                const listener = customaryEvent.listener;
-                this.addEvent(customElement, selector, type, listener);
-            }
-            return;
-        }
-        for (const [selector, listener] of Object.entries(customaryEvents)) {
-            const type = undefined;
-            this.addEvent(customElement, selector, type, listener);
-        }
-    }
-
-    private addEvent(
-        customElement: T,
-        selector: string,
-        type: string | undefined,
-        listener: CustomaryEventListener<T>
-    ) {
-        const parent: ParentNode = customElement.shadowRoot ?? customElement;
-        const elements: NodeListOf<Element> = parent.querySelectorAll(selector);
-        for (const element of elements) {
-            const tagName = element.tagName;
-            element.addEventListener(
-                type ??
-                getDefaultEventType(tagName) ??
-                (() => {
-                    throw new Error(
-                        `${customElement.tagName.toLowerCase()}: ${tagName} elements` +
-                        ' require you to provide an event type' +
-                        ' because Customary has not defined a default yet'
-                    );
-                })(),
-                (event: Event) => listener(customElement, event)
-            );
-        }
-    }
-}
-
-function getDefaultEventType(tagName: string) {
-    switch (tagName) {
-        case 'BUTTON':
-            return 'click';
-        case 'FORM':
-            return 'submit';
-        case 'TABLE':
-            return 'click';
-        default:
-            return undefined;
-    }
 }
