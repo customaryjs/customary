@@ -5,52 +5,55 @@
   "type": "module",
   "scripts": {
     "// ---- public ---- //": "",
-    "dist": "copyfiles --error --all \"web/**/*\" \"src/**/*\" .dist",
-    "help:dist": "echo we copy src because it lets browsers step debug .ts files",
-    "clean": "rimraf web/_script .dist .parcel-dist .parcel-cache",
-    "clean-src": "rimraf --glob src/**/*.d.ts src/**/*.js.map src/**/*.js",
+    "dist": "run-p dist:*",
     "dev": "npm run compile-watch",
+    "clean": "run-p clean:*",
     "// ---- pre & post ---- //": "",
-    "predist": "npm run clean && npm run compile",
+    "predist": "npm run clean && npm run dist-dependencies && npm run compile",
     "// ---- private ---- //": "",
+    "dist:bundled": "parcel build",
+    "dist:development": "npx webpack",
+    "clean:dist": "rimraf .dist .parcel-cache",
+    "clean:compile": "rimraf web/_script",
+    "clean:src": "rimraf --glob src/**/*.{d.ts,js.map,js}",
     "compile-watch": "tsc --build --verbose --watch",
     "compile": "tsc --build --verbose",
-    "// ---- parcel ---- //": "",
-    "watch": "parcel watch",
-    "build": "parcel build"
+    "// ---- dependencies ---- //": "",
+    "dist-dependencies": "run-p dist-dependency:*",
+    "dist-dependency:lit-for-customary": "npm run --prefix node_modules/lit-for-customary dist"
   },
   "dependencies": {
-    "lit-for-customary": "file:../lit-for-customary",
-    "knockout": "^3.5.1",
     "@lit/reactive-element": "2.0.4",
+    "@swc/helpers": "^0.5.15",
+    "knockout": "^3.5.1",
     "lit": "^3.2.0",
-    "lit-html": "^3.2.1",
-    "@swc/helpers": "^0.5.15"
+    "lit-for-customary": "file:../lit-for-customary",
+    "lit-html": "^3.2.1"
   },
   "devDependencies": {
     "@parcel/transformer-typescript-tsc": "^2.13.0",
     "@parcel/transformer-typescript-types": "^2.13.0",
     "@types/mocha": "^10.0.8",
-    "@types/node": "^20.16.5",
-    "copyfiles": "^2.4.1",
+    "@types/node": "^20.17.6",
+    "copy-webpack-plugin": "^12.0.2",
     "http-server": "^14.1.1",
     "mocha": "^10.7.3",
+    "npm-run-all": "^4.1.5",
     "parcel": "^2.12.0",
+    "remove-files-webpack-plugin": "^1.5.0",
     "rimraf": "^6.0.1",
     "sinon": "^19.0.2",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.6.2"
-  },
-  "engines": {
-    "node": "^20.17.0"
+    "typescript": "^5.6.3",
+    "webpack": "^5.96.1",
+    "webpack-cli": "^5.1.4"
   },
   "source": "./src/index.ts",
   "imports": {
     "#customary/*.js": "./src/*.ts"
   },
   "help:main": "https://parceljs.org/features/targets/#library-targets",
-  "main": ".parcel-dist/customary.mjs",
-  "main-now": ".parcel-dist/customary-now.mjs",
+  "main": ".dist/bundled/customary.mjs",
+  "main-now": ".dist/bundled/customary-now.mjs",
   "targets": {
     "main": {
       "includeNodeModules": [
@@ -70,7 +73,7 @@
     "main-now": {
       "context": "browser",
       "optimize": false,
-      "source":  "./src/now.ts",
+      "source": "./src/now.ts",
       "includeNodeModules": [
         "lit-for-customary",
         "lit",
@@ -88,6 +91,9 @@
   },
   "@parcel/resolver-default": {
     "packageExports": true
+  },
+  "engines": {
+    "node": "22.11.0"
   },
   "license": "MIT",
   "author": "Andre de Oliveira"
