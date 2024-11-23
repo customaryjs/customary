@@ -34,7 +34,9 @@ export class CustomaryDefine<T extends HTMLElement> {
 
 		const documentFragment: DocumentFragment = template?.content ?? (()=>{throw Error})();
 
-		hydrateStateBindings(documentFragment);
+		if (!(globalThis as any).customaryLit) {
+			hydrateStateBindings(documentFragment);
+		}
 
 		const config_construct = this.options.config?.construct;
 		const config = config_construct ? {construct: config_construct} : undefined;
