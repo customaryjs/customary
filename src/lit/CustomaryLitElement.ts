@@ -24,20 +24,15 @@ export class CustomaryLitElement extends LitElement {
 
 		const template: HTMLTemplateElement = definition.template;
 
-		const s = template.innerHTML.replace('&gt;', '>');
+		const htmlFromTemplate = template.innerHTML;
 
-		const dom_node = eval(`html\`${s}\``);
+		// if the template has Lit directives with arrow functions,
+		// innerHTML will encode the '>' out of the '=>' so we need to decode it back
+		const htmlWithLitDirectives = htmlFromTemplate.replace('=&gt;', '=>');
 
-		return html`${dom_node}`;
+		const resultWithVariablesInterpolated = eval(`html\`${htmlWithLitDirectives}\``);
 
-		/*
-		const s = template.innerHTML;
-
-		// https://stackoverflow.com/a/51012181/
-		const a = [`${s}`] as any;
-		a.raw = a;
-		return html(a);
-		 */
+		return html`${resultWithVariablesInterpolated}`;
 	}
 
 	connectedCallback(): void {

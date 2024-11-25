@@ -9,7 +9,7 @@
     "dev": "npm run compile-watch",
     "clean": "run-p clean:*",
     "// ---- pre & post ---- //": "",
-    "predist": "npm run clean && npm run dist-dependencies && npm run compile",
+    "predist": "npm run clean && npm run compile",
     "// ---- private ---- //": "",
     "dist:bundled": "parcel build",
     "dist:development": "npx webpack",
@@ -17,10 +17,7 @@
     "clean:compile": "rimraf web/_script",
     "clean:src": "rimraf --glob src/**/*.{d.ts,js.map,js}",
     "compile-watch": "tsc --build --verbose --watch",
-    "compile": "tsc --build --verbose",
-    "// ---- dependencies ---- //": "",
-    "dist-dependencies": "run-p dist-dependency:*",
-    "dist-dependency:lit-for-customary": "npm run --prefix node_modules/lit-for-customary dist"
+    "compile": "tsc --build --verbose"
   },
   "dependencies": {
     "@lit/reactive-element": "2.0.4",
