@@ -2,6 +2,8 @@ import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
 import {CustomaryHTMLElement} from "#customary/html/CustomaryHTMLElement.js";
 import {SlotHooks} from "#customary/CustomaryHooks.js";
 import {CustomaryEventBroker} from "#customary/events/CustomaryEventBroker.js";
+import {CSSStyleSheetBroker} from "#customary/cssstylesheet/CSSStyleSheetBroker.js";
+import {SlotsBroker} from "#customary/slots/SlotsBroker";
 
 export class CustomaryConstruct<T extends HTMLElement> {
 
@@ -23,9 +25,9 @@ export class CustomaryConstruct<T extends HTMLElement> {
 
         this.initStateBind(element, state);
 
-        this.adoptStylesheet(element, cssStyleSheet, config?.construct?.adoptStylesheetDont);
+        CSSStyleSheetBroker.adoptStylesheet(element, cssStyleSheet, config?.construct?.adoptStylesheetDont);
 
-        this.addEventListener_slotChange(element, hooks?.slots);
+        SlotsBroker.addEventListener_slotChange(element, hooks?.slots);
 
         new CustomaryEventBroker<T>().addEvents(element, hooks?.events);
     }
@@ -50,29 +52,6 @@ export class CustomaryConstruct<T extends HTMLElement> {
         if (!(element instanceof CustomaryHTMLElement)) return;
         if (state === undefined) return;
         void element.setState(state);
-    }
-
-    private adoptStylesheet(
-        element: Element,
-        cssStylesheet?: CSSStyleSheet,
-        adoptStylesheetDont?: boolean
-    ) {
-        if (adoptStylesheetDont) return;
-        if (!cssStylesheet) return;
-        const adopter: DocumentOrShadowRoot = element.shadowRoot ?? document;
-        adopter.adoptedStyleSheets.push(cssStylesheet);
-    }
-
-    private addEventListener_slotChange(element: Element, slotHooks?: SlotHooks<any>) {
-        const slotchange = slotHooks?.slotchange;
-        if (!slotchange) return;
-
-        slotchange(element);
-
-        /*
-        https://stackoverflow.com/questions/67332635/slots-does-not-work-on-a-html-web-component-without-shadow-dom
-        */
-        element.shadowRoot!.addEventListener('slotchange', event => slotchange(element, event));
     }
 
 }

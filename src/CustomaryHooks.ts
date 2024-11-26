@@ -1,5 +1,7 @@
+import {AttributeHooks} from "#customary/attributes/AttributeHooks.js";
+
 export type CustomaryHooks<T extends HTMLElement> = {
-    attributes?: Record<string, Customary_attributeChangedCallback<T>>;
+    attributes?: AttributeHooks<T>;
     construct?: {
         onConstruct? : (element: T, documentFragment: DocumentFragment) => void;
     };
@@ -18,9 +20,6 @@ export type CustomaryHooks<T extends HTMLElement> = {
     }
     slots?: SlotHooks<T>;
 }
-
-type Customary_attributeChangedCallback<T extends HTMLElement> =
-    (element: T, property: string, oldValue: string, newValue: string) => void;
 
 export type CustomaryEvents<T extends HTMLElement> =
     CustomaryEvent<T>[] | Record<string, CustomaryEventListener<T>>;

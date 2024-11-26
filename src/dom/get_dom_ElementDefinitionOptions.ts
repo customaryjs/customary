@@ -1,4 +1,3 @@
-import {CustomaryHTMLElement} from "#customary/html/CustomaryHTMLElement.js";
 import {dom_ElementDefinitionOptions} from "#customary/dom/dom_ElementDefinitionOptions.js";
 
 export function get_dom_ElementDefinitionOptions(
@@ -7,7 +6,7 @@ export function get_dom_ElementDefinitionOptions(
 ): dom_ElementDefinitionOptions | undefined {
 	const superclass = Object.getPrototypeOf(customElementConstructor);
 	if (!options.extends) {
-		const superclasses = [HTMLElement, CustomaryHTMLElement];
+		const superclasses = [HTMLElement];
 		if (superclasses.includes(superclass)) {
 			return undefined;
 		}

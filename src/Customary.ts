@@ -1,14 +1,10 @@
 import {CustomaryDefine} from "#customary/CustomaryDefine.js";
 import {CustomaryOptions} from "#customary/CustomaryOptions.js";
-import {CustomaryHTMLElement} from "#customary/html/CustomaryHTMLElement.js";
-import {CustomaryConfig} from "#customary/CustomaryConfig.js";
-import {CustomaryHooks} from "#customary/CustomaryHooks.js";
 import {CustomaryRegistry} from "#customary/registry/CustomaryRegistry.js";
+import {CustomaryLitElement} from "#customary/lit/CustomaryLitElement.js";
+import {LitElement} from "lit-for-customary";
 
 export class Customary {
-
-	static readonly config: Record<string, CustomaryConfig> = {};
-	static readonly hooks: Record<string, CustomaryHooks<any>> = {};
 
 	static async detect(): Promise<CustomElementConstructor[]> {
 		const attribute = 'data-customary-name';
@@ -22,15 +18,12 @@ export class Customary {
 				names.add(name.substring(s.length));
 			}
 		}
-		for (const name of Object.keys(this.hooks)) {
-			names.add(name);
-		}
 		return await Promise.all([...names].map(name => {
 			const options = this.detectOptions(name);
 			return this.define(
 					{
-						config: {...(options?.config ?? this.config[name]), name},
-						hooks: (options?.hooks ?? this.hooks[name]),
+						config: {...options?.config, name},
+						hooks: options?.hooks,
 						state: (options?.state ?? this.detectState(name))
 					})
 			}
@@ -60,17 +53,9 @@ export class Customary {
 	{
 		const isComponent = typeof optionsOrConstructor === 'function';
 
-		async function ephemeralLit(): Promise<CustomElementConstructor> {
-			const x = await import("#customary/lit/CustomaryLitElement.js");
-			const CustomaryLitElement = (x as any).CustomaryLitElement;
-			return class EphemeralCustomaryLitElement extends CustomaryLitElement {}
-		}
-
 		const constructor: CustomElementConstructor = isComponent
 				? optionsOrConstructor
-				: (globalThis as any).customaryLit
-						? await ephemeralLit()
-						: class EphemeralCustomaryHTMLElement extends CustomaryHTMLElement {};
+				: class EphemeralCustomaryLitElement extends CustomaryLitElement {};
 
 		const options: Partial<CustomaryOptions<T>> = isComponent
 				? (constructor as any)?.customary as CustomaryOptions<T>
@@ -81,10 +66,12 @@ export class Customary {
 					throw new Error('A name must be provided to define a custom element.')
 				})();
 
+		const definition = await new CustomaryDefine(options as CustomaryOptions<T>).define();
+
 		return await this.customaryRegistry.define(
 				name,
 				constructor,
-				await new CustomaryDefine(options as CustomaryOptions<T>).define(),
+				definition,
 				{extends: options?.config?.define?.extends}
 		);
 	}

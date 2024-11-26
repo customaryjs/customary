@@ -1,22 +1,42 @@
 import {CustomaryRegistry} from "#customary/registry/CustomaryRegistry.js";
 import {CustomaryEventBroker} from "#customary/events/CustomaryEventBroker.js";
 import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
+import {CSSStyleSheetBroker} from "#customary/cssstylesheet/CSSStyleSheetBroker.js";
+import {SlotsBroker} from "#customary/slots/SlotsBroker.js";
 
 export class CustomaryLit {
 
+	public static adoptStyleSheet<T extends HTMLElement>(element: T) {
+		const definition = this.getCustomaryDefinition(element);
+		const {cssStyleSheet, config} = definition;
+		CSSStyleSheetBroker.adoptStylesheet(
+				element, cssStyleSheet, config?.construct?.adoptStylesheetDont
+		);
+	}
+
+	public static addEventListener_slotChange<T extends HTMLElement>(element: T) {
+		const definition = this.getCustomaryDefinition(element);
+		SlotsBroker.addEventListener_slotChange(element, definition.hooks?.slots);
+	}
+
 	public static templateToRender<T extends HTMLElement>(element: T): HTMLTemplateElement {
-		const customaryDefinition = this.getCustomaryDefinition(element);
-		return customaryDefinition.template;
+		const definition = this.getCustomaryDefinition(element);
+		return definition.template;
 	}
 
 	public static getState(element: HTMLElement): any {
-		const customaryDefinition = this.getCustomaryDefinition(element);
-		return customaryDefinition.state;
+		const definition = this.getCustomaryDefinition(element);
+		return definition.state;
 	}
 
 	public static addEvents(element: HTMLElement) {
-		const customaryDefinition = this.getCustomaryDefinition(element);
-		new CustomaryEventBroker().addEvents(element, customaryDefinition.hooks?.events);
+		const definition = this.getCustomaryDefinition(element);
+		new CustomaryEventBroker().addEvents(element, definition.hooks?.events);
+	}
+
+	public static connectedCallback<T extends HTMLElement>(element: T) {
+		const definition = this.getCustomaryDefinition(element);
+		definition.hooks?.lifecycle?.connected?.(element);
 	}
 
 	public static getCustomaryDefinition(element: HTMLElement): CustomaryDefinition<HTMLElement> {
