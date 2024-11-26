@@ -1,7 +1,7 @@
 import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
 import {CustomaryHTMLElement} from "#customary/html/CustomaryHTMLElement.js";
 import {SlotHooks} from "#customary/CustomaryHooks.js";
-import {EventConnector} from "#customary/events/EventConnector.js";
+import {CustomaryEventBroker} from "#customary/events/CustomaryEventBroker.js";
 
 export class CustomaryConstruct<T extends HTMLElement> {
 
@@ -27,7 +27,7 @@ export class CustomaryConstruct<T extends HTMLElement> {
 
         this.addEventListener_slotChange(element, hooks?.slots);
 
-        new EventConnector<T>().addEvents(element, hooks?.events);
+        new CustomaryEventBroker<T>().addEvents(element, hooks?.events);
     }
 
     private useDocumentFragment(

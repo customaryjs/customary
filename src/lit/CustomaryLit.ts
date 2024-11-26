@@ -1,5 +1,5 @@
 import {CustomaryRegistry} from "#customary/registry/CustomaryRegistry.js";
-import {EventConnector} from "#customary/events/EventConnector.js";
+import {CustomaryEventBroker} from "#customary/events/CustomaryEventBroker.js";
 import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
 
 export class CustomaryLit {
@@ -9,9 +9,14 @@ export class CustomaryLit {
 		return customaryDefinition.template;
 	}
 
+	public static getState(element: HTMLElement): any {
+		const customaryDefinition = this.getCustomaryDefinition(element);
+		return customaryDefinition.state;
+	}
+
 	public static addEvents(element: HTMLElement) {
 		const customaryDefinition = this.getCustomaryDefinition(element);
-		new EventConnector().addEvents(element, customaryDefinition.hooks?.events);
+		new CustomaryEventBroker().addEvents(element, customaryDefinition.hooks?.events);
 	}
 
 	public static getCustomaryDefinition(element: HTMLElement): CustomaryDefinition<HTMLElement> {

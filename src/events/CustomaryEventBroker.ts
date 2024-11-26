@@ -1,6 +1,6 @@
 import {CustomaryEventListener, CustomaryEvents} from "#customary/CustomaryHooks";
 
-export class EventConnector<T extends HTMLElement> {
+export class CustomaryEventBroker<T extends HTMLElement> {
 	addEvents(customElement: T, customaryEvents: CustomaryEvents<T> | undefined) {
 		if (!customaryEvents) return;
 		if (customaryEvents instanceof Array) {
