@@ -1,4 +1,5 @@
 import {AttributeHooks} from "#customary/attributes/AttributeHooks.js";
+import {Hook_firstUpdated} from "#customary/lifecycle/firstUpdated/Hook_firstUpdated";
 
 export type CustomaryHooks<T extends HTMLElement> = {
     attributes?: AttributeHooks<T>;
@@ -14,6 +15,7 @@ export type CustomaryHooks<T extends HTMLElement> = {
     }
     events?: CustomaryEvents<T>;
     lifecycle?: {
+        firstUpdated?: Hook_firstUpdated<T>;
         connected?: (element: T) => void;
         disconnected?: (element: T) => void;
         adopted?: (element: T) => void;

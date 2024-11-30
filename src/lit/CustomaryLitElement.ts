@@ -3,9 +3,11 @@ import {html, LitElement, map, state} from "lit-for-customary";
 import {CustomaryStateBroker} from "#customary/state/CustomaryStateBroker.js";
 import {AttributesMixin} from "#customary/attributes/AttributesMixin.js";
 import {EventsMixin} from "#customary/events/EventsMixin.js";
+import {Mixin_firstUpdated} from "#customary/lifecycle/firstUpdated/Mixin_firstUpdated.js";
 
-export class CustomaryLitElement extends AttributesMixin(EventsMixin(LitElement)) {
-
+export class CustomaryLitElement
+		extends AttributesMixin(EventsMixin(Mixin_firstUpdated(LitElement)))
+{
 	@state()
 	private state: any;
 
@@ -20,7 +22,7 @@ export class CustomaryLitElement extends AttributesMixin(EventsMixin(LitElement)
 		);
 	}
 
-	protected render(): unknown {
+	protected override render(): unknown {
 		if (!map) throw new Error("https://www.typescriptlang.org/docs/handbook/modules/reference.html#type-only-imports-and-exports");
 
 		const template: HTMLTemplateElement = CustomaryLit.templateToRender(this);
@@ -47,18 +49,18 @@ export class CustomaryLitElement extends AttributesMixin(EventsMixin(LitElement)
 		return templateResult;
 	}
 
-	connectedCallback(): void {
+	override connectedCallback(): void {
 		super.connectedCallback();
 		CustomaryLit.connectedCallback(this);
 	}
 
-	firstUpdated(changedProperties: Map<string, any>) {
+	override firstUpdated(changedProperties: Map<string, any>) {
 		super.firstUpdated?.(changedProperties);
 		CustomaryLit.adoptStyleSheet(this);
 		CustomaryLit.addEventListener_slotChange(this);
 	}
 
-	updated(changedProperties: Map<string, any>) {
+	protected override updated(changedProperties: Map<string, any>) {
 		super.updated?.(changedProperties);
 	}
 
