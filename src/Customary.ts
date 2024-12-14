@@ -2,7 +2,7 @@ import {CustomaryDefine} from "#customary/CustomaryDefine.js";
 import {CustomaryOptions} from "#customary/CustomaryOptions.js";
 import {CustomaryRegistry} from "#customary/registry/CustomaryRegistry.js";
 import {CustomaryLitElement} from "#customary/lit/CustomaryLitElement.js";
-import {LitElement} from "lit-for-customary";
+import {AttributeBroker} from "#customary/attributes/AttributeBroker.js";
 
 export class Customary {
 
@@ -67,6 +67,8 @@ export class Customary {
 				})();
 
 		const definition = await new CustomaryDefine(options as CustomaryOptions<T>).define();
+
+		AttributeBroker.apply(constructor as typeof CustomaryLitElement, definition);
 
 		return await this.customaryRegistry.define(
 				name,

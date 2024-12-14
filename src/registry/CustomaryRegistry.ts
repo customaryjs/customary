@@ -1,8 +1,6 @@
 import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
 import {dom_ElementDefinitionOptions} from "#customary/dom/dom_ElementDefinitionOptions.js";
 import {get_dom_ElementDefinitionOptions} from "#customary/dom/get_dom_ElementDefinitionOptions.js";
-import {AttributeBroker} from "#customary/attributes/AttributeBroker.js";
-import {CustomaryLitElement} from "#customary/lit/CustomaryLitElement.js";
 
 export class CustomaryRegistry {
     constructor(private readonly customElementRegistry: CustomElementRegistry) {}
@@ -29,10 +27,6 @@ export class CustomaryRegistry {
         constructor: CustomElementConstructor,
         dom_ElementDefinitionOptions: ElementDefinitionOptions
     ) {
-        AttributeBroker.apply(
-            constructor as typeof CustomaryLitElement,
-            this.get(constructor)
-        );
         this.customElementRegistry.define(
             name,
             constructor,
