@@ -4,7 +4,6 @@ export type CustomaryDefinition<T extends HTMLElement> = {
     config?: {
         construct?: {
             adoptStylesheetDont?: boolean;
-            attachShadowDont?: boolean;
             replaceChildrenDont?: boolean;
         }
     };

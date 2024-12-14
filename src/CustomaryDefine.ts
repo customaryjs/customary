@@ -2,11 +2,9 @@ import {CSSStyleSheetAdopter} from "#customary/cssstylesheet/CSSStyleSheetAdopte
 import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
 import {CustomaryOptions} from "#customary/CustomaryOptions.js";
 import {CustomaryConfig} from "#customary/CustomaryConfig.js";
-import {hydrateStateBindings} from "#customary/CustomaryState.js";
 import {ExternalLoader} from "#customary/external/ExternalLoader.js";
 import {FetchText, FetchText_DOM_singleton} from "#customary/fetch/FetchText.js";
 import {CSSStyleSheetImporter} from "#customary/cssstylesheet/CSSStyleSheetImporter.js";
-import {findHTMLTemplateElementInDOMDocument} from "#customary/CustomaryHTMLTemplates.js";
 
 export class CustomaryDefine<T extends HTMLElement> {
 
@@ -33,10 +31,6 @@ export class CustomaryDefine<T extends HTMLElement> {
 						: await this.loadExternalCssStyleSheet();
 
 		const documentFragment: DocumentFragment = template?.content ?? (()=>{throw Error})();
-
-		if (!(globalThis as any).customaryLit) {
-			hydrateStateBindings(documentFragment);
-		}
 
 		const config_construct = this.options.config?.construct;
 		const config = config_construct ? {construct: config_construct} : undefined;
@@ -212,4 +206,8 @@ function prune<T extends { [s: string]: any }>(o: T): T {
 			Object.entries(o)
 					.filter(([, v]) => !!v)
 	) as T;
+}
+
+function findHTMLTemplateElementInDOMDocument(name: string): HTMLTemplateElement | undefined {
+	return document.querySelector(`template[data-customary-name='${name}']`) as HTMLTemplateElement ?? undefined;
 }

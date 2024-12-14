@@ -4,9 +4,10 @@ import {html, map} from "lit-for-customary";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
-export const Mixin_render =
-		<T extends Constructor<LitElement>>(superClass: T) => {
-			class MixinClass_render extends superClass {
+export function Mixin_renderFromTemplate
+		<T extends Constructor<LitElement>>(superClass: T): T {
+			class Mixin_renderFromTemplate_Class extends superClass {
+				// noinspection JSUnusedGlobalSymbols
 				protected override render(): unknown {
 					const definition = CustomaryLit.getCustomaryDefinition(this);
 
@@ -51,5 +52,5 @@ export const Mixin_render =
 				}
 			}
 
-			return MixinClass_render as T;
+			return Mixin_renderFromTemplate_Class as T;
 		}

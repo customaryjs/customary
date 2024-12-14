@@ -1,9 +1,8 @@
-import {AttributeHooks} from "#customary/attributes/AttributeHooks.js";
-import {Hook_firstUpdated} from "#customary/lifecycle/firstUpdated/Hook_firstUpdated";
-import {RenderHooks} from "#customary/render/RenderHooks.js";
-
 export type CustomaryHooks<T extends HTMLElement> = {
-    attributes?: AttributeHooks<T>;
+    attributes?: Record<
+        string,
+        (element: T, name: string, oldValue: string | null, newValue: string | null) => void
+    >;
     construct?: {
         onConstruct? : (element: T, documentFragment: DocumentFragment) => void;
     };
@@ -14,29 +13,32 @@ export type CustomaryHooks<T extends HTMLElement> = {
     externalLoader?: {
         import_meta?: ImportMeta;
     }
-    events?: CustomaryEvents<T>;
+    events?:
+        Array<{
+            selector?: string;
+            type?: string;
+            listener: (element: T, event: Event) => void;
+        }>
+        |
+        Record<
+            string,
+            (element: T, event: Event) => void
+        >;
     lifecycle?: {
-        firstUpdated?: Hook_firstUpdated<T>;
+        firstUpdated?: (element: T, changedProperties: PropertyValues) => void;
+        updated?: (element: T, changedProperties: PropertyValues) => void;
         connected?: (element: T) => void;
         disconnected?: (element: T) => void;
-        adopted?: (element: T) => void;
     }
-    render?: RenderHooks;
-    slots?: SlotHooks<T>;
+    render?: {
+        view?: (state?: State) => View;
+    }
+    slots?: {
+        slotchange?: (element: T, event?: Event) => void;
+    }
 }
 
-export type CustomaryEvents<T extends HTMLElement> =
-    CustomaryEvent<T>[] | Record<string, CustomaryEventListener<T>>;
+type PropertyValues = Map<PropertyKey, unknown>;
 
-export type CustomaryEvent<T extends HTMLElement> = {
-    selector?: string;
-    type?: string;
-    listener: CustomaryEventListener<T>;
-}
-
-export type CustomaryEventListener<T extends HTMLElement> =
-    (element: T, event: Event) => void;
-
-export type SlotHooks<T extends HTMLElement> = {
-    slotchange?: (element: T, event?: Event) => void;
-}
+type State = any;
+type View = any;

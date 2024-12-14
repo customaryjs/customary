@@ -1,7 +1,6 @@
 export type CustomaryConfig = {
 	construct?: {
 		adoptStylesheetDont?: boolean;
-		attachShadowDont?: boolean;
 		replaceChildrenDont?: boolean;
 	};
 	define?: {

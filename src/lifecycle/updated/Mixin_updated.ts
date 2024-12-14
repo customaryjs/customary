@@ -4,16 +4,16 @@ import {CustomaryLit} from "#customary/lit/CustomaryLit.js";
 type Constructor<T = {}> = new (...args: any[]) => T;
 type PropertyValues = Map<PropertyKey, unknown>;
 
-export function Mixin_firstUpdated
+export function Mixin_updated
 		<T extends Constructor<LitElement>>(superClass: T): T {
-			class Mixin_firstUpdated_Class extends superClass {
+			class Mixin_updated_Class extends superClass {
 				// noinspection JSUnusedGlobalSymbols
-				protected override firstUpdated(changedProperties: PropertyValues) {
-					super.firstUpdated?.(changedProperties);
+				protected override updated(changedProperties: PropertyValues) {
+					super.updated?.(changedProperties);
 
 					CustomaryLit.getCustomaryDefinition(this)
-							.hooks?.lifecycle?.firstUpdated?.(this, changedProperties);
+							.hooks?.lifecycle?.updated?.(this, changedProperties);
 				}
 			}
-			return Mixin_firstUpdated_Class;
+			return Mixin_updated_Class;
 		}
