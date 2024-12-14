@@ -11,44 +11,45 @@ export function Mixin_renderFromTemplate
 				protected override render(): unknown {
 					const definition = CustomaryLit.getCustomaryDefinition(this);
 
+					const htmlString = this.getHtmlString(definition.template);
 					const _state = (this as any).state;
-
 					const _view = definition.hooks?.render?.view?.(_state);
 
-					const templateResult = this.interpolateVariables(
-							definition.template,
+					return this.render_lit_html_TemplateResult(
+							htmlString,
 							_state,
 							_view,
 							html,
 							map
 					);
-
-					return html`${templateResult}`;
 				}
 
-				private interpolateVariables(
-						template: HTMLTemplateElement,
+				private getHtmlString(template: HTMLTemplateElement) {
+					// if the template has Lit directives with arrow functions,
+					// innerHTML will encode the '>' out of the '=>' so we need to decode it back
+					return template.innerHTML.replace('=&gt;', '=>');
+				}
+
+				/**
+					 lit "html" is a tag function
+					 at runtime, the tagged template comes from htmlString
+					 only JS compilation can parse the tagged template into a proper function call
+					 so we need JS compilation to happen at runtime
+					 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates
+				 */
+				private render_lit_html_TemplateResult(
+						htmlString: string,
 						_state: any,
 						_view: any,
 						_html: any,
 						_map: any
 				) {
-					const htmlFromTemplate = template.innerHTML;
-
-					// if the template has Lit directives with arrow functions,
-					// innerHTML will encode the '>' out of the '=>' so we need to decode it back
-					const htmlWithLitDirectives = htmlFromTemplate.replace('=&gt;', '=>');
-
 					const state = _state;
 					const view = _view;
 					const html = _html;
 					const map = _map;
 
-					const s: string = `html\`${htmlWithLitDirectives}\``;
-
-					const templateResult = eval(s);
-
-					return templateResult;
+					return eval(`html\`${htmlString}\``);
 				}
 			}
 
