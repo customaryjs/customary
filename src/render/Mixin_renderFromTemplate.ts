@@ -11,47 +11,45 @@ export function Mixin_renderFromTemplate
 				protected override render(): unknown {
 					const definition = CustomaryLit.getCustomaryDefinition(this);
 
-					const htmlString = this.getHtmlString(definition.template);
-					const _state = (this as any).state;
-					const _view = definition.hooks?.render?.view?.(_state);
+					const htmlString = getHtmlString(definition.template);
+					const state = (this as any).state;
+					const view = definition.hooks?.render?.view?.(state);
 
-					return this.render_lit_html_TemplateResult(
-							htmlString,
-							_state,
-							_view,
-							html,
-							map
-					);
-				}
-
-				private getHtmlString(template: HTMLTemplateElement) {
-					// if the template has Lit directives with arrow functions,
-					// innerHTML will encode the '>' out of the '=>' so we need to decode it back
-					return template.innerHTML.replace('=&gt;', '=>');
-				}
-
-				/**
-					 lit "html" is a tag function
-					 at runtime, the tagged template comes from htmlString
-					 only JS compilation can parse the tagged template into a proper function call
-					 so we need JS compilation to happen at runtime
-					 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates
-				 */
-				private render_lit_html_TemplateResult(
-						htmlString: string,
-						_state: any,
-						_view: any,
-						_html: any,
-						_map: any
-				) {
-					const state = _state;
-					const view = _view;
-					const html = _html;
-					const map = _map;
-
-					return eval(`html\`${htmlString}\``);
+					return render_lit_html_TemplateResult(this, htmlString, state, view);
 				}
 			}
 
 			return Mixin_renderFromTemplate_Class as T;
 		}
+
+/**
+ innerHTML encodes some characters used by lit directives
+ so we must decode them back into the HTML string.
+ over time the need to do this should disappear,
+ as we introduce custom elements for lit directives themselves.
+*/
+function getHtmlString(template: HTMLTemplateElement) {
+	// lit directives expressed as arrow functions
+	return template.innerHTML.replace('=&gt;', '=>');
+}
+
+/**
+ lit "html" is a tag function.
+ at runtime, the tagged template comes from htmlString.
+ only JS compilation can parse the tagged template into a proper function call,
+ so we need JS compilation to happen at runtime.
+ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates
+*/
+function render_lit_html_TemplateResult(
+		element: HTMLElement,
+		htmlString: string,
+		state: any,
+		view: any,
+) {
+	const thisArg = element;
+	const fn = new Function(
+			'state', 'view', 'html', 'map',
+			'"use strict"; return html\`' + htmlString + '\`'
+	);
+	return fn.call(thisArg, state, view, html, map);
+}
