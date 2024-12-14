@@ -1,5 +1,6 @@
 import {AttributeHooks} from "#customary/attributes/AttributeHooks.js";
 import {Hook_firstUpdated} from "#customary/lifecycle/firstUpdated/Hook_firstUpdated";
+import {RenderHooks} from "#customary/render/RenderHooks.js";
 
 export type CustomaryHooks<T extends HTMLElement> = {
     attributes?: AttributeHooks<T>;
@@ -20,6 +21,7 @@ export type CustomaryHooks<T extends HTMLElement> = {
         disconnected?: (element: T) => void;
         adopted?: (element: T) => void;
     }
+    render?: RenderHooks;
     slots?: SlotHooks<T>;
 }
 
@@ -27,7 +29,7 @@ export type CustomaryEvents<T extends HTMLElement> =
     CustomaryEvent<T>[] | Record<string, CustomaryEventListener<T>>;
 
 export type CustomaryEvent<T extends HTMLElement> = {
-    selector: string;
+    selector?: string;
     type?: string;
     listener: CustomaryEventListener<T>;
 }

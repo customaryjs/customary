@@ -19,19 +19,9 @@ export class CustomaryLit {
 		SlotsBroker.addEventListener_slotChange(element, definition.hooks?.slots);
 	}
 
-	public static templateToRender<T extends HTMLElement>(element: T): HTMLTemplateElement {
-		const definition = this.getCustomaryDefinition(element);
-		return definition.template;
-	}
-
 	public static getState(element: HTMLElement): any {
 		const definition = this.getCustomaryDefinition(element);
 		return definition.state;
-	}
-
-	public static addEvents(element: HTMLElement) {
-		const definition = this.getCustomaryDefinition(element);
-		new CustomaryEventBroker().addEvents(element, definition.hooks?.events);
 	}
 
 	public static connectedCallback<T extends HTMLElement>(element: T) {
