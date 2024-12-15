@@ -1,49 +1,25 @@
+import {CustomaryDetect} from "#customary/CustomaryDetect.js";
 import {CustomaryDefine} from "#customary/CustomaryDefine.js";
 import {CustomaryOptions} from "#customary/CustomaryOptions.js";
 import {CustomaryRegistry} from "#customary/registry/CustomaryRegistry.js";
 import {CustomaryLitElement} from "#customary/lit/CustomaryLitElement.js";
-import {AttributeBroker} from "#customary/attributes/AttributeBroker.js";
+import {AttributeProperties} from "#customary/attributes/AttributeProperties.js";
+import {StateProperties} from "#customary/state/StateProperties.js";
 
 export class Customary {
 
 	static async detect(): Promise<CustomElementConstructor[]> {
-		const attribute = 'data-customary-name';
-		const names = new Set<string>();
-		for (const template of document.querySelectorAll(`template[${attribute}]`)) {
-				names.add(template.getAttribute(attribute)!);
-		}
-		for (const name of Object.keys(globalThis)) {
-			const s = 'customary:';
-			if (name.startsWith(s)) {
-				names.add(name.substring(s.length));
-			}
-		}
-		return await Promise.all([...names].map(name => {
-			const options = this.detectOptions(name);
-			return this.define(
-					{
-						config: {...options?.config, name},
-						hooks: options?.hooks,
-						state: (options?.state ?? this.detectState(name))
-					})
-			}
-		));
-	}
-
-	private static detectOptions<T extends HTMLElement>(name: string): CustomaryOptions<T> | undefined {
-		return (globalThis as any)[`customary:${name}`];
-	}
-
-	private static detectState(name: string): object | object[] | undefined {
-		const element = document.querySelector(
-				`script[type="application/json"][data-customary-name='${name}']`
+		return await Promise.all(
+				new CustomaryDetect(document, globalThis)
+						.detect()
+						.map(one => Customary.define(one))
 		);
-		return element?.textContent ? JSON.parse(element.textContent) : undefined;
 	}
 
 	static async define<T extends HTMLElement>(
 			options: Partial<CustomaryOptions<T>>
 	): Promise<CustomElementConstructor>
+	// noinspection JSUnusedGlobalSymbols
 	static async define(
 			constructor: CustomElementConstructor
 	): Promise<CustomElementConstructor>
@@ -68,7 +44,8 @@ export class Customary {
 
 		const definition = await new CustomaryDefine(options as CustomaryOptions<T>).define();
 
-		AttributeBroker.apply(constructor as typeof CustomaryLitElement, definition);
+		AttributeProperties.addProperties(constructor as typeof CustomaryLitElement, definition);
+		StateProperties.addProperties(constructor as typeof CustomaryLitElement, definition);
 
 		return await this.customaryRegistry.define(
 				name,

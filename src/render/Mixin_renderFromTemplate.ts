@@ -11,7 +11,7 @@ export function Mixin_renderFromTemplate
 				protected override render(): unknown {
 					const definition = CustomaryLit.getCustomaryDefinition(this);
 
-					const htmlString = getHtmlString(definition.template);
+					const htmlString = recode(definition.template.innerHTML);
 					const state = (this as any).state;
 					const view = definition.hooks?.render?.view?.(state);
 
@@ -28,9 +28,9 @@ export function Mixin_renderFromTemplate
  over time the need to do this should disappear,
  as we introduce custom elements for lit directives themselves.
 */
-function getHtmlString(template: HTMLTemplateElement) {
+function recode(htmlString: string) {
 	// lit directives expressed as arrow functions
-	return template.innerHTML.replace('=&gt;', '=>');
+	return htmlString.replace('=&gt;', '=>');
 }
 
 /**

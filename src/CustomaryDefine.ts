@@ -17,18 +17,22 @@ export class CustomaryDefine<T extends HTMLElement> {
 	}
 
 	private async buildCustomaryDefinition(): Promise<CustomaryDefinition<T>> {
-		const documentTemplate: HTMLTemplateElement | undefined =
+		const templateInDocument: HTMLTemplateElement | undefined =
 				findHTMLTemplateElementInDOMDocument(this.options.config.name);
 
 		const template: HTMLTemplateElement | undefined =
-				documentTemplate
+				templateInDocument
 				?? await this.getHTMLTemplateElementFromHtmlFunction()
 				?? await this.loadHTMLTemplateElementFromExternalHtml();
 
 		const cssStyleSheet: CSSStyleSheet | undefined =
-				documentTemplate
+				templateInDocument
 						? undefined
 						: await this.loadExternalCssStyleSheet();
+
+		if (template) {
+			this.directize(template);
+		}
 
 		const documentFragment: DocumentFragment = template?.content ?? (()=>{throw Error})();
 
@@ -46,6 +50,20 @@ export class CustomaryDefine<T extends HTMLElement> {
 		};
 
 		return prune(definition);
+	}
+
+	private directize(template: HTMLTemplateElement) {
+		const mapTags = template?.content.querySelectorAll('map--');
+		if (mapTags) {
+			for (const tag of mapTags) {
+				const items = tag.getAttribute('items') ?? (()=>{throw Error('items attribute is required for directive-map')})();
+				const value = tag.getAttribute('value') ?? 'value';
+				const index = tag.getAttribute('index');
+				const args = index ? `(${value}, ${index})` : value;
+				const body = tag.innerHTML;
+				tag.outerHTML = `\${map(${items}, ${args} => html\`${body}\`)}`;
+			}
+		}
 	}
 
 	private async getHTMLTemplateElementFromHtmlFunction() {
