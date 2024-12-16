@@ -7,6 +7,7 @@ import {FetchText, FetchText_DOM_singleton} from "#customary/fetch/FetchText.js"
 import {CSSStyleSheetImporter} from "#customary/cssstylesheet/CSSStyleSheetImporter.js";
 import {Directive_choose} from "#customary/lit/directives/Directive_choose.js";
 import {Directive_map} from "#customary/lit/directives/Directive_map.js";
+import {Directive_when} from "#customary/lit/directives/Directive_when.js";
 
 export class CustomaryDefine<T extends HTMLElement> {
 
@@ -35,6 +36,7 @@ export class CustomaryDefine<T extends HTMLElement> {
 		if (template) {
 			Directive_choose.hydrate(template);
 			Directive_map.hydrate(template);
+			Directive_when.hydrate(template);
 		}
 
 		const documentFragment: DocumentFragment = template?.content ?? (()=>{throw Error})();
