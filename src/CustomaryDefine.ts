@@ -25,7 +25,6 @@ export class CustomaryDefine<T extends HTMLElement> {
 
 		const template: HTMLTemplateElement | undefined =
 				templateInDocument
-				?? await this.getHTMLTemplateElementFromHtmlFunction()
 				?? await this.loadHTMLTemplateElementFromExternalHtml();
 
 		const cssStyleSheet: CSSStyleSheet | undefined =
@@ -41,12 +40,9 @@ export class CustomaryDefine<T extends HTMLElement> {
 
 		const documentFragment: DocumentFragment = template?.content ?? (()=>{throw Error})();
 
-		const config_construct = this.options.config?.construct;
-		const config = config_construct ? {construct: config_construct} : undefined;
 		const {hooks, state} = this.options;
 
 		const definition: CustomaryDefinition<T> = {
-			config,
 			cssStyleSheet,
 			template,
 			documentFragment,
@@ -55,10 +51,6 @@ export class CustomaryDefine<T extends HTMLElement> {
 		};
 
 		return prune(definition);
-	}
-
-	private async getHTMLTemplateElementFromHtmlFunction() {
-		return await this.toTemplate(await this.options.hooks?.define?.fromHtml?.());
 	}
 
 	private async loadHTMLTemplateElementFromExternalHtml() {
@@ -97,7 +89,6 @@ export class CustomaryDefine<T extends HTMLElement> {
 		for (const delimiter of delimiters) {
 			const tile: string | undefined = this.detile(tileset, delimiter);
 			if (tile) {
-				await this.options.hooks?.define?.onTile?.(tile);
 				return tile;
 			}
 		}

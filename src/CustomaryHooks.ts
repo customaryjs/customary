@@ -3,13 +3,6 @@ export type CustomaryHooks<T extends HTMLElement> = {
         string,
         (element: T, name: string, oldValue: string | null, newValue: string | null) => void
     >;
-    construct?: {
-        onConstruct? : (element: T, documentFragment: DocumentFragment) => void;
-    };
-    define?: {
-        fromHtml?: () => Promise<string>;
-        onTile?: (tile: string) => Promise<any>;
-    };
     externalLoader?: {
         import_meta?: ImportMeta;
     }

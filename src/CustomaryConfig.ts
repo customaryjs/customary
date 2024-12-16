@@ -1,8 +1,4 @@
 export type CustomaryConfig = {
-	construct?: {
-		adoptStylesheetDont?: boolean;
-		replaceChildrenDont?: boolean;
-	};
 	define?: {
 		extends?: string;
 		detileDont?: boolean;
