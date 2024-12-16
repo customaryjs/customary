@@ -1,6 +1,5 @@
 import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
 import {CustomaryLitElement} from "#customary/lit/CustomaryLitElement.js";
-import {PropertyDeclaration} from "@lit/reactive-element";
 
 export class AttributeProperties {
 	static addProperties(
@@ -11,9 +10,7 @@ export class AttributeProperties {
 		const properties = constructor.properties;
 		for (const key of names) {
 				if (!properties.hasOwnProperty(key)) {
-					const propertyDeclaration: PropertyDeclaration = {reflect: true};
-					properties[key] = propertyDeclaration;
-					constructor.createProperty(key, propertyDeclaration);
+					properties[key] = {reflect: true};
 				}
 		}
 	}

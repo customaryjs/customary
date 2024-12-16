@@ -5,6 +5,7 @@ import {CustomaryConfig} from "#customary/CustomaryConfig.js";
 import {ExternalLoader} from "#customary/external/ExternalLoader.js";
 import {FetchText, FetchText_DOM_singleton} from "#customary/fetch/FetchText.js";
 import {CSSStyleSheetImporter} from "#customary/cssstylesheet/CSSStyleSheetImporter.js";
+import {Directive_map} from "#customary/lit/directives/Directive_map.js";
 
 export class CustomaryDefine<T extends HTMLElement> {
 
@@ -31,7 +32,7 @@ export class CustomaryDefine<T extends HTMLElement> {
 						: await this.loadExternalCssStyleSheet();
 
 		if (template) {
-			this.directize(template);
+			Directive_map.hydrate(template);
 		}
 
 		const documentFragment: DocumentFragment = template?.content ?? (()=>{throw Error})();
@@ -50,20 +51,6 @@ export class CustomaryDefine<T extends HTMLElement> {
 		};
 
 		return prune(definition);
-	}
-
-	private directize(template: HTMLTemplateElement) {
-		const mapTags = template?.content.querySelectorAll('map--');
-		if (mapTags) {
-			for (const tag of mapTags) {
-				const items = tag.getAttribute('items') ?? (()=>{throw Error('items attribute is required for directive-map')})();
-				const value = tag.getAttribute('value') ?? 'value';
-				const index = tag.getAttribute('index');
-				const args = index ? `(${value}, ${index})` : value;
-				const body = tag.innerHTML;
-				tag.outerHTML = `\${map(${items}, ${args} => html\`${body}\`)}`;
-			}
-		}
 	}
 
 	private async getHTMLTemplateElementFromHtmlFunction() {

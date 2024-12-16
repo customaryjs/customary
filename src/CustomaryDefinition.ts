@@ -11,5 +11,5 @@ export type CustomaryDefinition<T extends HTMLElement> = {
     template: HTMLTemplateElement;
     documentFragment: DocumentFragment;
     hooks?: CustomaryHooks<T>;
-    state?: object | object[];
+    state?: Record<string, object | object[]>;
 }

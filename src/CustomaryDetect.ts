@@ -23,20 +23,34 @@ export class CustomaryDetect {
 		return [...new Set([...fromDocument, ...fromGlobalScope])];
 	}
 
-	private detectOptions(name: string): CustomaryOptions<any> {
-		const optionsFromGlobalScope = this.globalThis[`customary:${name}`];
-		const options: CustomaryOptions<any> = {
-			config: {...optionsFromGlobalScope?.config, name},
-			hooks: optionsFromGlobalScope?.hooks,
-			state: (optionsFromGlobalScope?.state ?? this.detectState(name))
+	private detectOptions(name: string): CustomaryOptions<HTMLElement> {
+		const optionsFromGlobalScope: CustomaryOptions<any> = this.globalThis[`customary:${name}`];
+
+		const config = {...optionsFromGlobalScope?.config, name};
+		const hooks = optionsFromGlobalScope?.hooks;
+		const state = optionsFromGlobalScope?.state ?? this.detectState(name);
+
+		return {
+			config,
+			...(hooks ? {hooks} : {}),
+			...(state ? {state} : {}),
 		};
-		return options;
 	}
 
-	private detectState(name: string): object | object[] | undefined {
-		const element = this.document.querySelector(
+	private detectState(name: string): Record<string, object | object[]> | undefined {
+		const elements = this.document.querySelectorAll(
 				`script[type="application/json"][data-customary-name='${name}']`
 		);
-		return element?.textContent ? JSON.parse(element.textContent) : undefined;
+		if (elements.length === 0) {
+			return undefined;
+		}
+		const result: Record<string, object | object[]> = {};
+		for (const element of elements) {
+			if (element.textContent) {
+				const key = element.getAttribute('data-customary-state') ?? 'state';
+				result[key] = JSON.parse(element.textContent);
+			}
+		}
+		return result;
 	}
 }

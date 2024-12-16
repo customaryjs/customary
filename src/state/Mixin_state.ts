@@ -6,15 +6,10 @@ type Constructor<T = {}> = new (...args: any[]) => T;
 export function Mixin_state
 		<T extends Constructor<LitElement>>(superClass: T): T {
 	class Mixin_state_Class extends superClass {
-		/*
-		static properties: Record<PropertyKey, any> = {
-			state: {}
-		};
-		 */
-
 		constructor(...args: any[]) {
 			super(args);
-			(this as any).state = CustomaryLit.getCustomaryDefinition(this).state;
+
+			Object.assign(this, CustomaryLit.getCustomaryDefinition(this).state ?? {});
 		}
 
 		// noinspection JSUnusedGlobalSymbols

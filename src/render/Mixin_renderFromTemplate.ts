@@ -1,6 +1,6 @@
 import {LitElement} from 'lit';
 import {CustomaryLit} from "#customary/lit/CustomaryLit.js";
-import {html, map} from "lit-for-customary";
+import {html, map, choose, when} from "lit-for-customary";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -30,7 +30,7 @@ export function Mixin_renderFromTemplate
 */
 function recode(htmlString: string) {
 	// lit directives expressed as arrow functions
-	return htmlString.replace('=&gt;', '=>');
+	return htmlString.replaceAll('=&gt;', '=>');
 }
 
 /**
@@ -48,8 +48,8 @@ function render_lit_html_TemplateResult(
 ) {
 	const thisArg = element;
 	const fn = new Function(
-			'state', 'view', 'html', 'map',
+			'state', 'view', 'html', 'map', 'choose', 'when',
 			'"use strict"; return html\`' + htmlString + '\`'
 	);
-	return fn.call(thisArg, state, view, html, map);
+	return fn.call(thisArg, state, view, html, map, choose, when);
 }
