@@ -5,6 +5,7 @@ import {CustomaryConfig} from "#customary/CustomaryConfig.js";
 import {ExternalLoader} from "#customary/external/ExternalLoader.js";
 import {FetchText, FetchText_DOM_singleton} from "#customary/fetch/FetchText.js";
 import {CSSStyleSheetImporter} from "#customary/cssstylesheet/CSSStyleSheetImporter.js";
+import {Directive_choose} from "#customary/lit/directives/Directive_choose.js";
 import {Directive_map} from "#customary/lit/directives/Directive_map.js";
 
 export class CustomaryDefine<T extends HTMLElement> {
@@ -32,6 +33,7 @@ export class CustomaryDefine<T extends HTMLElement> {
 						: await this.loadExternalCssStyleSheet();
 
 		if (template) {
+			Directive_choose.hydrate(template);
 			Directive_map.hydrate(template);
 		}
 
