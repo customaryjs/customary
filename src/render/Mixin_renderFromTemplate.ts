@@ -11,11 +11,11 @@ export function Mixin_renderFromTemplate
 				protected override render(): unknown {
 					const definition = CustomaryLit.getCustomaryDefinition(this);
 
+					const element = this;
 					const htmlString = recode(definition.template.innerHTML);
-					const state = (this as any).state;
-					const view = definition.hooks?.render?.view?.(state);
+					const state = (element as any).state;
 
-					return render_lit_html_TemplateResult(this, htmlString, state, view);
+					return render_lit_html_TemplateResult(element, htmlString, state);
 				}
 			}
 
@@ -44,12 +44,11 @@ function render_lit_html_TemplateResult(
 		element: HTMLElement,
 		htmlString: string,
 		state: any,
-		view: any,
 ) {
 	const thisArg = element;
 	const fn = new Function(
-			'state', 'view', 'html', 'map', 'choose', 'when',
+			'state', 'html', 'map', 'choose', 'when',
 			'"use strict"; return html\`' + htmlString + '\`'
 	);
-	return fn.call(thisArg, state, view, html, map, choose, when);
+	return fn.call(thisArg, state, html, map, choose, when);
 }
