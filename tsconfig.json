@@ -1,24 +1,26 @@
 {
   "include": ["src/**/*"],
   "compilerOptions": {
-      "declaration": true,
-      "outDir": "web/_script",
-      "rootDir": "src",
-      "paths": {
-        "#customary/*": ["./src/*"],
-        "knockout/": ["./node_modules/knockout/build/types/knockout/"],
-      },
-      // https://lit.dev/docs/components/decorators/#decorators-typescript
-      "experimentalDecorators": true,
-      "useDefineForClassFields": false,
-      // ---- CODING STANDARDS TYPICAL FOR ALL PROJECTS START HERE ----
-      "allowJs": false,
-      "module": "esnext",
-      "moduleResolution": "node",
-      "noImplicitAny": true,
-      "noImplicitReturns": true,
-      "sourceMap": true,
-      "strict": true,
-      "target": "es2022"
+    "declaration": true,
+    "outDir": "web/_script",
+    "rootDir": "src",
+    "paths": {
+      "#customary/*": ["./src/*"],
+      "knockout/": ["./node_modules/knockout/build/types/knockout/"],
+    },
+    // ---- BEGIN lit decorators: @property @state @query
+    // https://lit.dev/docs/components/decorators/#decorators-typescript
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false,
+    // ---- END lit decorators: @property @state @query
+    // ---- CODING STANDARDS TYPICAL FOR ALL PROJECTS START HERE ----
+    "allowJs": false,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "sourceMap": true,
+    "strict": true,
+    "target": "es2022"
   }
 }
