@@ -4,6 +4,10 @@ export function get_dom_ElementDefinitionOptions(
 		options: dom_ElementDefinitionOptions,
 		customElementConstructor: CustomElementConstructor
 ): dom_ElementDefinitionOptions | undefined {
+	if (customElementConstructor.name === 'EphemeralCustomaryLitElement') {
+		return undefined;
+	}
+	// FIXME phase out? we are fully in lit world now, and extends lacks browser support
 	const superclass = Object.getPrototypeOf(customElementConstructor);
 	if (!options.extends) {
 		const superclasses = [HTMLElement];
