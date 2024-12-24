@@ -10,7 +10,6 @@ import {Mixin_slotChange} from "#customary/slots/Mixin_slotChange.js";
 import {Mixin_state} from "#customary/state/Mixin_state.js";
 import {Mixin_updated} from "#customary/lifecycle/updated/Mixin_updated.js";
 import {Mixin_willUpdate} from "#customary/lifecycle/willUpdate/Mixin_willUpdate.js";
-import {PropertyDeclaration} from "@lit/reactive-element";
 
 export class CustomaryLitElement
 		extends
@@ -27,6 +26,4 @@ export class CustomaryLitElement
 				Mixin_willUpdate(
 						LitElement
 				)))))))))))
-{
-	static properties: Record<PropertyKey, PropertyDeclaration> = {};
-}
+{}

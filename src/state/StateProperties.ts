@@ -1,19 +1,22 @@
-import {CustomaryLitElement} from "#customary/lit/CustomaryLitElement";
+import {LitElement} from "lit-for-customary";
 import {CustomaryDefinition} from "#customary/CustomaryDefinition";
+import {PropertyDeclarations} from "@lit/reactive-element";
 
 export class StateProperties {
 
 	static addProperties(
-			constructor: typeof CustomaryLitElement,
+			constructor: typeof LitElement,
 			definition: CustomaryDefinition<HTMLElement>
 	) {
 		const names: string[] = ['state'];
-		const properties = constructor.properties;
 		for (const key of names) {
-			if (!properties.hasOwnProperty(key)) {
-				properties[key] = {};
+			const properties: Writable<PropertyDeclarations> = constructor.properties ??= {};
+			if (!(key in properties)) {
+				properties[key] = {state: true};
 			}
 		}
 	}
 
 }
+
+type Writable<T> = {-readonly [P in keyof T]: T[P]}

@@ -1,10 +1,10 @@
+import {LitElement} from "lit-for-customary";
 import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
-import {CustomaryLitElement} from "#customary/lit/CustomaryLitElement.js";
-import {PropertyDeclaration} from "@lit/reactive-element";
+import {PropertyDeclaration, PropertyDeclarations} from "@lit/reactive-element";
 
 export class AttributeProperties {
 	static addProperties(
-			constructor: typeof CustomaryLitElement,
+			constructor: typeof LitElement,
 			definition: CustomaryDefinition<HTMLElement>
 	) {
 		const hooks = definition.hooks?.attributes;
@@ -22,8 +22,9 @@ export class AttributeProperties {
 		const names = [...new Set([...fromSArray, ...fromOArray, ...fromRecord, ...fromTemplate])];
 
 		for (const key of names) {
-			if (!constructor.properties.hasOwnProperty(key)) {
-				constructor.properties[key] =
+			const properties: Writable<PropertyDeclarations> = constructor.properties ??= {};
+			if (!(key in properties)) {
+				properties[key] =
 						hooksOArray.find(value => value.name === key)?.propertyDeclaration
 						?? hooksRecord[key]
 						?? {reflect: true};
@@ -33,3 +34,4 @@ export class AttributeProperties {
 }
 
 type Attrib = {name: string, propertyDeclaration: PropertyDeclaration};
+type Writable<T> = {-readonly [P in keyof T]: T[P]};
