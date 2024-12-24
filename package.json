@@ -18,7 +18,7 @@
   "wireit": {
     "dist": {
       "command": "npm run dist:*",
-      "dependencies": ["clean", "compile"]
+      "dependencies": ["compile-from-scratch"]
     },
     "dev": {
       "command": "npm run compile-watch",
@@ -26,6 +26,13 @@
     },
     "clean": {
       "dependencies": ["clean:dist", "clean:compile", "clean:src"]
+    },
+    "compile-from-scratch": {
+      "command": "npm run compile",
+      "dependencies": ["dist-dependency-bundle:*", "clean"]
+    },
+    "dist-dependency-bundle:*": {
+      "dependencies": ["../lit-for-customary:dist"]
     },
     "clean:dist": {"command": "rimraf .dist .parcel-cache"},
     "clean:compile": {"command": "rimraf web/_script"},
