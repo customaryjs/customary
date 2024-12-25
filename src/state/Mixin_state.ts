@@ -9,7 +9,8 @@ export function Mixin_state
 		constructor(...args: any[]) {
 			super(args);
 
-			Object.assign(this, CustomaryLit.getCustomaryDefinition(this).state ?? {});
+			Object.assign(this, CustomaryLit.getCustomaryDefinition(this)
+					.declaration.state ?? {});
 		}
 
 		// noinspection JSUnusedGlobalSymbols

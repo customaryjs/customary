@@ -12,7 +12,7 @@ export function Mixin_firstUpdated
 					super.firstUpdated?.(changedProperties);
 
 					CustomaryLit.getCustomaryDefinition(this)
-							.hooks?.lifecycle?.firstUpdated?.(this, changedProperties);
+							.declaration.hooks?.lifecycle?.firstUpdated?.(this, changedProperties);
 				}
 			}
 			return Mixin_firstUpdated_Class;

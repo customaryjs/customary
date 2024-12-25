@@ -10,7 +10,8 @@ export function Mixin_disconnected
 				override disconnectedCallback() {
 					super.disconnectedCallback?.();
 
-					CustomaryLit.getCustomaryDefinition(this).hooks?.lifecycle?.disconnected?.(this);
+					CustomaryLit.getCustomaryDefinition(this)
+							.declaration.hooks?.lifecycle?.disconnected?.(this);
 				}
 			}
 			return Mixin_disconnected_Class;

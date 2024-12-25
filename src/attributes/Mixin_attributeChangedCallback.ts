@@ -11,7 +11,7 @@ export function Mixin_attributeChangedCallback
 			super.attributeChangedCallback(name, oldValue, newValue);
 
 			CustomaryLit.getCustomaryDefinition(this)
-					.hooks?.lifecycle?.attributeChangedCallback
+					.declaration.hooks?.lifecycle?.attributeChangedCallback
 					?.(this, name, oldValue, newValue);
 		}
 	}

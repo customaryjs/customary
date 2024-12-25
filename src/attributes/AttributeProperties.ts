@@ -7,7 +7,7 @@ export class AttributeProperties {
 			constructor: typeof LitElement,
 			definition: CustomaryDefinition<HTMLElement>
 	) {
-		const hooks = definition.hooks?.attributes;
+		const hooks = definition.declaration.hooks?.attributes;
 		const hooksSArray: string[] = hooks instanceof Array && typeof hooks[0] === 'string' ? hooks as string[] : [];
 		const hooksOArray: Attrib[] = hooks instanceof Array && typeof hooks[0] === 'object' ? hooks as Attrib[] : [];
 		const hooksRecord = hooks && !(hooks instanceof Array) ? hooks : {};

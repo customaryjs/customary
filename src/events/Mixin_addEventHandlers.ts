@@ -11,7 +11,7 @@ export function Mixin_addEventHandlers
 					super.updated?.(changedProperties);
 
 					const eventHandlers = CustomaryLit.getCustomaryDefinition(this)
-							.hooks?.events;
+							.declaration.hooks?.events;
 					if (!eventHandlers) return;
 
 					if (eventHandlers instanceof Array) {

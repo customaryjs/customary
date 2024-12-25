@@ -10,7 +10,8 @@ export function Mixin_connected
 				override connectedCallback() {
 					super.connectedCallback?.();
 
-					CustomaryLit.getCustomaryDefinition(this).hooks?.lifecycle?.connected?.(this);
+					CustomaryLit.getCustomaryDefinition(this)
+							.declaration.hooks?.lifecycle?.connected?.(this);
 				}
 			}
 			return Mixin_connected_Class;

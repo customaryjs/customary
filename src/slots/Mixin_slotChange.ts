@@ -14,7 +14,8 @@ export function Mixin_slotChange
 					const element = this;
 
 					const slotchange: ((element: HTMLElement, event?: Event) => void) | undefined =
-							CustomaryLit.getCustomaryDefinition(element).hooks?.slots?.slotchange;
+							CustomaryLit.getCustomaryDefinition(element)
+									.declaration.hooks?.slots?.slotchange;
 
 					if (!slotchange) return;
 

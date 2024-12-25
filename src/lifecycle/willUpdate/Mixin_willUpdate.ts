@@ -12,7 +12,7 @@ export function Mixin_willUpdate
 					super.willUpdate?.(changedProperties);
 
 					CustomaryLit.getCustomaryDefinition(this)
-							.hooks?.lifecycle?.willUpdate?.(this, changedProperties);
+							.declaration.hooks?.lifecycle?.willUpdate?.(this, changedProperties);
 				}
 			}
 			return Mixin_willUpdate_Class;

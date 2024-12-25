@@ -1,6 +1,6 @@
 import {CSSStyleSheetAdopter} from "#customary/cssstylesheet/CSSStyleSheetAdopter.js";
 import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
-import {CustomaryOptions} from "#customary/CustomaryOptions.js";
+import {CustomaryDeclaration, CustomaryOptions} from "#customary/CustomaryOptions.js";
 import {CustomaryConfig} from "#customary/CustomaryConfig.js";
 import {ExternalLoader} from "#customary/external/ExternalLoader.js";
 import {FetchText, FetchText_DOM_singleton} from "#customary/fetch/FetchText.js";
@@ -40,14 +40,13 @@ export class CustomaryDefine<T extends HTMLElement> {
 
 		const documentFragment: DocumentFragment = template?.content ?? (()=>{throw Error})();
 
-		const {hooks, state} = this.options;
+		const declaration: CustomaryDeclaration<T> = this.options;
 
 		const definition: CustomaryDefinition<T> = {
+			declaration,
 			cssStyleSheet,
 			template,
 			documentFragment,
-			hooks,
-			state,
 		};
 
 		return prune(definition);
