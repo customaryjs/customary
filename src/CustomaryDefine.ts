@@ -25,7 +25,9 @@ export class CustomaryDefine<T extends HTMLElement> {
 
 		const template: HTMLTemplateElement | undefined =
 				templateInDocument
-				?? await this.loadHTMLTemplateElementFromExternalHtml();
+				?? await this.loadHTMLTemplateElementFromExternalHtml()
+				?? (()=>{throw new Error(
+						'template unresolvable from current page or external html')})();
 
 		const cssStyleSheet: CSSStyleSheet | undefined =
 				templateInDocument
@@ -38,15 +40,12 @@ export class CustomaryDefine<T extends HTMLElement> {
 			Directive_when.hydrate(template);
 		}
 
-		const documentFragment: DocumentFragment = template?.content ?? (()=>{throw Error})();
-
 		const declaration: CustomaryDeclaration<T> = this.options;
 
 		const definition: CustomaryDefinition<T> = {
 			declaration,
 			cssStyleSheet,
 			template,
-			documentFragment,
 		};
 
 		return prune(definition);
