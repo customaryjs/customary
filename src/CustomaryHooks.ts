@@ -1,9 +1,7 @@
 import {PropertyDeclaration} from "@lit/reactive-element";
 
 export type CustomaryHooks<T extends HTMLElement> = {
-	attributes?:
-			Array<string>
-			|
+	properties?:
 			Array<
 					{
 						name: string,

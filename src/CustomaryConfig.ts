@@ -1,4 +1,5 @@
 export type CustomaryConfig = {
+	attributes?: string[];
 	define?: {
 		extends?: string;
 		detileDont?: boolean;
@@ -12,6 +13,7 @@ export type CustomaryConfig = {
 		};
 	};
 	preset?: CustomaryPreset;
+	state?: string[];
 }
 
 export type CustomaryPreset = 'recommended';

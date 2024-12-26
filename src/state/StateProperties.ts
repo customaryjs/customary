@@ -1,6 +1,6 @@
 import {LitElement} from "lit-for-customary";
-import {CustomaryDefinition} from "#customary/CustomaryDefinition";
-import {PropertyDeclarations} from "@lit/reactive-element";
+import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
+import {PropertiesInjector} from "#customary/lit/properties/PropertiesInjector.js";
 
 export class StateProperties {
 
@@ -8,15 +8,10 @@ export class StateProperties {
 			constructor: typeof LitElement,
 			definition: CustomaryDefinition<HTMLElement>
 	) {
-		const names: string[] = ['state'];
-		for (const key of names) {
-			const properties: Writable<PropertyDeclarations> = constructor.properties ??= {};
-			if (!(key in properties)) {
-				properties[key] = {state: true};
-			}
-		}
+		const fromDeclaration = definition.declaration.config.state ?? [];
+		const fromLegacy = ['state'];
+		const names = [...new Set([...fromDeclaration, ...fromLegacy])];
+		PropertiesInjector.injectProperties(constructor, {state: true}, names);
 	}
 
 }
-
-type Writable<T> = {-readonly [P in keyof T]: T[P]}

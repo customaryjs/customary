@@ -5,6 +5,8 @@ import {CustomaryRegistry} from "#customary/registry/CustomaryRegistry.js";
 import {CustomaryLitElement} from "#customary/lit/CustomaryLitElement.js";
 import {AttributeProperties} from "#customary/attributes/AttributeProperties.js";
 import {StateProperties} from "#customary/state/StateProperties.js";
+import {PropertiesProperties} from "#customary/lit/properties/PropertiesProperties.js";
+import {LitElement} from "lit-for-customary";
 
 export class Customary {
 
@@ -44,8 +46,9 @@ export class Customary {
 
 		const definition = await new CustomaryDefine(options as CustomaryOptions<T>).define();
 
-		AttributeProperties.addProperties(constructor as typeof CustomaryLitElement, definition);
-		StateProperties.addProperties(constructor as typeof CustomaryLitElement, definition);
+		AttributeProperties.addProperties(constructor as typeof LitElement, definition);
+		StateProperties.addProperties(constructor as typeof LitElement, definition);
+		PropertiesProperties.addProperties(constructor as typeof LitElement, definition);
 
 		return await this.customaryRegistry.define(
 				name,
