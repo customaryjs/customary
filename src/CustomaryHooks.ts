@@ -13,6 +13,20 @@ export type CustomaryHooks<T extends HTMLElement> = {
 					string,
 					PropertyDeclaration
 			>;
+	changes?:
+			Array<
+					{
+						name: string,
+						willUpdate?: (el: T, a: any, z: any) => void;
+						firstUpdated?: (el: T, a: any, z: any) => void;
+						updated?: (el: T, a: any, z: any) => void;
+					}
+			>
+			|
+			Record<
+				string,
+				(el: T, a: any, z: any) => void
+			>;
 	externalLoader?: {
 		import_meta?: ImportMeta;
 	}

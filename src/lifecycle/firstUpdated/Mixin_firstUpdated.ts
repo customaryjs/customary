@@ -1,8 +1,8 @@
 import {LitElement} from 'lit';
 import {CustomaryLit} from "#customary/lit/CustomaryLit.js";
+import {PropertyValues} from "@lit/reactive-element";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
-type PropertyValues = Map<PropertyKey, unknown>;
 
 export function Mixin_firstUpdated
 		<T extends Constructor<LitElement>>(superClass: T): T {
@@ -11,8 +11,17 @@ export function Mixin_firstUpdated
 				protected override firstUpdated(changedProperties: PropertyValues) {
 					super.firstUpdated?.(changedProperties);
 
-					CustomaryLit.getCustomaryDefinition(this)
-							.declaration.hooks?.lifecycle?.firstUpdated?.(this, changedProperties);
+					const {lifecycle, changes} = CustomaryLit.getCustomaryDefinition(this)
+							.declaration.hooks ?? {};
+					lifecycle?.firstUpdated?.(this, changedProperties);
+					if (changes instanceof Array) {
+						for (const change of changes) {
+							const {name, firstUpdated} = change;
+							if (firstUpdated && changedProperties.has(name)) {
+								firstUpdated(this, (this as any)[name], changedProperties.get(name));
+							}
+						}
+					}
 				}
 			}
 			return Mixin_firstUpdated_Class;
