@@ -1,6 +1,6 @@
 import {LitElement} from 'lit';
-import {CustomaryLit} from "#customary/lit/CustomaryLit.js";
-import {html, map, choose, when} from "lit-for-customary";
+import {html, map, choose, when} from "#customary/lit";
+import {CustomaryRegistry} from "#customary/registry/CustomaryRegistry.js";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -9,7 +9,7 @@ export function Mixin_renderFromTemplate
 			class Mixin_renderFromTemplate_Class extends superClass {
 				// noinspection JSUnusedGlobalSymbols
 				protected override render(): unknown {
-					const definition = CustomaryLit.getCustomaryDefinition(this);
+					const definition = CustomaryRegistry.getCustomaryDefinition(this);
 
 					const element = this;
 					const htmlString = recode(definition.template.innerHTML);

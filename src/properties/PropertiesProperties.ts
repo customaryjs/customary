@@ -1,6 +1,6 @@
-import {LitElement} from "lit-for-customary";
+import {LitElement} from "#customary/lit";
 import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
-import {PropertiesInjector} from "#customary/lit/properties/PropertiesInjector.js";
+import {PropertiesInjector} from "#customary/properties/PropertiesInjector.js";
 import {PropertyDeclaration} from "@lit/reactive-element";
 
 export class PropertiesProperties

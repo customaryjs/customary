@@ -6,7 +6,7 @@
     "rootDir": "src",
     "paths": {
       "#customary/*": ["./src/*"],
-      "knockout/": ["./node_modules/knockout/build/types/knockout/"],
+      "#customary/lit": ["./src/lit/index.js"],
     },
     // ---- BEGIN lit decorators: @property @state @query
     // https://lit.dev/docs/components/decorators/#decorators-typescript

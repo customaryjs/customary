@@ -1,12 +1,12 @@
+import {LitElement} from "#customary/lit";
 import {CustomaryDetect} from "#customary/CustomaryDetect.js";
 import {CustomaryDefine} from "#customary/CustomaryDefine.js";
 import {CustomaryOptions} from "#customary/CustomaryOptions.js";
 import {CustomaryRegistry} from "#customary/registry/CustomaryRegistry.js";
-import {CustomaryLitElement} from "#customary/lit/CustomaryLitElement.js";
+import {CustomaryElement} from "#customary/CustomaryElement.js";
 import {AttributeProperties} from "#customary/attributes/AttributeProperties.js";
 import {StateProperties} from "#customary/state/StateProperties.js";
-import {PropertiesProperties} from "#customary/lit/properties/PropertiesProperties.js";
-import {LitElement} from "lit-for-customary";
+import {PropertiesProperties} from "#customary/properties/PropertiesProperties.js";
 
 export class Customary {
 
@@ -33,7 +33,7 @@ export class Customary {
 
 		const constructor: CustomElementConstructor = isComponent
 				? optionsOrConstructor
-				: class EphemeralCustomaryLitElement extends CustomaryLitElement {};
+				: class EphemeralCustomaryElement extends CustomaryElement {};
 
 		const options: Partial<CustomaryOptions<T>> = isComponent
 				? (constructor as any)?.customary as CustomaryOptions<T>

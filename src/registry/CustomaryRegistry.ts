@@ -46,4 +46,9 @@ export class CustomaryRegistry {
     private readonly map: Map<CustomElementConstructor, CustomaryDefinition<any>> = new Map();
 
     static readonly CustomaryRegistry_singleton: CustomaryRegistry = new CustomaryRegistry(customElements);
+
+    public static getCustomaryDefinition<T extends HTMLElement>(element: T): CustomaryDefinition<T> {
+        const customaryRegistry = CustomaryRegistry.CustomaryRegistry_singleton;
+        return customaryRegistry.get(element.constructor as CustomElementConstructor)!;
+    }
 }

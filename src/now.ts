@@ -1,3 +1,7 @@
-import {Customary} from "#customary/Customary.js";
+import {Customary} from "#customary/index.js";
 
-await Customary.detect();
+if (!(globalThis as any)[`customary-flag:detect-dont`]) {
+	await Customary.detect();
+}
+
+export * from '#customary/index.js';

@@ -1,5 +1,5 @@
 import {LitElement} from 'lit';
-import {CustomaryLit} from "#customary/lit/CustomaryLit.js";
+import {CustomaryRegistry} from "#customary/registry/CustomaryRegistry.js";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -9,7 +9,7 @@ export function Mixin_state
 		constructor(...args: any[]) {
 			super(args);
 
-			Object.assign(this, CustomaryLit.getCustomaryDefinition(this)
+			Object.assign(this, CustomaryRegistry.getCustomaryDefinition(this)
 					.declaration.state ?? {});
 		}
 

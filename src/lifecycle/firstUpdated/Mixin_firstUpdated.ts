@@ -1,6 +1,6 @@
 import {LitElement} from 'lit';
-import {CustomaryLit} from "#customary/lit/CustomaryLit.js";
 import {PropertyValues} from "@lit/reactive-element";
+import {CustomaryRegistry} from "#customary/registry/CustomaryRegistry.js";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -11,7 +11,7 @@ export function Mixin_firstUpdated
 				protected override firstUpdated(changedProperties: PropertyValues) {
 					super.firstUpdated?.(changedProperties);
 
-					const {lifecycle, changes} = CustomaryLit.getCustomaryDefinition(this)
+					const {lifecycle, changes} = CustomaryRegistry.getCustomaryDefinition(this)
 							.declaration.hooks ?? {};
 					lifecycle?.firstUpdated?.(this, changedProperties);
 					if (changes instanceof Array) {

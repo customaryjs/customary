@@ -1,5 +1,5 @@
-import {LitElement} from 'lit';
-import {CustomaryLit} from "#customary/lit/CustomaryLit.js";
+import {LitElement} from '#customary/lit';
+import {CustomaryRegistry} from "#customary/registry/CustomaryRegistry.js";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -10,7 +10,7 @@ export function Mixin_attributeChangedCallback
 		override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
 			super.attributeChangedCallback(name, oldValue, newValue);
 
-			CustomaryLit.getCustomaryDefinition(this)
+			CustomaryRegistry.getCustomaryDefinition(this)
 					.declaration.hooks?.lifecycle?.attributeChangedCallback
 					?.(this, name, oldValue, newValue);
 		}

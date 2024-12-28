@@ -1,5 +1,5 @@
 import {LitElement} from 'lit';
-import {CustomaryLit} from "#customary/lit/CustomaryLit.js";
+import {CustomaryRegistry} from "#customary/registry/CustomaryRegistry.js";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -10,89 +10,67 @@ export function Mixin_addEventHandlers
 				protected override updated(changedProperties: Map<string, any>) {
 					super.updated?.(changedProperties);
 
-					const eventHandlers = CustomaryLit.getCustomaryDefinition(this)
-							.declaration.hooks?.events;
-					if (!eventHandlers) return;
+					const hooks = CustomaryRegistry.getCustomaryDefinition(this)
+							.declaration.hooks;
+					if (!hooks?.events) return;
 
-					if (eventHandlers instanceof Array) {
-						addEventHandlersFromArray(this, eventHandlers);
+					if (hooks.events instanceof Array) {
+						for (const customaryEvent of hooks.events) {
+							const selector = customaryEvent.selector;
+							const type = customaryEvent.type;
+							const listener = customaryEvent.listener;
+							this.addEventHandler(selector, type, listener as any);
+						}
 					}
 					else {
-						addEventHandlersFromRecord(this, eventHandlers);
+						for (const [selector, listener] of Object.entries(hooks.events)) {
+							const type = undefined;
+							this.addEventHandler(selector, type, listener as any);
+						}
 					}
 				}
+
+				private addEventHandler(
+						selector: string | undefined,
+						type: string | undefined,
+						listener: (element: HTMLElement, event: Event) => void
+				) {
+					if (!selector) {
+						this.addCustomEventListener(this, type, listener);
+						return;
+					}
+
+					const parent: ParentNode = this.shadowRoot ?? this;
+					const elements: NodeListOf<Element> = parent.querySelectorAll(selector);
+					for (const element of elements) {
+						this.addCustomEventListener(element, type, listener);
+					}
+				}
+
+				private addCustomEventListener(
+						element: Element,
+						type: string | undefined,
+						listener: (element: HTMLElement, event: Event) => void
+				)
+				{
+					const tagName = element.tagName;
+					element.addEventListener(
+							type ??
+							getDefaultEventType(tagName) ??
+							(() => {
+								throw new Error(
+										`${this.tagName.toLowerCase()}: ${tagName} elements` +
+										' require you to provide an event type' +
+										' because Customary has not defined a default yet'
+								);
+							})(),
+							(event: Event) => listener(this, event)
+					);
+				}
+
 			}
 			return Mixin_addEventHandlers_Class;
 		}
-
-function addEventHandlersFromArray(
-		customElement: HTMLElement,
-		eventHandlers: Array<{
-			selector?: string;
-			type?: string;
-			listener: (element: HTMLElement, event: Event) => void;
-		}>
-) {
-	for (const customaryEvent of eventHandlers) {
-		const selector = customaryEvent.selector;
-		const type = customaryEvent.type;
-		const listener = customaryEvent.listener;
-		addEventHandler(customElement, selector, type, listener);
-	}
-}
-
-function addEventHandlersFromRecord(
-		customElement: HTMLElement,
-		eventHandlers: Record<
-				string,
-				(element: HTMLElement, event: Event) => void
-		>
-) {
-	for (const [selector, listener] of Object.entries(eventHandlers)) {
-		const type = undefined;
-		addEventHandler(customElement, selector, type, listener);
-	}
-}
-
-function addEventHandler(
-		customElement: HTMLElement,
-		selector: string | undefined,
-		type: string | undefined,
-		listener: (element: HTMLElement, event: Event) => void
-) {
-	if (!selector) {
-		addEventListener(customElement, customElement, type, listener);
-		return;
-	}
-
-	const parent: ParentNode = customElement.shadowRoot ?? customElement;
-	const elements: NodeListOf<Element> = parent.querySelectorAll(selector);
-	for (const element of elements) {
-		addEventListener(customElement, element, type, listener);
-	}
-}
-
-function addEventListener<T extends HTMLElement>(
-		customElement: T,
-		element: Element,
-		type: string | undefined,
-		listener: (element: T, event: Event) => void
-)
-{
-	const tagName = element.tagName;
-	element.addEventListener(
-			type ??
-			getDefaultEventType(tagName) ??
-			(() => {
-				throw new Error(
-						`${customElement.tagName.toLowerCase()}: ${tagName} elements` +
-						' require you to provide an event type' +
-						' because Customary has not defined a default yet'
-				);
-			})(),
-			(event: Event) => listener(customElement, event)
-	);
-}
 
 function getDefaultEventType(tagName: string) {
 	switch (tagName) {

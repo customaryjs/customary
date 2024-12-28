@@ -1,4 +1,4 @@
-import {LitElement} from "lit-for-customary";
+import {LitElement} from "#customary/lit";
 import {PropertyDeclaration, PropertyDeclarations} from "@lit/reactive-element";
 
 export class PropertiesInjector {

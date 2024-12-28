@@ -1,4 +1,4 @@
-import {LitElement} from "lit-for-customary";
+import {LitElement} from "#customary/lit";
 import {Mixin_addEventHandlers} from "#customary/events/Mixin_addEventHandlers.js";
 import {Mixin_adoptStyleSheet} from "#customary/style/Mixin_adoptStyleSheet.js";
 import {Mixin_attributeChangedCallback} from "#customary/attributes/Mixin_attributeChangedCallback.js";
@@ -11,7 +11,7 @@ import {Mixin_state} from "#customary/state/Mixin_state.js";
 import {Mixin_updated} from "#customary/lifecycle/updated/Mixin_updated.js";
 import {Mixin_willUpdate} from "#customary/lifecycle/willUpdate/Mixin_willUpdate.js";
 
-export class CustomaryLitElement
+export class CustomaryElement
 		extends
 				Mixin_addEventHandlers(
 				Mixin_adoptStyleSheet(

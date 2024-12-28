@@ -1,5 +1,5 @@
 import {LitElement} from 'lit';
-import {CustomaryLit} from "#customary/lit/CustomaryLit.js";
+import {CustomaryRegistry} from "#customary/registry/CustomaryRegistry.js";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -10,7 +10,7 @@ export function Mixin_connected
 				override connectedCallback() {
 					super.connectedCallback?.();
 
-					CustomaryLit.getCustomaryDefinition(this)
+					CustomaryRegistry.getCustomaryDefinition(this)
 							.declaration.hooks?.lifecycle?.connected?.(this);
 				}
 			}
