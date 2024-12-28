@@ -6,15 +6,15 @@ export class Directive_when {
 			const condition = tag.getAttribute('condition') ??
 					(()=>{throw Error('Attribute "condition" is required for "when--" markup')})();
 
-			const trueElements = [...tag.querySelectorAll(':scope > true')];
+			const trueElements = [...tag.querySelectorAll(':scope > true--')];
 			if (trueElements.length > 1) {
-				throw Error('Only one "true" is allowed for "when--" markup');
+				throw Error('Only one "true--" is allowed for "when--" markup');
 			}
 			const trueElement: Element | undefined = trueElements[0];
 
-			const falseElements = [...tag.querySelectorAll(':scope > false')];
+			const falseElements = [...tag.querySelectorAll(':scope > false--')];
 			if (falseElements.length > 1) {
-				throw Error('Only one "false" is allowed for "when--" markup');
+				throw Error('Only one "false--" is allowed for "when--" markup');
 			}
 			const falseElement: Element | undefined = falseElements[0];
 

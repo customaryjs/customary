@@ -5,7 +5,7 @@ export class Directive_choose {
 		for (const tag of tags) {
 			const value = tag.getAttribute('value') ??
 					(()=>{throw Error('Attribute "value" is required for "choose--" markup')})();
-			const cases = this.toCases([...tag.querySelectorAll(':scope > case')]);
+			const cases = this.toCases([...tag.querySelectorAll(':scope > case--')]);
 			const valueCases = cases.valueCases.join(',\n');
 			const defaultCase = cases.defaultCase ? `,\n${cases.defaultCase}` : '';
 			tag.outerHTML = `\${choose(${value},\n[${valueCases}]${defaultCase})}`;
@@ -17,13 +17,13 @@ export class Directive_choose {
 		defaultCase?: string
 	} {
 		if (cases.length === 0) {
-			throw Error('At least one "case" is required for "choose--" markup');
+			throw Error('At least one "case--" is required for "choose--" markup');
 		}
 
 		const defaultElements =
 				cases.filter(caseElement => !caseElement.hasAttribute('value'));
 		if (defaultElements.length > 1) {
-			throw Error('Only one default "case" is allowed for "choose--" markup');
+			throw Error('Only one default "case--" is allowed for "choose--" markup');
 		}
 		const defaultElement = defaultElements[0];
 		const defaultCase = `() => html\`${defaultElement?.innerHTML}\``;
