@@ -1,5 +1,4 @@
 import {FetchText} from "#customary/fetch/FetchText.js";
-import {NotFound404Error} from "#customary/fetch/NotFound404Error.js";
 
 interface CSSStyleSheetImporter {
     getCSSStyleSheet(location: string): Promise<CSSStyleSheet | undefined>;
@@ -32,28 +31,12 @@ export class ExternalLoader {
 
     async loadHtml(): Promise<string> {
         const location = this.resolveResourceLocation('html');
-        try {
-            return await this.fetchText.fetchText(location);
-        } catch (error) {
-            if (error instanceof NotFound404Error) {
-                // TODO re-wrap as an instructive error
-                throw error;
-            } else
-                throw error;
-        }
+        return await this.fetchText.fetchText(location);
     }
 
     async loadCssStyleSheet(): Promise<undefined | CSSStyleSheet> {
         const location = this.resolveResourceLocation('css');
-        try {
-            return await this.cssStyleSheetImporter.getCSSStyleSheet(location);
-        } catch (error) {
-            if (error instanceof NotFound404Error) {
-                // TODO re-wrap instructive error
-                return undefined;
-            }
-            throw error;
-        }
+        return await this.cssStyleSheetImporter.getCSSStyleSheet(location);
     }
 
     private resolveResourceLocation(

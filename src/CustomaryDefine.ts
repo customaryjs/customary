@@ -20,27 +20,20 @@ export class CustomaryDefine<T extends HTMLElement> {
 	}
 
 	private async buildCustomaryDefinition(): Promise<CustomaryDefinition<T>> {
-		const templateInDocument: HTMLTemplateElement | undefined =
-				findHTMLTemplateElementInDOMDocument(this.options.config.name);
+		const declaration: CustomaryDeclaration<T> = this.options;
 
-		const template: HTMLTemplateElement | undefined =
-				templateInDocument
-				?? await this.loadHTMLTemplateElementFromExternalHtml()
-				?? (()=>{throw new Error(
-						'template unresolvable from current page or external html')})();
+		const templateInDocument: HTMLTemplateElement | undefined =
+				findHTMLTemplateElementInDOMDocument(declaration.config.name);
+
+		const template: HTMLTemplateElement =
+				await this.resolveHTMLTemplateElement(templateInDocument);
 
 		const cssStyleSheet: CSSStyleSheet | undefined =
-				templateInDocument
-						? undefined
-						: await this.loadExternalCssStyleSheet();
+				await this.resolveCSSStyleSheet(templateInDocument, declaration);
 
-		if (template) {
-			Directive_choose.hydrate(template);
-			Directive_map.hydrate(template);
-			Directive_when.hydrate(template);
-		}
-
-		const declaration: CustomaryDeclaration<T> = this.options;
+		Directive_choose.hydrate(template);
+		Directive_map.hydrate(template);
+		Directive_when.hydrate(template);
 
 		const definition: CustomaryDefinition<T> = {
 			declaration,
@@ -51,12 +44,42 @@ export class CustomaryDefine<T extends HTMLElement> {
 		return prune(definition);
 	}
 
-	private async loadHTMLTemplateElementFromExternalHtml() {
-		return await this.toTemplate(await (await this.externalLoader).loadHtml());
+	private async resolveHTMLTemplateElement(
+			templateInDocument: HTMLTemplateElement | undefined
+	): Promise<HTMLTemplateElement> {
+		if (templateInDocument) return templateInDocument;
+		try {
+			return await this.toTemplate(await this.loadExternalHtml());
+		}
+		catch (error) {
+			throw new Error(
+					'template unresolvable from current page or external html',
+					{cause: error}
+			);
+		}
 	}
 
-	private async loadExternalCssStyleSheet() {
-		return await (await this.externalLoader).loadCssStyleSheet();
+	private async loadExternalHtml(): Promise<string> {
+		try {
+			return await (await this.externalLoader).loadHtml();
+		}
+		catch (error) {
+			throw new Error('External html file out of reach.', {cause: error});
+		}
+	}
+
+	private async resolveCSSStyleSheet(
+			templateInDocument: HTMLTemplateElement | undefined,
+			declaration: CustomaryDeclaration<T>
+	): Promise<undefined | CSSStyleSheet> {
+		if (templateInDocument) return undefined;
+		if (declaration.hooks?.externalLoader?.css_dont) return undefined;
+		try {
+			return await (await this.externalLoader).loadCssStyleSheet();
+		} catch (error) {
+			console.debug('External css file out of reach.', {cause: error});
+			return undefined;
+		}
 	}
 
 	private async adopt_font_cssStyleSheets() {
@@ -71,8 +94,7 @@ export class CustomaryDefine<T extends HTMLElement> {
 		return await (await this.cssStyleSheetAdopter).adoptCSSStylesheets(...locations);
 	}
 
-	private async toTemplate(htmlString?: string) {
-		if (!htmlString) return undefined;
+	private async toTemplate(htmlString: string): Promise<HTMLTemplateElement> {
 		const tile: string = await this.getTile(htmlString);
 		const template: HTMLTemplateElement = document.createElement('template');
 		template.innerHTML = tile;
