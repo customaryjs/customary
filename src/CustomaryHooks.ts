@@ -29,6 +29,7 @@ export type CustomaryHooks<T extends HTMLElement> = {
 			>;
 	externalLoader?: {
 		import_meta?: ImportMeta;
+		css_dont?: boolean;
 	}
 	events?:
 			Array<
