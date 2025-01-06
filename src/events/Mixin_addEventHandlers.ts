@@ -7,8 +7,8 @@ export function Mixin_addEventHandlers
 		<T extends Constructor<LitElement>>(superClass: T): T {
 			class Mixin_addEventHandlers_Class extends superClass {
 				// noinspection JSUnusedGlobalSymbols
-				protected override updated(changedProperties: Map<string, any>) {
-					super.updated?.(changedProperties);
+				protected override firstUpdated(changedProperties: Map<string, any>) {
+					super.firstUpdated?.(changedProperties);
 
 					const hooks = CustomaryRegistry.getCustomaryDefinition(this)
 							.declaration.hooks;
@@ -78,8 +78,12 @@ function getDefaultEventType(tagName: string) {
 			return 'click';
 		case 'FORM':
 			return 'submit';
+		case 'INPUT':
+			return 'input';
 		case 'TABLE':
 			return 'click';
+		case 'TEXTAREA':
+			return 'input';
 		default:
 			return undefined;
 	}
