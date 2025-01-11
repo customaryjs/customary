@@ -1,7 +1,7 @@
 import {LitElement} from "#customary/lit";
 import {CustomaryDetect} from "#customary/CustomaryDetect.js";
 import {CustomaryDefine} from "#customary/CustomaryDefine.js";
-import {CustomaryOptions} from "#customary/CustomaryOptions.js";
+import {CustomaryDeclaration, CustomaryOptions} from "#customary/CustomaryOptions.js";
 import {CustomaryRegistry} from "#customary/registry/CustomaryRegistry.js";
 import {CustomaryElement} from "#customary/CustomaryElement.js";
 import {AttributeProperties} from "#customary/attributes/AttributeProperties.js";
@@ -35,16 +35,17 @@ export class Customary {
 				? optionsOrConstructor
 				: class EphemeralCustomaryElement extends CustomaryElement {};
 
-		const options: Partial<CustomaryOptions<T>> = isComponent
-				? (constructor as any)?.customary as CustomaryOptions<T>
+		const declaration: Partial<CustomaryDeclaration<T>> = isComponent
+				? (constructor as any)?.customary as CustomaryDeclaration<T>
 				: optionsOrConstructor;
 
-		const name = options?.config?.name ??
+		const name = declaration?.name ??
 				(()=>{
 					throw new Error('A name must be provided to define a custom element.')
 				})();
 
-		const definition = await new CustomaryDefine(options as CustomaryOptions<T>).define();
+		const definition =
+				await new CustomaryDefine(name, declaration as CustomaryDeclaration<T>).define();
 
 		AttributeProperties.addProperties(constructor as typeof LitElement, definition);
 		StateProperties.addProperties(constructor as typeof LitElement, definition);
@@ -54,7 +55,7 @@ export class Customary {
 				name,
 				constructor,
 				definition,
-				{extends: options?.config?.define?.extends}
+				{extends: declaration?.config?.define?.extends}
 		);
 	}
 

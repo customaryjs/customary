@@ -8,7 +8,7 @@ export class StateProperties {
 			constructor: typeof LitElement,
 			definition: CustomaryDefinition<HTMLElement>
 	) {
-		const fromDeclaration = definition.declaration.config.state ?? [];
+		const fromDeclaration = definition.declaration.config?.state ?? [];
 		const fromLegacy = ['state'];
 		const names = [...new Set([...fromDeclaration, ...fromLegacy])];
 		PropertiesInjector.injectProperties(constructor, {state: true}, names);

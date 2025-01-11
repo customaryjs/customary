@@ -1,6 +1,6 @@
 import {CSSStyleSheetAdopter} from "#customary/cssstylesheet/CSSStyleSheetAdopter.js";
 import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
-import {CustomaryDeclaration, CustomaryOptions} from "#customary/CustomaryOptions.js";
+import {CustomaryDeclaration} from "#customary/CustomaryOptions.js";
 import {CustomaryConfig} from "#customary/CustomaryConfig.js";
 import {ExternalLoader} from "#customary/external/ExternalLoader.js";
 import {FetchText, FetchText_DOM_singleton} from "#customary/fetch/FetchText.js";
@@ -20,10 +20,10 @@ export class CustomaryDefine<T extends HTMLElement> {
 	}
 
 	private async buildCustomaryDefinition(): Promise<CustomaryDefinition<T>> {
-		const declaration: CustomaryDeclaration<T> = this.options;
+		const declaration: CustomaryDeclaration<T> = this.declaration;
 
 		const templateInDocument: HTMLTemplateElement | undefined =
-				findHTMLTemplateElementInDOMDocument(declaration.config.name);
+				findHTMLTemplateElementInDOMDocument(this.name);
 
 		const template: HTMLTemplateElement =
 				await this.resolveHTMLTemplateElement(templateInDocument);
@@ -85,8 +85,8 @@ export class CustomaryDefine<T extends HTMLElement> {
 	private async adopt_font_cssStyleSheets() {
 		const locations = ((a: string[]) => a.length > 0 ? a : undefined)(
 				[
-					this.options.config.define?.fontLocation,
-					...(this.options.config.define?.fontLocations ?? []),
+					this.declaration.config?.define?.fontLocation,
+					...(this.declaration.config?.define?.fontLocations ?? []),
 				]
 						.filter(location => location != undefined)
 		);
@@ -102,10 +102,10 @@ export class CustomaryDefine<T extends HTMLElement> {
 	}
 
 	private async getTile(tileset: string) {
-		if (this.options.config.define?.detileDont) {
+		if (this.declaration.config?.define?.detileDont) {
 			return tileset;
 		}
-		const delimiters = ['customary', this.options.config.name].map(s => `<!--${s}-->`);
+		const delimiters = ['customary', this.name].map(s => `<!--${s}-->`);
 		for (const delimiter of delimiters) {
 			const tile: string | undefined = this.detile(tileset, delimiter);
 			if (tile) {
@@ -130,7 +130,8 @@ export class CustomaryDefine<T extends HTMLElement> {
 	}
 
 	constructor(
-			private readonly options: CustomaryOptions<any>
+			private readonly name: string,
+			private readonly declaration: CustomaryDeclaration<any>
 	) {}
 
 	private get cssStyleSheetImporter(): Promise<CSSStyleSheetImporter> {
@@ -147,19 +148,19 @@ export class CustomaryDefine<T extends HTMLElement> {
 
 	private get externalLoader(): Promise<ExternalLoader> {
 		return this._externalLoader ??= loadTilesetLoader(
-				this.getResourceLocationResolution(this.options.config),
+				this.getResourceLocationResolution(this.declaration.config),
 				this.fetchText,
 				this.cssStyleSheetImporter,
 				{
-					name: this.options.config.name,
+					name: this.name,
 					import_meta: this.get_import_meta(),
 				}
 		);
 	}
 
-	private getResourceLocationResolution(config: CustomaryConfig): ResourceLocationResolution | undefined {
-		return config.define?.resourceLocationResolution ??
-		config.preset === "recommended" ?
+	private getResourceLocationResolution(config?: CustomaryConfig): ResourceLocationResolution | undefined {
+		return config?.define?.resourceLocationResolution ??
+		config?.preset === "recommended" ?
 				{
 					kind: "relative",
 					pathPrefix: '../',
@@ -168,8 +169,8 @@ export class CustomaryDefine<T extends HTMLElement> {
 	}
 
 	private get_import_meta() {
-		return this.options.hooks?.externalLoader?.import_meta ?? (() => {
-			throw new Error(`${this.options.config.name}: Customary needs "import.meta" if the custom element template ` +
+		return this.declaration.hooks?.externalLoader?.import_meta ?? (() => {
+			throw new Error(`${this.name}: Customary needs "import.meta" if the custom element template ` +
 					'is to be loaded from an external file. ' +
 					'(document did not have a named template element, and an html string was not provided.)')
 		})();

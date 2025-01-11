@@ -1,4 +1,4 @@
-import {CustomaryOptions} from "#customary/CustomaryOptions";
+import {CustomaryDeclaration} from "#customary/CustomaryOptions";
 
 export class CustomaryDetect {
 	constructor(
@@ -6,8 +6,8 @@ export class CustomaryDetect {
 			private readonly globalThis: any
 	) {}
 
-	detect(): CustomaryOptions<any>[] {
-		return this.detectElementNames().map(name => this.detectOptions(name));
+	detect(): CustomaryDeclaration<any>[] {
+		return this.detectElementNames().map(name => this.detectDeclaration(name));
 	}
 
 	private detectElementNames(): string[] {
@@ -23,21 +23,22 @@ export class CustomaryDetect {
 		return [...new Set([...fromDocument, ...fromGlobalScope])];
 	}
 
-	private detectOptions(name: string): CustomaryOptions<HTMLElement> {
-		const optionsFromGlobalScope: CustomaryOptions<any> = this.globalThis[`customary:${name}`];
+	private detectDeclaration(name: string): CustomaryDeclaration<any> {
+		const fromGlobalScope: Partial<CustomaryDeclaration<any>> = this.globalThis[`customary:${name}`];
 
-		const config = {...optionsFromGlobalScope?.config, name};
-		const hooks = optionsFromGlobalScope?.hooks;
-		const state = optionsFromGlobalScope?.state ?? this.detectState(name);
+		const config = fromGlobalScope?.config;
+		const hooks = fromGlobalScope?.hooks;
+		const values = fromGlobalScope?.values ?? this.detectValues(name);
 
 		return {
-			config,
+			name,
+			...(config ? {config} : {}),
 			...(hooks ? {hooks} : {}),
-			...(state ? {state} : {}),
+			...(values ? {values} : {}),
 		};
 	}
 
-	private detectState(name: string): Record<string, object | object[]> | undefined {
+	private detectValues(name: string): Record<string, object | object[]> | undefined {
 		const elements = this.document.querySelectorAll(
 				`script[type="application/json"][data-customary-name='${name}']`
 		);

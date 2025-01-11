@@ -8,7 +8,7 @@ export class AttributeProperties {
 			constructor: typeof LitElement,
 			definition: CustomaryDefinition<HTMLElement>
 	) {
-		const fromDeclaration = definition.declaration.config.attributes ?? [];
+		const fromDeclaration = definition.declaration.config?.attributes ?? [];
 		const fromTemplate =
 				definition.template.getAttribute('data-customary-attributes')?.
 				split(',').map(s => s.trim()) ?? [];
