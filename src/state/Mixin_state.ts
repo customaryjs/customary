@@ -9,8 +9,11 @@ export function Mixin_state
 		constructor(...args: any[]) {
 			super(args);
 
-			Object.assign(this, CustomaryRegistry.getCustomaryDefinition(this)
-					.declaration.state ?? {});
+			Object.assign(
+					this,
+					CustomaryRegistry.getCustomaryDefinition(this)
+						.declaration.values ?? {}
+			);
 		}
 
 		// noinspection JSUnusedGlobalSymbols

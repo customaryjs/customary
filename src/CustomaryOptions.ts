@@ -5,7 +5,7 @@ export type CustomaryOptions<T extends HTMLElement> = {
     name?: string;
     config?: CustomaryConfig;
     hooks?: CustomaryHooks<T>;
-    state?: Record<string, object | object[]>;
+    values?: Record<string, any>;
 };
 
 export type CustomaryDeclaration<T extends HTMLElement> = CustomaryOptions<T>;

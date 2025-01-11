@@ -48,7 +48,8 @@ export class CustomaryDetect {
 		const result: Record<string, object | object[]> = {};
 		for (const element of elements) {
 			if (element.textContent) {
-				const key = element.getAttribute('data-customary-state') ?? 'state';
+				// TODO Require a key and retire default 'state'
+				const key = element.getAttribute('data-customary-value') ?? 'state';
 				result[key] = JSON.parse(element.textContent);
 			}
 		}
