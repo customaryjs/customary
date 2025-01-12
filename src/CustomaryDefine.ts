@@ -159,13 +159,18 @@ export class CustomaryDefine<T extends HTMLElement> {
 	}
 
 	private getResourceLocationResolution(config?: CustomaryConfig): ResourceLocationResolution | undefined {
-		return config?.define?.resourceLocationResolution ??
-		config?.preset === "recommended" ?
-				{
-					kind: "relative",
-					pathPrefix: '../',
-				}
-				: undefined;
+		return config?.define?.resourceLocationResolution
+			??
+				(
+						config?.preset === "recommended"
+								?
+									{
+										kind: "relative",
+										pathPrefix: '../',
+									}
+								:
+									undefined
+				);
 	}
 
 	private get_import_meta() {
