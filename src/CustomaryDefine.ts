@@ -1,6 +1,6 @@
 import {CSSStyleSheetAdopter} from "#customary/cssstylesheet/CSSStyleSheetAdopter.js";
 import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
-import {CustomaryDeclaration} from "#customary/CustomaryOptions.js";
+import {CustomaryDeclaration} from "#customary/CustomaryDeclaration";
 import {CustomaryConfig} from "#customary/CustomaryConfig.js";
 import {ExternalLoader} from "#customary/external/ExternalLoader.js";
 import {FetchText, FetchText_DOM_singleton} from "#customary/fetch/FetchText.js";

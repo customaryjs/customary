@@ -1,7 +1,7 @@
 import {LitElement} from "#customary/lit";
 import {CustomaryDetect} from "#customary/CustomaryDetect.js";
 import {CustomaryDefine} from "#customary/CustomaryDefine.js";
-import {CustomaryDeclaration, CustomaryOptions} from "#customary/CustomaryOptions.js";
+import {CustomaryDeclaration} from "#customary/CustomaryDeclaration.js";
 import {CustomaryRegistry} from "#customary/registry/CustomaryRegistry.js";
 import {CustomaryElement} from "#customary/CustomaryElement.js";
 import {AttributeProperties} from "#customary/attributes/AttributeProperties.js";
@@ -19,25 +19,25 @@ export class Customary {
 	}
 
 	static async define<T extends HTMLElement>(
-			options: Partial<CustomaryOptions<T>>
+			declaration: Partial<CustomaryDeclaration<T>>
 	): Promise<CustomElementConstructor>
 	// noinspection JSUnusedGlobalSymbols
 	static async define(
 			constructor: CustomElementConstructor
 	): Promise<CustomElementConstructor>
 	static async define<T extends HTMLElement>(
-			optionsOrConstructor: Partial<CustomaryOptions<T>> | CustomElementConstructor,
+			declarationOrConstructor: Partial<CustomaryDeclaration<T>> | CustomElementConstructor,
 	): Promise<CustomElementConstructor>
 	{
-		const isComponent = typeof optionsOrConstructor === 'function';
+		const isComponent = typeof declarationOrConstructor === 'function';
 
 		const constructor: CustomElementConstructor = isComponent
-				? optionsOrConstructor
+				? declarationOrConstructor
 				: class EphemeralCustomaryElement extends CustomaryElement {};
 
 		const declaration: Partial<CustomaryDeclaration<T>> = isComponent
 				? (constructor as any)?.customary as CustomaryDeclaration<T>
-				: optionsOrConstructor;
+				: declarationOrConstructor;
 
 		const name = declaration?.name ??
 				(()=>{
@@ -63,4 +63,4 @@ export class Customary {
 
 }
 
-export {CustomaryOptions};
+export {CustomaryDeclaration};

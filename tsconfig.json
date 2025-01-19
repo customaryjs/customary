@@ -4,7 +4,7 @@
     "rootDir": "src",
     "paths": {
       "#customary/*": ["./src/*"],
-      "#customary/lit": ["./src/lit/index.js"],
+      "#customary/lit": ["./src/lit/"],
     },
     // ---- BEGIN lit decorators: @property @state @query
     // https://lit.dev/docs/components/decorators/#decorators-typescript

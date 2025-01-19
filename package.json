@@ -32,7 +32,7 @@
       "dependencies": ["clean"]
     },
     "clean:dist": {"command": "rimraf .dist .parcel-cache"},
-    "clean:src": {"command": "rimraf --glob src/**/*.{d.ts,js.map,js}"},
+    "clean:src": {"command": "rimraf --glob src/**/*.{d.ts,js.map,js} --glob tsconfig.tsbuildinfo"},
     "dist:*": {
       "dependencies": ["dist:bundled", "dist:development"]
     },

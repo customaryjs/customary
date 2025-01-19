@@ -1,4 +1,4 @@
-import {CustomaryDeclaration} from "#customary/CustomaryOptions";
+import {CustomaryDeclaration} from "#customary/CustomaryDeclaration";
 
 export class CustomaryDetect {
 	constructor(
