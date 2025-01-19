@@ -1,18 +1,38 @@
-export class Directive_choose {
+import {set_outerHTML} from "./set_outerHTML.js";
 
-	static hydrate(template: HTMLTemplateElement) {
-		const tags = template.content.querySelectorAll('choose--');
-		for (const tag of tags) {
+export class Directive_choose
+{
+	static hydrate(template: HTMLTemplateElement)
+	{
+		this.hydrateTree(template.content, template);
+	}
+
+	private static hydrateTree(node: ParentNode, template: HTMLTemplateElement)
+	{
+		while (true) {
+			const tag = node.querySelector('choose--');
+			if (!tag) return;
+
+			this.hydrateTree(tag, template);
+
 			const value = tag.getAttribute('value') ??
-					(()=>{throw Error('Attribute "value" is required for "choose--" markup')})();
+					(() => {
+						throw Error('Attribute "value" is required for "choose--" markup')
+					})();
+
 			const cases = this.toCases([...tag.querySelectorAll(':scope > case--')]);
+
 			const valueCases = cases.valueCases.join(',\n');
+
 			const defaultCase = cases.defaultCase ? `,\n${cases.defaultCase}` : '';
-			tag.outerHTML = `\${choose(${value},\n[${valueCases}]${defaultCase})}`;
+
+			const directive = `\${choose(${value},\n[${valueCases}]${defaultCase})}`;
+
+			set_outerHTML(tag, directive, template);
 		}
 	}
 
-	static toCases(cases: Element[]): {
+	private static toCases(cases: Element[]): {
 		valueCases: string[];
 		defaultCase?: string
 	} {

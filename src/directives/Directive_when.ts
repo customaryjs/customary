@@ -1,10 +1,23 @@
-export class Directive_when {
+import {set_outerHTML} from "./set_outerHTML.js";
 
+export class Directive_when
+{
 	static hydrate(template: HTMLTemplateElement) {
-		const tags = template.content.querySelectorAll('when--');
-		for (const tag of tags) {
+		this.hydrateTree(template.content, template);
+	}
+
+	private static hydrateTree(node: ParentNode, template: HTMLTemplateElement)
+	{
+		while (true) {
+			const tag = node.querySelector('when--');
+			if (!tag) return;
+
+			this.hydrateTree(tag, template);
+
 			const condition = tag.getAttribute('condition') ??
-					(()=>{throw Error('Attribute "condition" is required for "when--" markup')})();
+					(()=>{
+						throw Error('Attribute "condition" is required for "when--" markup')
+					})();
 
 			const trueElements = [...tag.querySelectorAll(':scope > true--')];
 			if (trueElements.length > 1) {
@@ -23,10 +36,12 @@ export class Directive_when {
 			}
 
 			const trueCase = `() => html\`${trueElement?.innerHTML ?? tag.innerHTML}\``;
+
 			const falseCase = falseElement ? `, () => html\`${falseElement.innerHTML}\`` : '';
 
-			tag.outerHTML = `\${when(${condition}, ${trueCase}${falseCase})}`;
+			const directive = `\${when(${condition}, ${trueCase}${falseCase})}`;
+
+			set_outerHTML(tag, directive, template);
 		}
 	}
-
 }
