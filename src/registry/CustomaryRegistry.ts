@@ -1,6 +1,5 @@
 import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
 import {dom_ElementDefinitionOptions} from "#customary/dom/dom_ElementDefinitionOptions.js";
-import {get_dom_ElementDefinitionOptions} from "#customary/dom/get_dom_ElementDefinitionOptions.js";
 
 export class CustomaryRegistry {
     constructor(private readonly customElementRegistry: CustomElementRegistry) {}
@@ -9,10 +8,11 @@ export class CustomaryRegistry {
         name: string,
         constructor: CustomElementConstructor,
         definition: CustomaryDefinition<T>,
-        dom_ElementDefinitionOptions: dom_ElementDefinitionOptions = {}
     ): Promise<CustomElementConstructor> {
         this.register(constructor, definition);
-        return await this.defineOne(name, constructor, dom_ElementDefinitionOptions);
+        // FIXME register - define - detect
+        return await this.defineOne(
+            name, constructor, definition.declaration?.hooks?.dom?.define?.options);
     }
 
     register(
@@ -25,13 +25,9 @@ export class CustomaryRegistry {
     private async defineOne(
         name: string,
         constructor: CustomElementConstructor,
-        dom_ElementDefinitionOptions: ElementDefinitionOptions
-    ) {
-        this.customElementRegistry.define(
-            name,
-            constructor,
-            get_dom_ElementDefinitionOptions(dom_ElementDefinitionOptions, constructor),
-        );
+        options?: dom_ElementDefinitionOptions
+    ): Promise<CustomElementConstructor> {
+        this.customElementRegistry.define(name, constructor, options);
         return await this.customElementRegistry.whenDefined(name);
     }
 

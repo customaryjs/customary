@@ -1,4 +1,5 @@
 import {PropertyDeclaration} from "@lit/reactive-element";
+import {dom_ElementDefinitionOptions} from "#customary/dom/dom_ElementDefinitionOptions";
 
 export type CustomaryHooks<T extends HTMLElement> = {
 	properties?:
@@ -50,10 +51,15 @@ export type CustomaryHooks<T extends HTMLElement> = {
 		updated?: (el: T, changedProperties: PropertyValues) => void;
 		connected?: (el: T) => void;
 		disconnected?: (el: T) => void;
-		attributeChangedCallback?: (el: T, name: string, oldValue: string | null, newValue: string | null) => void,
 	}
 	slots?: {
 		slotchange?: (el: T, event?: Event) => void;
+	}
+	dom?: {
+		define?: {
+			options?: dom_ElementDefinitionOptions,
+		}
+		attributeChangedCallback?: (el: T, name: string, oldValue: string | null, newValue: string | null) => void;
 	}
 }
 

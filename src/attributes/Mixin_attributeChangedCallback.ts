@@ -11,7 +11,7 @@ export function Mixin_attributeChangedCallback
 			super.attributeChangedCallback(name, oldValue, newValue);
 
 			CustomaryRegistry.getCustomaryDefinition(this)
-					.declaration.hooks?.lifecycle?.attributeChangedCallback
+					.declaration.hooks?.dom?.attributeChangedCallback
 					?.(this, name, oldValue, newValue);
 		}
 	}

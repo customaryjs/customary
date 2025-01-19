@@ -5,9 +5,9 @@ import {PropertyDeclaration} from "@lit/reactive-element";
 
 export class PropertiesProperties
 {
-	static addProperties(
+	static addProperties<T extends HTMLElement>(
 			constructor: typeof LitElement,
-			definition: CustomaryDefinition<HTMLElement>
+			definition: CustomaryDefinition<T>
 	) {
 		const hooks = definition.declaration.hooks?.properties;
 		const hooksArray: Attrib[] = hooks instanceof Array ? hooks as Attrib[] : [];

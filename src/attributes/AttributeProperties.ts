@@ -4,9 +4,9 @@ import {PropertiesInjector} from "#customary/properties/PropertiesInjector.js";
 
 export class AttributeProperties {
 
-	static addProperties(
+	static addProperties<T extends HTMLElement>(
 			constructor: typeof LitElement,
-			definition: CustomaryDefinition<HTMLElement>
+			definition: CustomaryDefinition<T>
 	) {
 		const fromDeclaration = definition.declaration.config?.attributes ?? [];
 		const fromTemplate =
