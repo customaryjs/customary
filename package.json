@@ -25,14 +25,13 @@
       "service": true
     },
     "clean": {
-      "dependencies": ["clean:dist", "clean:compile", "clean:src"]
+      "dependencies": ["clean:dist", "clean:src"]
     },
     "compile-from-scratch": {
       "command": "npm run compile",
       "dependencies": ["clean"]
     },
     "clean:dist": {"command": "rimraf .dist .parcel-cache"},
-    "clean:compile": {"command": "rimraf web/_script"},
     "clean:src": {"command": "rimraf --glob src/**/*.{d.ts,js.map,js}"},
     "dist:*": {
       "dependencies": ["dist:bundled", "dist:development"]

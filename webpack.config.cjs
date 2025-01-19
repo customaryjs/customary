@@ -7,22 +7,17 @@ module.exports = {
         new CopyPlugin({
             patterns: [
                 {
-                    from: 'web/',
-                    to: 'development/',
+                    // we copy .ts files too because browsers can step debug them
+                    from: 'src/',
                     globOptions: {
                         ignore: ["**/tsconfig.tsbuildinfo"]
                     }
                 },
-                {
-                    // we copy src/*.ts files too because browsers can step debug them
-                    from: 'src/',
-                    to: 'development/src',
-                }
             ]
         }),
         new RemovePlugin({
            after: {
-               root: '.dist',
+               root: '.dist/development',
                include: [
                    '__JUST_HERE_BECAUSE_CANT_SKIP_WEBPACK_ENTRY.js',
                ]
@@ -32,7 +27,7 @@ module.exports = {
     mode: "none",
     entry: './webpack-entry-SKIP.json',
     output: {
-        path: path.resolve(__dirname, '.dist'),
+        path: path.resolve(__dirname, '.dist/development'),
         filename: '__JUST_HERE_BECAUSE_CANT_SKIP_WEBPACK_ENTRY.js',
     }
 }

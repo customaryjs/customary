@@ -1,8 +1,6 @@
 {
   "include": ["src/**/*"],
   "compilerOptions": {
-    "declaration": true,
-    "outDir": "web/_script",
     "rootDir": "src",
     "paths": {
       "#customary/*": ["./src/*"],
