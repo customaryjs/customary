@@ -4,49 +4,54 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "// ---- public ---- //": "//",
+    "// ---- make ---- //": "//",
     "dist": "wireit",
-    "dev": "wireit",
     "clean": "wireit",
-    "// ---- private ---- //": "//",
+    "// ---- dev ---- //": "//",
+    "dev": "wireit",
+    "compile:watch": "wireit",
+    "// ---- command ---- //": "//",
     "dist:*": "wireit",
-    "dist:bundled": "wireit",
-    "dist:development": "wireit",
-    "compile-watch": "wireit",
     "compile": "wireit"
   },
   "wireit": {
     "dist": {
       "command": "npm run dist:*",
-      "dependencies": ["compile-from-scratch"]
+      "dependencies": ["build"]
     },
-    "dev": {
-      "command": "npm run compile-watch",
-      "service": true
+    "dist:*": {
+      "dependencies": ["dist:bundles", "dist:library"]
+    },
+    "dist:bundles": {
+      "help:command": "https://github.com/parcel-bundler/parcel/issues/2540#issuecomment-454172473",
+      "command": "parcel build --log-level=info"
+    },
+    "dist:library": {
+      "command": "npx webpack"
+    },
+    "build": {
+      "command": "npm run compile",
+      "dependencies": ["clean"]
+    },
+    "compile": {
+      "command": "tsc --build --pretty --verbose"
     },
     "clean": {
       "dependencies": ["clean:dist", "clean:src"]
     },
-    "compile-from-scratch": {
-      "command": "npm run compile",
-      "dependencies": ["clean"]
+    "clean:dist": {
+      "command": "rimraf .dist .parcel-cache"
     },
-    "clean:dist": {"command": "rimraf .dist .parcel-cache"},
-    "clean:src": {"command": "rimraf --glob src/**/*.{d.ts,js.map,js} --glob tsconfig.tsbuildinfo"},
-    "dist:*": {
-      "dependencies": ["dist:bundled", "dist:development"]
+    "clean:src": {
+      "command": "rimraf --glob src/**/*.{d.ts,js.map,js} --glob tsconfig.tsbuildinfo"
     },
-    "dist:bundled": {
-      "help:command": "https://github.com/parcel-bundler/parcel/issues/2540#issuecomment-454172473",
-      "command": "parcel build --log-level=info"
-    },
-    "dist:development": {"command": "npx webpack"},
-    "compile-watch": {
-      "command": "tsc --build --pretty --verbose --watch",
+    "dev": {
+      "command": "npm run compile:watch",
       "service": true
     },
-    "compile": {
-      "command": "tsc --build --pretty --verbose"
+    "compile:watch": {
+      "command": "tsc --build --pretty --verbose --watch",
+      "service": true
     }
   },
   "dependencies": {
@@ -72,10 +77,10 @@
     "#customary/lit": "./src/lit/index.ts"
   },
   "help:main": "https://parceljs.org/features/targets/#library-targets",
-  "main": ".dist/bundled/customary.mjs",
-  "target-customary-library": ".dist/bundled/customary-library.mjs",
+  "target:bundle:customary.mjs": ".dist/bundled/customary.mjs",
+  "target:bundle:customary-library.mjs": ".dist/bundled/customary-library.mjs",
   "targets": {
-    "main": {
+    "target:bundle:customary.mjs": {
       "source": "./src/now.ts",
       "context": "browser",
       "isLibrary": true,
@@ -90,7 +95,7 @@
         "inline": true
       }
     },
-    "target-customary-library": {
+    "target:bundle:customary-library.mjs": {
       "source": "./src/index.ts",
       "context": "browser",
       "isLibrary": true,
