@@ -1,7 +1,6 @@
 import {CSSStyleSheetAdopter} from "#customary/cssstylesheet/CSSStyleSheetAdopter.js";
 import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
 import {CustomaryDeclaration} from "#customary/CustomaryDeclaration";
-import {CustomaryConfig} from "#customary/CustomaryConfig.js";
 import {ExternalLoader} from "#customary/external/ExternalLoader.js";
 import {FetchText, FetchText_DOM_singleton} from "#customary/fetch/FetchText.js";
 import {CSSStyleSheetImporter} from "#customary/cssstylesheet/CSSStyleSheetImporter.js";
@@ -148,7 +147,6 @@ export class CustomaryDefine<T extends HTMLElement> {
 
 	private get externalLoader(): Promise<ExternalLoader> {
 		return this._externalLoader ??= loadTilesetLoader(
-				this.getResourceLocationResolution(this.declaration.config),
 				this.fetchText,
 				this.cssStyleSheetImporter,
 				{
@@ -156,21 +154,6 @@ export class CustomaryDefine<T extends HTMLElement> {
 					import_meta: this.get_import_meta(),
 				}
 		);
-	}
-
-	private getResourceLocationResolution(config?: CustomaryConfig): ResourceLocationResolution | undefined {
-		return config?.define?.resourceLocationResolution
-			??
-				(
-						config?.preset === "recommended"
-								?
-									{
-										kind: "relative",
-										pathPrefix: '../',
-									}
-								:
-									undefined
-				);
 	}
 
 	private get_import_meta() {
@@ -199,15 +182,7 @@ async function loadCssStyleSheetImporter(fetchText: Promise<FetchText>): Promise
 	return new CSSStyleSheetImporter(await fetchText);
 }
 
-type ResourceLocationResolution = {
-	kind: 'flat';
-} | {
-	kind: 'relative';
-	pathPrefix: string;
-};
-
 async function loadTilesetLoader(
-		resourceLocationResolution: ResourceLocationResolution | undefined,
 		fetchText: Promise<FetchText>,
 		cssStyleSheetImporter: Promise<CSSStyleSheetImporter>,
 		options: {
@@ -216,7 +191,6 @@ async function loadTilesetLoader(
 		}
 ): Promise<ExternalLoader> {
 	return new ExternalLoader(
-			resourceLocationResolution,
 			await fetchText,
 			await cssStyleSheetImporter,
 			options
