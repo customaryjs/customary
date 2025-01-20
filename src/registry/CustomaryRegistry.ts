@@ -1,50 +1,88 @@
-import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
-import {dom_ElementDefinitionOptions} from "#customary/dom/dom_ElementDefinitionOptions.js";
+import {CustomaryDefinition, hasDefinition, setDefinition} from "#customary/CustomaryDefinition.js";
+import {CustomaryDeclaration} from "#customary/CustomaryDeclaration.js";
+import {CustomaryDefine} from "#customary/CustomaryDefine.js";
 
-export class CustomaryRegistry {
-    constructor(private readonly customElementRegistry: CustomElementRegistry) {}
+const WAIT_TO_DEFINE_EVERYTHING_IN_THE_END = false;
 
-    async define<T extends HTMLElement>(
-        name: string,
+export class CustomaryRegistry
+{
+    static singleton(): CustomaryRegistry {
+        return CustomaryRegistry.CustomaryRegistry_singleton
+    }
+
+    async declare(
         constructor: CustomElementConstructor,
-        definition: CustomaryDefinition<T>,
-    ): Promise<CustomElementConstructor> {
-        this.register(constructor, definition);
-        // FIXME register - define - detect
-        return await this.defineOne(
-            name, constructor, definition.declaration?.hooks?.dom?.define?.options);
+        declaration: CustomaryDeclaration<any>
+    ): Promise<void> {
+        if (!declaration.name) {
+            throw new Error('A name must be provided to define a custom element.');
+        }
+
+        if (!WAIT_TO_DEFINE_EVERYTHING_IN_THE_END) {
+            await this.define(constructor, declaration);
+            return;
+        }
+
+        this.declarations.set(constructor, declaration);
     }
 
-    register(
+    async settle(): Promise<void> {
+        if (!WAIT_TO_DEFINE_EVERYTHING_IN_THE_END) {
+            return;
+        }
+
+        const entries = [...this.declarations.entries()];
+
+        const promises = entries.map(
+            entry =>
+            {
+                const
+                [
+                    constructor, declaration
+                ]: [
+                CustomElementConstructor, CustomaryDeclaration<any>
+            ] = entry;
+                return this.define(constructor, declaration)
+            }
+        );
+
+        await Promise.all(promises);
+    }
+
+    async untilDefined(constructor: CustomElementConstructor): Promise<CustomElementConstructor> {
+        const name: string | undefined = (constructor as any).customary?.name;
+
+        if (name === undefined) {
+            throw new Error('Class must have the "customary" declaration with a "name" property.');
+        }
+
+        return await this.dom_customElementRegistry.whenDefined(name);
+    }
+
+    private async define<T extends HTMLElement>(
         constructor: CustomElementConstructor,
-        definition: CustomaryDefinition<any>
-    ) {
-        this.map.set(constructor, definition);
+        declaration: CustomaryDeclaration<any>
+    ): Promise<void>
+    {
+        if (hasDefinition(constructor)) {
+            console.debug(`${constructor.name}: element already defined, skipping...`);
+            return;
+        }
+
+        const definition: CustomaryDefinition<T> =
+            await new CustomaryDefine(declaration).define(constructor);
+
+        setDefinition(constructor, definition);
+
+        this.dom_customElementRegistry.define(
+            declaration.name!, constructor,
+            declaration.hooks?.dom?.define?.options
+        );
     }
 
-    private async defineOne(
-        name: string,
-        constructor: CustomElementConstructor,
-        options?: dom_ElementDefinitionOptions
-    ): Promise<CustomElementConstructor> {
-        this.customElementRegistry.define(name, constructor, options);
-        return await this.customElementRegistry.whenDefined(name);
-    }
+    constructor(private readonly dom_customElementRegistry: CustomElementRegistry) {}
 
-    get<T extends HTMLElement>(
-        constructor: CustomElementConstructor
-    ): CustomaryDefinition<T> {
-        return this.map.get(constructor) ?? (() => {
-            throw new Error(`element never defined: ${constructor}`)
-        })();
-    }
+    private readonly declarations: Map<CustomElementConstructor, CustomaryDeclaration<any>> = new Map();
 
-    private readonly map: Map<CustomElementConstructor, CustomaryDefinition<any>> = new Map();
-
-    static readonly CustomaryRegistry_singleton: CustomaryRegistry = new CustomaryRegistry(customElements);
-
-    public static getCustomaryDefinition<T extends HTMLElement>(element: T): CustomaryDefinition<T> {
-        const customaryRegistry = CustomaryRegistry.CustomaryRegistry_singleton;
-        return customaryRegistry.get(element.constructor as CustomElementConstructor)!;
-    }
+    private static readonly CustomaryRegistry_singleton: CustomaryRegistry = new CustomaryRegistry(customElements);
 }

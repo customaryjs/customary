@@ -2,14 +2,15 @@ import {LitElement} from "#customary/lit";
 import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
 import {PropertiesInjector} from "#customary/properties/PropertiesInjector.js";
 import {PropertyDeclaration} from "@lit/reactive-element";
+import {CustomaryDeclaration} from "#customary/CustomaryDeclaration";
 
 export class PropertiesProperties
 {
 	static addProperties<T extends HTMLElement>(
 			constructor: typeof LitElement,
-			definition: CustomaryDefinition<T>
+			declaration: CustomaryDeclaration<T>
 	) {
-		const hooks = definition.declaration.hooks?.properties;
+		const hooks = declaration.hooks?.properties;
 		const hooksArray: Attrib[] = hooks instanceof Array ? hooks as Attrib[] : [];
 		const hooksRecord = hooks && !(hooks instanceof Array) ? hooks : {};
 

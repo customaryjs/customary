@@ -1,5 +1,5 @@
 import {LitElement} from 'lit';
-import {CustomaryRegistry} from "#customary/registry/CustomaryRegistry.js";
+import {getDefinition} from "#customary/CustomaryDefinition.js";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -10,8 +10,9 @@ export function Mixin_disconnected
 				override disconnectedCallback() {
 					super.disconnectedCallback?.();
 
-					CustomaryRegistry.getCustomaryDefinition(this)
-							.declaration.hooks?.lifecycle?.disconnected?.(this);
+					const definition = getDefinition(this);
+
+					definition.declaration.hooks?.lifecycle?.disconnected?.(this);
 				}
 			}
 			return Mixin_disconnected_Class;

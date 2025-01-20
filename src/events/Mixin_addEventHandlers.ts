@@ -1,5 +1,5 @@
 import {LitElement} from 'lit';
-import {CustomaryRegistry} from "#customary/registry/CustomaryRegistry.js";
+import {getDefinition} from "#customary/CustomaryDefinition.js";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -10,12 +10,14 @@ export function Mixin_addEventHandlers
 				protected override firstUpdated(changedProperties: Map<string, any>) {
 					super.firstUpdated?.(changedProperties);
 
-					const hooks = CustomaryRegistry.getCustomaryDefinition(this)
-							.declaration.hooks;
-					if (!hooks?.events) return;
+					const definition = getDefinition(this);
 
-					if (hooks.events instanceof Array) {
-						for (const customaryEvent of hooks.events) {
+					const events =
+							definition.declaration.hooks?.events;
+					if (!events) return;
+
+					if (events instanceof Array) {
+						for (const customaryEvent of events) {
 							const selector = customaryEvent.selector;
 							const type = customaryEvent.type;
 							const listener = customaryEvent.listener;
@@ -23,7 +25,7 @@ export function Mixin_addEventHandlers
 						}
 					}
 					else {
-						for (const [selector, listener] of Object.entries(hooks.events)) {
+						for (const [selector, listener] of Object.entries(events)) {
 							const type = undefined;
 							this.addEventHandler(selector, type, listener as any);
 						}

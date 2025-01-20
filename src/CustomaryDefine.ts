@@ -1,43 +1,44 @@
 import {CSSStyleSheetAdopter} from "#customary/cssstylesheet/CSSStyleSheetAdopter.js";
 import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
-import {CustomaryDeclaration} from "#customary/CustomaryDeclaration";
+import {CustomaryDeclaration} from "#customary/CustomaryDeclaration.js";
 import {ExternalLoader} from "#customary/external/ExternalLoader.js";
 import {FetchText, FetchText_DOM_singleton} from "#customary/fetch/FetchText.js";
 import {CSSStyleSheetImporter} from "#customary/cssstylesheet/CSSStyleSheetImporter.js";
 import {Directive_choose} from "#customary/directives/Directive_choose.js";
 import {Directive_map} from "#customary/directives/Directive_map.js";
 import {Directive_when} from "#customary/directives/Directive_when.js";
+import {AttributeProperties} from "#customary/attributes/AttributeProperties.js";
+import {StateProperties} from "#customary/state/StateProperties.js";
+import {PropertiesProperties} from "#customary/properties/PropertiesProperties.js";
+import {LitElement} from "#customary/lit";
 
 export class CustomaryDefine<T extends HTMLElement> {
 
-	async define(): Promise<CustomaryDefinition<T>> {
+	async define(constructor: CustomElementConstructor): Promise<CustomaryDefinition<T>> {
 		const [definition, ] = await Promise.all([
-			this.buildCustomaryDefinition(),
+			this.buildDefinition(constructor),
 			this.adopt_font_cssStyleSheets(),
 		])
 		return definition;
 	}
 
-	private async buildCustomaryDefinition(): Promise<CustomaryDefinition<T>> {
-		const declaration: CustomaryDeclaration<T> = this.declaration;
-
+	private async buildDefinition(
+			constructor: CustomElementConstructor
+	): Promise<CustomaryDefinition<T>>
+	{
 		const {template, templateInDocument} =
 				await this.resolveHTMLTemplateElement(this.name);
 
-		Directive_choose.hydrate(template);
-		Directive_map.hydrate(template);
-		Directive_when.hydrate(template);
+		this.addProperties(constructor as typeof LitElement, template);
 
-		const cssStyleSheet: CSSStyleSheet | undefined =
-				await this.resolveCSSStyleSheet(templateInDocument, declaration);
+		const cssStyleSheet: CSSStyleSheet | undefined = templateInDocument
+				? undefined : await this.loadExternalCSSStyleSheet();
 
-		const definition: CustomaryDefinition<T> = {
-			declaration,
-			cssStyleSheet,
-			template,
+		return {
+			immutable_htmlString: this.getHtmlString(template),
+			...(cssStyleSheet ? {cssStyleSheet} : {}),
+			declaration: this.declaration,
 		};
-
-		return prune(definition);
 	}
 
 	private async resolveHTMLTemplateElement(
@@ -71,6 +72,24 @@ export class CustomaryDefine<T extends HTMLElement> {
 		}
 	}
 
+	private addProperties(
+			constructor: typeof LitElement,
+			template: HTMLTemplateElement
+	)
+	{
+		AttributeProperties.addProperties(constructor, this.declaration, template);
+		StateProperties.addProperties(constructor, this.declaration);
+		PropertiesProperties.addProperties(constructor, this.declaration);
+	}
+
+	private getHtmlString(template: HTMLTemplateElement): string
+	{
+		Directive_choose.hydrate(template);
+		Directive_map.hydrate(template);
+		Directive_when.hydrate(template);
+		return recode(template.innerHTML);
+	}
+
 	private async findHTMLTemplateElementInExternalFile(
 			name: string
 	): Promise<HTMLTemplateElement> {
@@ -89,12 +108,8 @@ export class CustomaryDefine<T extends HTMLElement> {
 		}
 	}
 
-	private async resolveCSSStyleSheet(
-			templateInDocument: HTMLTemplateElement | undefined,
-			declaration: CustomaryDeclaration<T>
-	): Promise<undefined | CSSStyleSheet> {
-		if (templateInDocument) return undefined;
-		if (declaration.hooks?.externalLoader?.css_dont) return undefined;
+	private async loadExternalCSSStyleSheet(): Promise<undefined | CSSStyleSheet> {
+		if (this.declaration.hooks?.externalLoader?.css_dont) return undefined;
 		try {
 			return await (await this.externalLoader).loadCssStyleSheet();
 		} catch (error) {
@@ -115,10 +130,8 @@ export class CustomaryDefine<T extends HTMLElement> {
 		return await (await this.cssStyleSheetAdopter).adoptCSSStylesheets(...locations);
 	}
 
-	constructor(
-			private readonly name: string,
-			private readonly declaration: CustomaryDeclaration<any>
-	) {}
+	constructor(private readonly declaration: CustomaryDeclaration<any>) {}
+	private readonly name: string = this.declaration.name!;
 
 	private get cssStyleSheetImporter(): Promise<CSSStyleSheetImporter> {
 		return this._cssStyleSheetImporter ??= loadCssStyleSheetImporter(this.fetchText);
@@ -188,13 +201,17 @@ async function loadFetchText(): Promise<FetchText> {
 	return FetchText_DOM_singleton;
 }
 
-function prune<T extends { [s: string]: any }>(o: T): T {
-	return Object.fromEntries(
-			Object.entries(o)
-					.filter(([, v]) => !!v)
-	) as T;
-}
-
 function findHTMLTemplateElement(name: string, node: ParentNode): HTMLTemplateElement | undefined {
 	return node.querySelector(`template[data-customary-name='${name}']`) as HTMLTemplateElement ?? undefined;
+}
+
+/**
+ innerHTML encodes some characters used by lit directives
+ so we must decode them back into the HTML string.
+ over time the need to do this should disappear,
+ as we add directive markup for a larger number of lit directives.
+ */
+function recode(htmlString: string) {
+	// lit directives expressed as arrow functions
+	return htmlString.replaceAll('=&gt;', '=>');
 }

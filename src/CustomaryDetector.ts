@@ -1,6 +1,6 @@
 import {CustomaryDeclaration} from "#customary/CustomaryDeclaration";
 
-export class CustomaryDetect {
+export class CustomaryDetector {
 	constructor(
 			private readonly document: Document,
 			private readonly globalThis: any

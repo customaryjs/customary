@@ -1,5 +1,5 @@
 import {LitElement} from 'lit';
-import {CustomaryRegistry} from "#customary/registry/CustomaryRegistry.js";
+import {getDefinition} from "#customary/CustomaryDefinition.js";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -10,8 +10,9 @@ export function Mixin_connected
 				override connectedCallback() {
 					super.connectedCallback?.();
 
-					CustomaryRegistry.getCustomaryDefinition(this)
-							.declaration.hooks?.lifecycle?.connected?.(this);
+					const definition = getDefinition(this);
+
+					definition.declaration.hooks?.lifecycle?.connected?.(this);
 				}
 			}
 			return Mixin_connected_Class;

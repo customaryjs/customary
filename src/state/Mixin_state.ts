@@ -1,5 +1,5 @@
 import {LitElement} from 'lit';
-import {CustomaryRegistry} from "#customary/registry/CustomaryRegistry.js";
+import {getDefinition} from "#customary/CustomaryDefinition.js";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -9,11 +9,12 @@ export function Mixin_state
 		constructor(...args: any[]) {
 			super(args);
 
-			Object.assign(
-					this,
-					CustomaryRegistry.getCustomaryDefinition(this)
-						.declaration.values ?? {}
-			);
+			const definition = getDefinition(this);
+
+			const {values} = definition.declaration;
+			if (!values) return;
+
+			Object.assign(this, values);
 		}
 
 		// noinspection JSUnusedGlobalSymbols

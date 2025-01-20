@@ -28,10 +28,6 @@ export type CustomaryHooks<T extends HTMLElement> = {
 				string,
 				(el: T, a: any, z: any) => void
 			>;
-	externalLoader?: {
-		import_meta?: ImportMeta;
-		css_dont?: boolean;
-	}
 	events?:
 			Array<
 					{
@@ -54,6 +50,11 @@ export type CustomaryHooks<T extends HTMLElement> = {
 	}
 	slots?: {
 		slotchange?: (el: T, event?: Event) => void;
+	}
+	requires?: Array<typeof HTMLElement>;
+	externalLoader?: {
+		import_meta?: ImportMeta;
+		css_dont?: boolean;
 	}
 	dom?: {
 		define?: {

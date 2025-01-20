@@ -1,7 +1,7 @@
 import {LitElement} from 'lit';
 import {choose, html, map, when} from "#customary/lit";
 import {UncompiledTemplateResult} from "lit-html";
-import {CustomaryRegistry} from "#customary/registry/CustomaryRegistry.js";
+import {getDefinition} from "#customary/CustomaryDefinition.js";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -10,27 +10,24 @@ export function Mixin_renderFromTemplate
 			class Mixin_renderFromTemplate_Class extends superClass {
 				// noinspection JSUnusedGlobalSymbols
 				protected override render(): unknown {
-					const element = this;
-
-					const htmlString = this.immutable_htmlString ??= this.resolve_htmlString();
-
-					const state = (element as any).state;
+					const definition = getDefinition(this);
 
 					const templateResult: UncompiledTemplateResult =
-							render_lit_html_TemplateResult(element, htmlString, state);
+							render_lit_html_TemplateResult(
+									this,
+									definition.immutable_htmlString,
+									(this as any).state
+							);
 
 					this.reuse_immutable_TemplateStringsArray(templateResult);
 
 					return templateResult;
 				}
 
-				private resolve_htmlString(): string {
-					const definition = CustomaryRegistry.getCustomaryDefinition(this);
-					// FIXME recode on define, only once. this string must never ever change
-					return recode(definition.template.innerHTML);
-				}
-
-				private reuse_immutable_TemplateStringsArray(templateResult: UncompiledTemplateResult) {
+				private reuse_immutable_TemplateStringsArray(
+						templateResult: UncompiledTemplateResult
+				)
+				{
 					const templateStringsArray = templateResult.strings;
 
 					if (!this.immutable_templateStringsArray) {
@@ -52,23 +49,11 @@ could not have possibly changed structure inbetween calls to render.... tamperin
 					templateResult.strings = this.immutable_templateStringsArray;
 				}
 
-				private immutable_htmlString: string | undefined;
 				private immutable_templateStringsArray: TemplateStringsArray | undefined;
 			}
 
 			return Mixin_renderFromTemplate_Class as T;
 		}
-
-/**
- innerHTML encodes some characters used by lit directives
- so we must decode them back into the HTML string.
- over time the need to do this should disappear,
- as we add directive markup for a larger number of lit directives.
-*/
-function recode(htmlString: string) {
-	// lit directives expressed as arrow functions
-	return htmlString.replaceAll('=&gt;', '=>');
-}
 
 /**
  lit "html" is a tag function.

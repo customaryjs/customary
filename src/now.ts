@@ -1,7 +1,9 @@
 import {Customary} from "#customary/index.js";
 
-if (!(globalThis as any)[`customary-flag:detect-dont`]) {
-	await Customary.detect();
-}
+document.addEventListener("DOMContentLoaded", (event) => {
+	if (!(globalThis as any)[`customary-options:autodetect-dont`]) {
+		void Customary.autodetect();
+	}
+});
 
 export * from '#customary/index.js';

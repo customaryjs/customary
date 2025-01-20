@@ -26,4 +26,23 @@ export class CustomaryElement
 				Mixin_willUpdate(
 						LitElement
 				)))))))))))
-{}
+{
+	constructor() {
+		try {
+			super();
+		}
+		catch (error) {
+			if (error instanceof TypeError) {
+				if (error.message.startsWith("Illegal constructor")) {
+					throw new Error(
+							"Custom element must be fully defined before you can instantiate it. Try this:\n" +
+							"    await Customary.untilDefined(MyCustomElement);\n" +
+							"    const element = new MyCustomElement();",
+							{cause: error}
+					);
+				}
+			}
+			throw error;
+		}
+	}
+}

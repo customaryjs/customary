@@ -1,5 +1,5 @@
 import {LitElement} from 'lit';
-import {CustomaryRegistry} from "#customary/registry/CustomaryRegistry.js";
+import {getDefinition} from "#customary/CustomaryDefinition.js";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
@@ -10,7 +10,7 @@ export function Mixin_adoptStyleSheet
 		override firstUpdated(changedProperties: Map<string, any>) {
 			super.firstUpdated?.(changedProperties);
 
-			const definition = CustomaryRegistry.getCustomaryDefinition(this);
+			const definition = getDefinition(this);
 
 			const {cssStyleSheet} = definition;
 			if (!cssStyleSheet) return;

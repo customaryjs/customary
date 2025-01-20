@@ -1,5 +1,5 @@
 import {LitElement} from 'lit';
-import {CustomaryRegistry} from "#customary/registry/CustomaryRegistry.js";
+import {getDefinition} from "#customary/CustomaryDefinition.js";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 type PropertyValues = Map<PropertyKey, unknown>;
@@ -13,9 +13,10 @@ export function Mixin_slotChange
 
 					const element = this;
 
+					const definition = getDefinition(element);
+
 					const slotchange =
-							CustomaryRegistry.getCustomaryDefinition(element)
-									.declaration.hooks?.slots?.slotchange;
+							definition.declaration.hooks?.slots?.slotchange;
 
 					if (!slotchange) return;
 
