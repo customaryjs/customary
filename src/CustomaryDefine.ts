@@ -21,18 +21,15 @@ export class CustomaryDefine<T extends HTMLElement> {
 	private async buildCustomaryDefinition(): Promise<CustomaryDefinition<T>> {
 		const declaration: CustomaryDeclaration<T> = this.declaration;
 
-		const templateInDocument: HTMLTemplateElement | undefined =
-				findHTMLTemplateElementInDOMDocument(this.name);
-
-		const template: HTMLTemplateElement =
-				await this.resolveHTMLTemplateElement(templateInDocument);
-
-		const cssStyleSheet: CSSStyleSheet | undefined =
-				await this.resolveCSSStyleSheet(templateInDocument, declaration);
+		const {template, templateInDocument} =
+				await this.resolveHTMLTemplateElement(this.name);
 
 		Directive_choose.hydrate(template);
 		Directive_map.hydrate(template);
 		Directive_when.hydrate(template);
+
+		const cssStyleSheet: CSSStyleSheet | undefined =
+				await this.resolveCSSStyleSheet(templateInDocument, declaration);
 
 		const definition: CustomaryDefinition<T> = {
 			declaration,
@@ -44,11 +41,27 @@ export class CustomaryDefine<T extends HTMLElement> {
 	}
 
 	private async resolveHTMLTemplateElement(
-			templateInDocument: HTMLTemplateElement | undefined
-	): Promise<HTMLTemplateElement> {
-		if (templateInDocument) return templateInDocument;
+			name: string
+	): Promise<{
+		templateInDocument: HTMLTemplateElement | undefined;
+		template: HTMLTemplateElement;
+	}> {
 		try {
-			return await this.toTemplate(await this.loadExternalHtml());
+			const templateInDocument: HTMLTemplateElement | undefined =
+					findHTMLTemplateElement(name, document);
+
+			if (templateInDocument) return {
+				template: templateInDocument,
+				templateInDocument,
+			};
+
+			const templateInExternalFile: HTMLTemplateElement =
+					await this.findHTMLTemplateElementInExternalFile(name);
+
+			return {
+				template: templateInExternalFile,
+				templateInDocument: undefined,
+			}
 		}
 		catch (error) {
 			throw new Error(
@@ -56,6 +69,15 @@ export class CustomaryDefine<T extends HTMLElement> {
 					{cause: error}
 			);
 		}
+	}
+
+	private async findHTMLTemplateElementInExternalFile(
+			name: string
+	): Promise<HTMLTemplateElement> {
+		const htmlString = await this.loadExternalHtml();
+		const template: HTMLTemplateElement = document.createElement('template');
+		template.innerHTML = htmlString;
+		return findHTMLTemplateElement(name, template.content) ?? template;
 	}
 
 	private async loadExternalHtml(): Promise<string> {
@@ -93,41 +115,6 @@ export class CustomaryDefine<T extends HTMLElement> {
 		return await (await this.cssStyleSheetAdopter).adoptCSSStylesheets(...locations);
 	}
 
-	private async toTemplate(htmlString: string): Promise<HTMLTemplateElement> {
-		const tile: string = await this.getTile(htmlString);
-		const template: HTMLTemplateElement = document.createElement('template');
-		template.innerHTML = tile;
-		return template;
-	}
-
-	private async getTile(tileset: string) {
-		if (this.declaration.config?.define?.detileDont) {
-			return tileset;
-		}
-		const delimiters = ['customary', this.name].map(s => `<!--${s}-->`);
-		for (const delimiter of delimiters) {
-			const tile: string | undefined = this.detile(tileset, delimiter);
-			if (tile) {
-				return tile;
-			}
-		}
-		throw new Error(
-				'Delimited tile not found.' +
-				' Customary looks for delimiters in your html tileset' +
-				' to read the tile your custom component will display.' +
-				` Try using one of these delimiters: ${delimiters}`);
-	}
-
-	private detile(text: string, delimiter: string): string | undefined
-	{
-		const strings = text.split(delimiter);
-		if (strings.length < 3) return undefined;
-		const string = strings[1];
-		const split = string?.split(delimiter);
-		const string1 = split?.[0];
-		return string1 ?? text;
-	}
-
 	constructor(
 			private readonly name: string,
 			private readonly declaration: CustomaryDeclaration<any>
@@ -146,7 +133,7 @@ export class CustomaryDefine<T extends HTMLElement> {
 	private _cssStyleSheetAdopter: Promise<CSSStyleSheetAdopter> | undefined;
 
 	private get externalLoader(): Promise<ExternalLoader> {
-		return this._externalLoader ??= loadTilesetLoader(
+		return this._externalLoader ??= createExternalLoader(
 				this.fetchText,
 				this.cssStyleSheetImporter,
 				{
@@ -182,7 +169,7 @@ async function loadCssStyleSheetImporter(fetchText: Promise<FetchText>): Promise
 	return new CSSStyleSheetImporter(await fetchText);
 }
 
-async function loadTilesetLoader(
+async function createExternalLoader(
 		fetchText: Promise<FetchText>,
 		cssStyleSheetImporter: Promise<CSSStyleSheetImporter>,
 		options: {
@@ -208,6 +195,6 @@ function prune<T extends { [s: string]: any }>(o: T): T {
 	) as T;
 }
 
-function findHTMLTemplateElementInDOMDocument(name: string): HTMLTemplateElement | undefined {
-	return document.querySelector(`template[data-customary-name='${name}']`) as HTMLTemplateElement ?? undefined;
+function findHTMLTemplateElement(name: string, node: ParentNode): HTMLTemplateElement | undefined {
+	return node.querySelector(`template[data-customary-name='${name}']`) as HTMLTemplateElement ?? undefined;
 }
