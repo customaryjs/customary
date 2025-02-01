@@ -1,6 +1,6 @@
 import {set_outerHTML} from "./set_outerHTML.js";
 
-export class Directive_map
+export class Directive_for
 {
 	static hydrate(template: HTMLTemplateElement) {
 		this.hydrateTree(template.content, template);
@@ -9,14 +9,14 @@ export class Directive_map
 	private static hydrateTree(node: ParentNode, template: HTMLTemplateElement)
 	{
 		while (true) {
-			const tag = node.querySelector('map--');
+			const tag = node.querySelector('for--');
 			if (!tag) return;
 
 			this.hydrateTree(tag, template);
 
 			const items = tag.getAttribute('items') ??
 					(()=>{
-						throw Error('Attribute "items" is required for "map--" markup')
+						throw Error('Attribute "items" is required for "for--" markup')
 					})();
 
 			const value = tag.getAttribute('value') ?? 'value';

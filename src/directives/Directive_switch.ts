@@ -1,6 +1,6 @@
 import {set_outerHTML} from "./set_outerHTML.js";
 
-export class Directive_choose
+export class Directive_switch
 {
 	static hydrate(template: HTMLTemplateElement)
 	{
@@ -10,14 +10,14 @@ export class Directive_choose
 	private static hydrateTree(node: ParentNode, template: HTMLTemplateElement)
 	{
 		while (true) {
-			const tag = node.querySelector('choose--');
+			const tag = node.querySelector('switch--');
 			if (!tag) return;
 
 			this.hydrateTree(tag, template);
 
 			const value = tag.getAttribute('value') ??
 					(() => {
-						throw Error('Attribute "value" is required for "choose--" markup')
+						throw Error('Attribute "value" is required for "switch--" markup')
 					})();
 
 			const cases = this.toCases([...tag.querySelectorAll(':scope > case--')]);
