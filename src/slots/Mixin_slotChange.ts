@@ -1,4 +1,4 @@
-import {LitElement} from 'lit';
+import {LitElement} from '#customary/lit';
 import {getDefinition} from "#customary/CustomaryDefinition.js";
 
 type Constructor<T = {}> = new (...args: any[]) => T;

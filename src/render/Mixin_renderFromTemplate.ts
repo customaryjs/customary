@@ -1,4 +1,4 @@
-import {LitElement} from 'lit';
+import {LitElement} from '#customary/lit';
 import {choose, html, map, when} from "#customary/lit";
 import {UncompiledTemplateResult} from "lit-html";
 import {getDefinition} from "#customary/CustomaryDefinition.js";

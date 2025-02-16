@@ -1,4 +1,4 @@
-import {LitElement} from 'lit';
+import {LitElement} from '#customary/lit';
 import {PropertyValues} from "@lit/reactive-element";
 import {getDefinition} from "#customary/CustomaryDefinition.js";
 
