@@ -6,6 +6,7 @@ import {FetchText, FetchText_DOM_singleton} from "#customary/fetch/FetchText.js"
 import {CSSStyleSheetImporter} from "#customary/cssstylesheet/CSSStyleSheetImporter.js";
 import {Directive_for} from "#customary/directives/Directive_for.js";
 import {Directive_if} from "#customary/directives/Directive_if.js";
+import {Directive_inside} from "#customary/directives/Directive_inside.js";
 import {Directive_switch} from "#customary/directives/Directive_switch.js";
 import {AttributeProperties} from "#customary/attributes/AttributeProperties.js";
 import {StateProperties} from "#customary/state/StateProperties.js";
@@ -87,6 +88,10 @@ export class CustomaryDefine<T extends HTMLElement> {
 		Directive_for.hydrate(template);
 		Directive_if.hydrate(template);
 		Directive_switch.hydrate(template);
+
+		// must be last to accommodate all other directives
+		Directive_inside.hydrate(template);
+
 		return recode(template.innerHTML);
 	}
 
