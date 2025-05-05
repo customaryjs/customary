@@ -55,9 +55,9 @@
     }
   },
   "dependencies": {
-    "@lit/reactive-element": "2.0.4",
-    "lit": "^3.2.0",
-    "lit-html": "^3.2.1"
+    "@lit/reactive-element": "^2.1.0",
+    "lit": "^3.3.0",
+    "lit-html": "^3.3.0"
   },
   "devDependencies": {
     "@parcel/transformer-typescript-tsc": "^2.13.0",
