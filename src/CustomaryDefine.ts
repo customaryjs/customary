@@ -4,10 +4,10 @@ import {CustomaryDeclaration} from "#customary/CustomaryDeclaration.js";
 import {ExternalLoader} from "#customary/external/ExternalLoader.js";
 import {FetchText, FetchText_DOM_singleton} from "#customary/fetch/FetchText.js";
 import {CSSStyleSheetImporter} from "#customary/cssstylesheet/CSSStyleSheetImporter.js";
-import {Directive_for} from "#customary/directives/Directive_for.js";
-import {Directive_if} from "#customary/directives/Directive_if.js";
-import {Directive_inside} from "#customary/directives/Directive_inside.js";
-import {Directive_switch} from "#customary/directives/Directive_switch.js";
+import {Markup_for} from "#customary/markup/Markup_for.js";
+import {Markup_if} from "#customary/markup/Markup_if.js";
+import {Markup_inside} from "#customary/markup/Markup_inside.js";
+import {Markup_switch} from "#customary/markup/Markup_switch.js";
 import {AttributeProperties} from "#customary/attributes/AttributeProperties.js";
 import {StateProperties} from "#customary/state/StateProperties.js";
 import {PropertiesProperties} from "#customary/properties/PropertiesProperties.js";
@@ -85,12 +85,12 @@ export class CustomaryDefine<T extends HTMLElement> {
 
 	private getHtmlString(template: HTMLTemplateElement): string
 	{
-		Directive_for.hydrate(template);
-		Directive_if.hydrate(template);
-		Directive_switch.hydrate(template);
+		Markup_for.hydrate(template);
+		Markup_if.hydrate(template);
+		Markup_switch.hydrate(template);
 
-		// must be last to accommodate all other directives
-		Directive_inside.hydrate(template);
+		// must be last to accommodate all others
+		Markup_inside.hydrate(template);
 
 		return recode(template.innerHTML);
 	}
