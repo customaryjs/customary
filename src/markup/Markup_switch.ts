@@ -1,6 +1,7 @@
 import {set_outerHTML} from "./set_outerHTML.js";
+import {toSelector} from "#customary/markup/toSelector.js";
 
-export class Directive_switch
+export class Markup_switch
 {
 	static hydrate(template: HTMLTemplateElement)
 	{
@@ -10,17 +11,17 @@ export class Directive_switch
 	private static hydrateTree(node: ParentNode, template: HTMLTemplateElement)
 	{
 		while (true) {
-			const tag = node.querySelector('switch--');
+			const tag = node.querySelector(toSelector(switch_markup));
 			if (!tag) return;
 
 			this.hydrateTree(tag, template);
 
 			const value = tag.getAttribute('value') ??
 					(() => {
-						throw Error('Attribute "value" is required for "switch--" markup')
+						throw Error(`Attribute "value" is required for "${switch_markup}" markup`)
 					})();
 
-			const cases = this.toCases([...tag.querySelectorAll(':scope > case--')]);
+			const cases = this.toCases([...tag.querySelectorAll(`:scope > ${toSelector(case_markup)}`)]);
 
 			const valueCases = cases.valueCases.join(',\n');
 
@@ -37,13 +38,13 @@ export class Directive_switch
 		defaultCase?: string
 	} {
 		if (cases.length === 0) {
-			throw Error('At least one "case--" is required for "choose--" markup');
+			throw Error(`At least one "${case_markup}" is required for "${switch_markup}" markup`);
 		}
 
 		const defaultElements =
 				cases.filter(caseElement => !caseElement.hasAttribute('value'));
 		if (defaultElements.length > 1) {
-			throw Error('Only one default "case--" is allowed for "choose--" markup');
+			throw Error(`Only one default "${case_markup}" is allowed for "${switch_markup}" markup`);
 		}
 		const defaultElement = defaultElements[0];
 		const defaultCase = `() => html\`${defaultElement?.innerHTML}\``;
@@ -58,3 +59,5 @@ export class Directive_switch
 		return {valueCases, defaultCase};
 	}
 }
+const switch_markup = 'customary:switch';
+const case_markup = 'customary:case';

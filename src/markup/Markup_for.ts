@@ -1,6 +1,7 @@
 import {set_outerHTML} from "./set_outerHTML.js";
+import {toSelector} from "#customary/markup/toSelector.js";
 
-export class Directive_for
+export class Markup_for
 {
 	static hydrate(template: HTMLTemplateElement) {
 		this.hydrateTree(template.content, template);
@@ -9,14 +10,14 @@ export class Directive_for
 	private static hydrateTree(node: ParentNode, template: HTMLTemplateElement)
 	{
 		while (true) {
-			const tag = node.querySelector('for--');
+			const tag = node.querySelector(toSelector(for_markup));
 			if (!tag) return;
 
 			this.hydrateTree(tag, template);
 
 			const items = tag.getAttribute('items') ??
 					(()=>{
-						throw Error('Attribute "items" is required for "for--" markup')
+						throw Error(`Attribute "items" is required for "${for_markup}" markup`)
 					})();
 
 			const value = tag.getAttribute('value') ?? 'value';
@@ -31,5 +32,5 @@ export class Directive_for
 			set_outerHTML(tag, directive, template);
 		}
 	}
-
 }
+const for_markup = 'customary:for';
