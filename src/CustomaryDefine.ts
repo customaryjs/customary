@@ -12,6 +12,8 @@ import {AttributeProperties} from "#customary/attributes/AttributeProperties.js"
 import {StateProperties} from "#customary/state/StateProperties.js";
 import {PropertiesProperties} from "#customary/properties/PropertiesProperties.js";
 import {LitElement} from "#customary/lit";
+import {Attribute_bind} from "#customary/bind/Attribute_bind.js";
+import {AttributesDefinition, detectAttributes} from "#customary/attributes/AttributesDefinition.js";
 
 export class CustomaryDefine<T extends HTMLElement> {
 
@@ -30,16 +32,22 @@ export class CustomaryDefine<T extends HTMLElement> {
 		const {template, templateInDocument} =
 				await this.resolveHTMLTemplateElement(this.name);
 
-		this.addProperties(constructor as typeof LitElement, template);
+		const attributes: AttributesDefinition =
+			detectAttributes({config: this.declaration.config, template});
 
 		const cssStyleSheet: CSSStyleSheet | undefined = templateInDocument
 				? undefined : await this.loadExternalCSSStyleSheet();
 
-		return {
-			immutable_htmlString: this.getHtmlString(template),
-			...(cssStyleSheet ? {cssStyleSheet} : {}),
+		const customaryDefinition: CustomaryDefinition<T> = {
 			declaration: this.declaration,
+			attributes: attributes,
+			...(cssStyleSheet ? {cssStyleSheet} : {}),
+			immutable_htmlString: this.getHtmlString(template),
 		};
+
+		CustomaryDefine.addProperties(constructor as typeof LitElement, customaryDefinition);
+
+		return customaryDefinition;
 	}
 
 	private async resolveHTMLTemplateElement(
@@ -73,26 +81,37 @@ export class CustomaryDefine<T extends HTMLElement> {
 		}
 	}
 
-	private addProperties(
+	private static addProperties<T extends HTMLElement>(
 			constructor: typeof LitElement,
-			template: HTMLTemplateElement
+			customaryDefinition: CustomaryDefinition<T>,
 	)
 	{
-		AttributeProperties.addProperties(constructor, this.declaration, template);
-		StateProperties.addProperties(constructor, this.declaration);
-		PropertiesProperties.addProperties(constructor, this.declaration);
+		AttributeProperties.addProperties(constructor, customaryDefinition.attributes);
+		StateProperties.addProperties(constructor, customaryDefinition.declaration);
+		PropertiesProperties.addProperties(constructor, customaryDefinition.declaration);
 	}
 
 	private getHtmlString(template: HTMLTemplateElement): string
 	{
+		this.hydrateBindings(template);
+		this.hydrateMarkup(template);
+
+		const s1 = template.innerHTML;
+		const s2 = Attribute_bind.recode(s1);
+		return recodeMarkup(s2);
+	}
+
+	private hydrateBindings(template: HTMLTemplateElement) {
+		Attribute_bind.hydrate(template);
+	}
+
+	private hydrateMarkup(template: HTMLTemplateElement) {
 		Markup_for.hydrate(template);
 		Markup_if.hydrate(template);
 		Markup_switch.hydrate(template);
 
 		// must be last to accommodate all others
 		Markup_inside.hydrate(template);
-
-		return recode(template.innerHTML);
 	}
 
 	private async findHTMLTemplateElementInExternalFile(
@@ -216,7 +235,7 @@ function findHTMLTemplateElement(name: string, node: ParentNode): HTMLTemplateEl
  over time the need to do this should disappear,
  as we add directive markup for a larger number of lit directives.
  */
-function recode(htmlString: string) {
+function recodeMarkup(htmlString: string) {
 	// lit directives expressed as arrow functions
 	return htmlString.replaceAll('=&gt;', '=>');
 }

@@ -1,20 +1,14 @@
 import {LitElement} from "#customary/lit";
 import {PropertiesInjector} from "#customary/properties/PropertiesInjector.js";
-import {CustomaryDeclaration} from "#customary/CustomaryDeclaration";
+import {AttributesDefinition} from "#customary/attributes/AttributesDefinition.js";
 
 export class AttributeProperties
 {
-	static addProperties<T extends HTMLElement>(
+	static addProperties(
 			constructor: typeof LitElement,
-			declaration: CustomaryDeclaration<T>,
-			template: HTMLTemplateElement
+			attributesDefinition: AttributesDefinition,
 	)
 	{
-		const fromDeclaration = declaration.config?.attributes ?? [];
-		const fromTemplate =
-				template.getAttribute('data-customary-attributes')?.
-				split(',').map(s => s.trim()) ?? [];
-		const names = [...new Set([...fromDeclaration, ...fromTemplate])];
-		PropertiesInjector.injectProperties(constructor, {reflect: true}, names);
+		PropertiesInjector.injectProperties(constructor, {reflect: true}, attributesDefinition.attributes);
 	}
 }

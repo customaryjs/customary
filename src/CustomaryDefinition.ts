@@ -1,8 +1,10 @@
-import {CustomaryDeclaration} from "#customary/CustomaryDeclaration";
+import {CustomaryDeclaration} from "#customary/CustomaryDeclaration.js";
+import {AttributesDefinition} from "#customary/attributes/AttributesDefinition.js";
 
 export type CustomaryDefinition<T extends HTMLElement> =
 {
     readonly declaration: CustomaryDeclaration<T>;
+    readonly attributes: AttributesDefinition;
     readonly cssStyleSheet?: CSSStyleSheet;
     readonly immutable_htmlString: string;
 }
