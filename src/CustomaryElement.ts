@@ -10,6 +10,7 @@ import {Mixin_slotChange} from "#customary/slots/Mixin_slotChange.js";
 import {Mixin_state} from "#customary/state/Mixin_state.js";
 import {Mixin_updated} from "#customary/lifecycle/updated/Mixin_updated.js";
 import {Mixin_willUpdate} from "#customary/lifecycle/willUpdate/Mixin_willUpdate.js";
+import {getDefinition} from "#customary/CustomaryDefinition.js";
 
 export class CustomaryElement
 		extends
@@ -44,5 +45,15 @@ export class CustomaryElement
 			}
 			throw error;
 		}
+	}
+
+	override createRenderRoot() {
+		const definition = getDefinition(this);
+
+		if (definition.declaration.config?.construct?.shadowRootDont) {
+			return this;
+		}
+
+		return super.createRenderRoot();
 	}
 }
