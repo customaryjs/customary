@@ -47,13 +47,13 @@ export class Markup_switch
 			throw Error(`Only one default "${case_markup}" is allowed for "${switch_markup}" markup`);
 		}
 		const defaultElement = defaultElements[0];
-		const defaultCase = `() => html\`${defaultElement?.innerHTML}\``;
+		const defaultCase = `() => customary_lit_html_track( html\`${defaultElement?.innerHTML}\` )`;
 
 		const valueElements =
 				cases.filter(caseElement => caseElement.hasAttribute('value'));
 		const valueCases = valueElements.map(caseElement => {
 			const value = caseElement.getAttribute('value')!;
-			return `['${value}', () => html\`${caseElement.innerHTML}\`]`;
+			return `['${value}', () => customary_lit_html_track( html\`${caseElement.innerHTML}\` ) ]`;
 		})
 
 		return {valueCases, defaultCase};

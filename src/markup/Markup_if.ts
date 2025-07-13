@@ -36,9 +36,9 @@ export class Markup_if
 				throw Error(`One "${true_markup}" is required if "${false_markup}" present for "${if_markup}" markup`);
 			}
 
-			const trueCase = `() => html\`${trueElement?.innerHTML ?? tag.innerHTML}\``;
+			const trueCase = `() => customary_lit_html_track( html\`${trueElement?.innerHTML ?? tag.innerHTML}\` )`;
 
-			const falseCase = falseElement ? `, () => html\`${falseElement.innerHTML}\`` : '';
+			const falseCase = falseElement ? `, () => customary_lit_html_track( html\`${falseElement.innerHTML}\` )` : '';
 
 			const directive = `\${when(${condition}, ${trueCase}${falseCase})}`;
 

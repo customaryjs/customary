@@ -39,7 +39,5 @@ function addEventListenersForBindings(customElement: HTMLElement) {
 }
 
 function matchAttributeToInput(element: HTMLElement, attribute: string, input: HTMLInputElement) {
-	const value = input.type === 'checkbox' ? (input.checked ? 'true' : 'false') : input.value;
-
-	element.setAttribute(attribute, value);
+	(<any>element)[attribute] = input.type === 'checkbox' ? (input.checked ? 'true' : 'false') : input.value;
 }

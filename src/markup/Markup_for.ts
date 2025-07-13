@@ -27,7 +27,11 @@ export class Markup_for
 
 			const body = tag.innerHTML;
 
-			const directive = `\${map(${items}, ${args} => html\`${body}\`)}`;
+			const use_repeat_instead_of_map = true;
+			const directive = use_repeat_instead_of_map
+				? `\${repeat(${items}??[], ${args} => customary_lit_html_track( html\`${body}\` ) )}`
+				: `\${map(${items}, ${args} => customary_lit_html_track( html\`${body}\` ) )}`
+			;
 
 			set_outerHTML(tag, directive, template);
 		}
