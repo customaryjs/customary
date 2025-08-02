@@ -14,6 +14,8 @@ import {PropertiesProperties} from "#customary/properties/PropertiesProperties.j
 import {LitElement} from "#customary/lit";
 import {Attribute_bind} from "#customary/bind/Attribute_bind.js";
 import {AttributesDefinition, detectAttributes} from "#customary/attributes/AttributesDefinition.js";
+import {ExpressionAttributes} from "#customary/expressions/ExpressionAttributes.js";
+import {Expressions_recode} from "#customary/expressions/Expressions_recode.js";
 
 export class CustomaryDefine<T extends HTMLElement> {
 
@@ -97,11 +99,12 @@ export class CustomaryDefine<T extends HTMLElement> {
 		this.hydrateMarkup(template);
 
 		const s1 = template.innerHTML;
-		const s2 = Attribute_bind.recode(s1);
+		const s2 = Expressions_recode.recode(s1);
 		return recodeMarkup(s2);
 	}
 
 	private hydrateBindings(template: HTMLTemplateElement) {
+		ExpressionAttributes.hydrate(template);
 		Attribute_bind.hydrate(template);
 	}
 
