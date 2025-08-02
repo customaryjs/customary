@@ -5,7 +5,7 @@ export type CustomaryDefinition<T extends HTMLElement> =
 {
     readonly declaration: CustomaryDeclaration<T>;
     readonly attributes: AttributesDefinition;
-    readonly cssStyleSheet?: CSSStyleSheet;
+    readonly templateInDocument: boolean;
     readonly immutable_htmlString: string;
 }
 

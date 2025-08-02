@@ -1,9 +1,7 @@
-import {CSSStyleSheetAdopter} from "#customary/cssstylesheet/CSSStyleSheetAdopter.js";
 import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
 import {CustomaryDeclaration} from "#customary/CustomaryDeclaration.js";
 import {ExternalLoader} from "#customary/external/ExternalLoader.js";
 import {FetchText, FetchText_DOM_singleton} from "#customary/fetch/FetchText.js";
-import {CSSStyleSheetImporter} from "#customary/cssstylesheet/CSSStyleSheetImporter.js";
 import {Markup_for} from "#customary/markup/Markup_for.js";
 import {Markup_if} from "#customary/markup/Markup_if.js";
 import {Markup_inside} from "#customary/markup/Markup_inside.js";
@@ -20,11 +18,7 @@ import {Expressions_recode} from "#customary/expressions/Expressions_recode.js";
 export class CustomaryDefine<T extends HTMLElement> {
 
 	async define(constructor: CustomElementConstructor): Promise<CustomaryDefinition<T>> {
-		const [definition, ] = await Promise.all([
-			this.buildDefinition(constructor),
-			this.adopt_font_cssStyleSheets(),
-		])
-		return definition;
+		return await this.buildDefinition(constructor);
 	}
 
 	private async buildDefinition(
@@ -37,13 +31,10 @@ export class CustomaryDefine<T extends HTMLElement> {
 		const attributes: AttributesDefinition =
 			detectAttributes({config: this.declaration.config, template});
 
-		const cssStyleSheet: CSSStyleSheet | undefined = templateInDocument
-				? undefined : await this.loadExternalCSSStyleSheet();
-
 		const customaryDefinition: CustomaryDefinition<T> = {
 			declaration: this.declaration,
 			attributes: attributes,
-			...(cssStyleSheet ? {cssStyleSheet} : {}),
+			templateInDocument: !!templateInDocument,
 			immutable_htmlString: this.getHtmlString(template),
 		};
 
@@ -135,60 +126,17 @@ export class CustomaryDefine<T extends HTMLElement> {
 		}
 	}
 
-	private async loadExternalCSSStyleSheet(): Promise<undefined | CSSStyleSheet> {
-		if (this.declaration.hooks?.externalLoader?.css_dont) return undefined;
-		try {
-			return await (await this.externalLoader).loadCssStyleSheet();
-		} catch (error) {
-			console.debug('External css file out of reach.', {cause: error});
-			return undefined;
-		}
-	}
-
-	private async adopt_font_cssStyleSheets() {
-		const locations = ((a: string[]) => a.length > 0 ? a : undefined)(
-				[
-					this.declaration.config?.define?.fontLocation,
-					...(this.declaration.config?.define?.fontLocations ?? []),
-				]
-						.filter(location => location != undefined)
-		);
-		if (!locations) return;
-		return await (await this.cssStyleSheetAdopter).adoptCSSStylesheets(...locations);
-	}
-
 	constructor(private readonly declaration: CustomaryDeclaration<any>) {}
 	private readonly name: string = this.declaration.name!;
-
-	private get cssStyleSheetImporter(): Promise<CSSStyleSheetImporter> {
-		return this._cssStyleSheetImporter ??= loadCssStyleSheetImporter(this.fetchText);
-	}
-
-	private _cssStyleSheetImporter: Promise<CSSStyleSheetImporter> | undefined;
-
-	private get cssStyleSheetAdopter(): Promise<CSSStyleSheetAdopter> {
-		return this._cssStyleSheetAdopter ??= loadCssStyleSheetAdopter(this.cssStyleSheetImporter);
-	}
-
-	private _cssStyleSheetAdopter: Promise<CSSStyleSheetAdopter> | undefined;
 
 	private get externalLoader(): Promise<ExternalLoader> {
 		return this._externalLoader ??= createExternalLoader(
 				this.fetchText,
-				this.cssStyleSheetImporter,
 				{
 					name: this.name,
-					import_meta: this.get_import_meta(),
+					import_meta: get_import_meta(this.declaration),
 				}
 		);
-	}
-
-	private get_import_meta() {
-		return this.declaration.hooks?.externalLoader?.import_meta ?? (() => {
-			throw new Error(`${this.name}: Customary needs "import.meta" if the custom element template ` +
-					'is to be loaded from an external file. ' +
-					'(document did not have a named template element, and an html string was not provided.)')
-		})();
 	}
 
 	private _externalLoader: Promise<ExternalLoader> | undefined;
@@ -201,17 +149,8 @@ export class CustomaryDefine<T extends HTMLElement> {
 
 }
 
-async function loadCssStyleSheetAdopter(cssStyleSheetImporter: Promise<CSSStyleSheetImporter>): Promise<CSSStyleSheetAdopter> {
-	return new CSSStyleSheetAdopter(await cssStyleSheetImporter as any, document);
-}
-
-async function loadCssStyleSheetImporter(fetchText: Promise<FetchText>): Promise<CSSStyleSheetImporter> {
-	return new CSSStyleSheetImporter(await fetchText);
-}
-
 async function createExternalLoader(
 		fetchText: Promise<FetchText>,
-		cssStyleSheetImporter: Promise<CSSStyleSheetImporter>,
 		options: {
 			name: string,
 			import_meta: ImportMeta;
@@ -219,7 +158,6 @@ async function createExternalLoader(
 ): Promise<ExternalLoader> {
 	return new ExternalLoader(
 			await fetchText,
-			await cssStyleSheetImporter,
 			options
 	);
 }
@@ -241,4 +179,22 @@ function findHTMLTemplateElement(name: string, node: ParentNode): HTMLTemplateEl
 function recodeMarkup(htmlString: string) {
 	// lit directives expressed as arrow functions
 	return htmlString.replaceAll('=&gt;', '=>');
+}
+
+export function get_import_meta(declaration: CustomaryDeclaration<any>) {
+	return declaration.hooks?.externalLoader?.import_meta ?? (() => {
+		throw new Error(`${declaration.name}: Customary needs "import.meta" if the custom element template ` +
+			'is to be loaded from an external file. ' +
+			'(document did not have a named template element, and an html string was not provided.)')
+	})();
+}
+
+export function collect_font_locations(declaration: CustomaryDeclaration<any>): string[] | undefined {
+	return ((a: string[]) => a.length > 0 ? a : undefined)(
+		[
+			declaration.config?.define?.fontLocation,
+			...(declaration.config?.define?.fontLocations ?? []),
+		]
+			.filter(location => location != undefined)
+	);
 }
