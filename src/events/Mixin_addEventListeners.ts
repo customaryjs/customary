@@ -4,6 +4,7 @@ import {AddEventListener} from "#customary/events/AddEventListener.js";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
+/*
 export function Mixin_addEventListeners
 		<T extends Constructor<LitElement>>(superClass: T): T {
 			class Mixin_addEventListenersToUpdatedDescendants_Class extends superClass {
@@ -16,7 +17,9 @@ export function Mixin_addEventListeners
 			return Mixin_addEventListenersToUpdatedDescendants_Class;
 		}
 
-function addEventListeners(customElement: HTMLElement) {
+ */
+
+export function addEventListeners(customElement: HTMLElement) {
 	const definition = getDefinition(customElement);
 
 	const events =

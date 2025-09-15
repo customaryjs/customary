@@ -1,9 +1,9 @@
 import {LitElement} from "#customary/lit";
 import {Mixin_addEventListenersForBindings} from "#customary/bind/Mixin_addEventListenersForBindings.js";
-import {Mixin_addEventListeners} from "#customary/events/Mixin_addEventListeners.js";
+import {addEventListeners} from "#customary/events/Mixin_addEventListeners.js";
 import {Mixin_adoptStyleSheet} from "#customary/style/Mixin_adoptStyleSheet.js";
 import {Mixin_attributeChangedCallback} from "#customary/attributes/Mixin_attributeChangedCallback.js";
-import {Mixin_connected} from "#customary/lifecycle/connected/Mixin_connected.js";
+import {execute_hook_connected} from "#customary/lifecycle/connected/Mixin_connected.js";
 import {Mixin_disconnected} from "#customary/lifecycle/disconnected/Mixin_disconnected.js";
 import {Mixin_firstUpdated} from "#customary/lifecycle/firstUpdated/Mixin_firstUpdated.js";
 import {Mixin_renderFromTemplate} from "#customary/render/Mixin_renderFromTemplate.js";
@@ -15,11 +15,11 @@ import {getDefinition} from "#customary/CustomaryDefinition.js";
 
 export class CustomaryElement
 		extends
-				Mixin_addEventListeners(
+//				Mixin_addEventListeners(
 				Mixin_addEventListenersForBindings(
 				Mixin_adoptStyleSheet(
 				Mixin_attributeChangedCallback(
-				Mixin_connected(
+//				Mixin_connected(
 				Mixin_disconnected(
 				Mixin_firstUpdated(
 				Mixin_renderFromTemplate(
@@ -28,7 +28,8 @@ export class CustomaryElement
 				Mixin_updated(
 				Mixin_willUpdate(
 						LitElement
-				))))))))))))
+				))))))))))
+//))
 {
 	constructor() {
 		try {
@@ -58,4 +59,13 @@ export class CustomaryElement
 
 		return super.createRenderRoot();
 	}
+
+    // noinspection JSUnusedGlobalSymbols
+    override connectedCallback() {
+        super.connectedCallback?.();
+
+        addEventListeners(this);
+
+        execute_hook_connected(this);
+    }
 }
