@@ -5,7 +5,7 @@ export class AddEventListener {
             customElement: HTMLElement,
             selector?: string,
             type: string | undefined,
-            listener: (el: HTMLElement, e: Event) => void,
+            listener: (el: HTMLElement, e: Event, t: EventTarget) => void,
         }
     ) {}
 
@@ -17,25 +17,36 @@ export class AddEventListener {
         if (!selector) {
             customElement.addEventListener(
                 type,
-                (event: Event) => listener(customElement, event)
+                (event: Event) => listener(customElement, event, event.target!)
             );
             return;
         }
 
-        const eventContainer: ParentNode =
-            customElement.shadowRoot ?? customElement;
-        eventContainer.addEventListener(
+        customElement.addEventListener(
             type,
-            (event: Event) =>
-                matchesEventDelegation(event, selector) &&
-                listener(customElement, event)
+            (event: Event) => this.doIfEventDelegationMatches(event, selector, listener, customElement)
         );
     }
-}
 
-function matchesEventDelegation(event: Event, selector: string): boolean {
-    const target = event.target;
-    return target instanceof Element ? !!target.closest(selector) : false;
+    private doIfEventDelegationMatches(
+        event: Event,
+        selector: string,
+        listener: (el: HTMLElement, e: Event, target: EventTarget) => void,
+        customElement: HTMLElement
+    ) {
+        const composedPath = event.composedPath();
+
+        const target = composedPath[0];
+
+        const matchesEventDelegation =
+            target instanceof Element
+                ? !!target.closest(selector)
+                : false;
+
+        if (matchesEventDelegation) {
+            listener(customElement, event, target);
+        }
+    }
 }
 
 const DEFAULT_EVENT_TYPE = 'click';

@@ -93,17 +93,13 @@ export class CustomaryDefine<T extends HTMLElement> {
 
 	private getHtmlString(template: HTMLTemplateElement): string
 	{
-		this.hydrateBindings(template);
+		encodeExpressionPlaceholders(template);
 		this.hydrateMarkup(template);
 
-		const s1 = template.innerHTML;
-		const s2 = Expressions_recode.recode(s1);
-		return recodeMarkup(s2);
-	}
+		const s = template.innerHTML;
 
-	private hydrateBindings(template: HTMLTemplateElement) {
-		ExpressionAttributes.hydrate(template);
-		Attribute_bind.hydrate(template);
+		const s1 = decodeExpressionPlaceholders(s);
+		return restoreArrowFunctionsEncodedByTemplateInnerHtml(s1);
 	}
 
 	private hydrateMarkup(template: HTMLTemplateElement) {
@@ -177,13 +173,22 @@ function findHTMLTemplateElement(name: string, node: ParentNode): HTMLTemplateEl
 	return node.querySelector(`template[data-customary-name='${name}']`) as HTMLTemplateElement ?? undefined;
 }
 
+function encodeExpressionPlaceholders(template: HTMLTemplateElement) {
+    ExpressionAttributes.encodeExpressionPlaceholders(template);
+    Attribute_bind.encodeExpressionPlaceholders(template);
+}
+
+function decodeExpressionPlaceholders(s1: string) {
+    return Expressions_recode.decodeExpressionPlaceholders(s1);
+}
+
 /**
  innerHTML encodes some characters used by lit directives,
  so we must decode them back into the HTML string.
  over time the need to do this should disappear,
  as we add directive markup for a larger number of lit directives.
  */
-function recodeMarkup(htmlString: string) {
+function restoreArrowFunctionsEncodedByTemplateInnerHtml(htmlString: string) {
 	// lit directives expressed as arrow functions
 	return htmlString.replaceAll('=&gt;', '=>');
 }

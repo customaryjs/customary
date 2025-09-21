@@ -1,5 +1,5 @@
 import {LitElement} from "#customary/lit";
-import {Mixin_addEventListenersForBindings} from "#customary/bind/Mixin_addEventListenersForBindings.js";
+import {addEventListenersForBindings} from "#customary/bind/Mixin_addEventListenersForBindings.js";
 import {addEventListeners} from "#customary/events/Mixin_addEventListeners.js";
 import {Mixin_adoptStyleSheet} from "#customary/style/Mixin_adoptStyleSheet.js";
 import {Mixin_attributeChangedCallback} from "#customary/attributes/Mixin_attributeChangedCallback.js";
@@ -15,11 +15,8 @@ import {getDefinition} from "#customary/CustomaryDefinition.js";
 
 export class CustomaryElement
 		extends
-//				Mixin_addEventListeners(
-				Mixin_addEventListenersForBindings(
 				Mixin_adoptStyleSheet(
 				Mixin_attributeChangedCallback(
-//				Mixin_connected(
 				Mixin_disconnected(
 				Mixin_firstUpdated(
 				Mixin_renderFromTemplate(
@@ -28,8 +25,7 @@ export class CustomaryElement
 				Mixin_updated(
 				Mixin_willUpdate(
 						LitElement
-				))))))))))
-//))
+				)))))))))
 {
 	constructor() {
 		try {
@@ -65,6 +61,7 @@ export class CustomaryElement
         super.connectedCallback?.();
 
         addEventListeners(this);
+        addEventListenersForBindings(this);
 
         execute_hook_connected(this);
     }

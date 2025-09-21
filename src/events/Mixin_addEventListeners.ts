@@ -1,23 +1,5 @@
-import {LitElement} from '#customary/lit';
 import {getDefinition} from "#customary/CustomaryDefinition.js";
 import {AddEventListener} from "#customary/events/AddEventListener.js";
-
-type Constructor<T = {}> = new (...args: any[]) => T;
-
-/*
-export function Mixin_addEventListeners
-		<T extends Constructor<LitElement>>(superClass: T): T {
-			class Mixin_addEventListenersToUpdatedDescendants_Class extends superClass {
-				// noinspection JSUnusedGlobalSymbols
-				override connectedCallback() {
-					super.connectedCallback?.();
-                    addEventListeners(this);
-				}
-			}
-			return Mixin_addEventListenersToUpdatedDescendants_Class;
-		}
-
- */
 
 export function addEventListeners(customElement: HTMLElement) {
 	const definition = getDefinition(customElement);
@@ -42,7 +24,7 @@ function eventsArrayToOps(
 		{
 			selector?: string;
 			type?: string;
-			listener: (el: HTMLElement, event: Event) => void;
+			listener: (el: HTMLElement, event: Event, t: EventTarget) => void;
 		}
 	>
 ): Array<AddEventListener> {
@@ -61,7 +43,7 @@ function eventsRecordToOps(
 	customElement: HTMLElement,
 	events: Record<
 		string,
-		(el: HTMLElement, event: Event) => void
+		(el: HTMLElement, event: Event, t: EventTarget) => void
 	>
 ): Array<AddEventListener> {
 	return Object.entries(events)

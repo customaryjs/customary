@@ -33,13 +33,13 @@ export type CustomaryHooks<T extends HTMLElement> = {
 					{
 						selector?: string;
 						type?: string;
-						listener: (el: T, event: Event) => void;
+						listener: (el: T, event: Event, target: EventTarget) => void;
 					}
 			>
 			|
 			Record<
 					string,
-					(el: T, event: Event) => void
+					(el: T, event: Event, target: EventTarget) => void
 			>;
 	lifecycle?: {
 		willUpdate?: (el: T, changedProperties: PropertyValues) => void;
