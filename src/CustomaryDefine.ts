@@ -67,10 +67,17 @@ export class CustomaryDefine<T extends HTMLElement> {
 			}
 		}
 		catch (error) {
-			throw new Error(
-					'template unresolvable from current page or external html',
-					{cause: error}
-			);
+            const message = `${name}: template unresolvable from current page or external html`;
+            async function unresolvable() {
+                throw new Error(message, {cause: error});
+            }
+            void unresolvable();
+            const templatePlaceholder = document.createElement('template');
+            templatePlaceholder.innerHTML = `<span style="color: red; background: yellow">[${message}]</span>`;
+            return {
+                template: templatePlaceholder,
+                templateInDocument: templatePlaceholder,
+            }
 		}
 	}
 
@@ -171,7 +178,7 @@ function findHTMLTemplateElement(name: string, node: ParentNode): HTMLTemplateEl
 }
 
 /**
- innerHTML encodes some characters used by lit directives
+ innerHTML encodes some characters used by lit directives,
  so we must decode them back into the HTML string.
  over time the need to do this should disappear,
  as we add directive markup for a larger number of lit directives.
