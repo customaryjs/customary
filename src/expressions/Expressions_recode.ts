@@ -4,13 +4,13 @@ export class Expressions_recode
 {
     static encodeExpressionPlaceholder(
         {
-            type, tag, name, value,
+            type, tag, name, data,
         }:{
-            type?: string, tag: Element, name: string, value: string
+            type?: string, tag: Element, name: string, data: string
         }
     ) {
         const prefix = TYPE_x_PREFIX[this.toExpressionType(name, type)];
-        tag.setAttribute(`${prefix}${name}`, value);
+        tag.setAttribute(`${prefix}${name}`, data);
     }
 
     static decodeExpressionPlaceholders(htmlString: string) {

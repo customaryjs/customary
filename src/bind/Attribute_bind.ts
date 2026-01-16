@@ -12,7 +12,7 @@ export class Attribute_bind {
                     tag,
                     type: 'boolean',
                     name: 'checked',
-                    value: '$' +'{' + `this.${binding}` + " === 'true'}"
+                    data: '$' +'{' + `this.${binding}` + " === 'true'}"
                 });
             }
             else
@@ -20,7 +20,7 @@ export class Attribute_bind {
                 Expressions_recode.encodeExpressionPlaceholder({
                     tag,
                     name: 'value',
-                    value: '$' + '{' + `this.${binding}` + ' ?? null}'
+                    data: '$' + '{' + `this.${binding}` + ' ?? null}'
                 });
             }
         }
