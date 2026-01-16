@@ -14,23 +14,26 @@ export class ExpressionAttributes
     }
 
     private static encodeExpressionPlaceholder(attributeName: string, tag: Element) {
-        if (!attributeName.startsWith(EXPRESSION_ATTRIBUTE_PREFIX)) {
+        if (!attributeName.startsWith(EXPRESSION_NAME_ATTRIBUTE_PREFIX)) {
             return;
         }
-        const name = attributeName.substring(EXPRESSION_ATTRIBUTE_PREFIX.length);
-        const typeAttributeName = EXPRESSION_TYPE_ATTRIBUTE_PREFIX + name;
+        const ordinal = attributeName.substring(EXPRESSION_NAME_ATTRIBUTE_PREFIX.length);
+        const dataAttributeName = EXPRESSION_DATA_ATTRIBUTE_PREFIX + ordinal;
+        const typeAttributeName = EXPRESSION_TYPE_ATTRIBUTE_PREFIX + ordinal;
 
         Expressions_recode.encodeExpressionPlaceholder({
             tag,
-            name,
-            value: tag.getAttribute(attributeName)!,
+            name: tag.getAttribute(attributeName)!,
+            data: tag.getAttribute(dataAttributeName)!,
             type: tag.getAttribute(typeAttributeName) ?? undefined,
         });
         tag.removeAttribute(attributeName);
+        tag.removeAttribute(dataAttributeName);
         tag.removeAttribute(typeAttributeName);
     }
 }
 
 const EXPRESSIONS_ATTRIBUTE = 'data-customary-expressions';
-const EXPRESSION_ATTRIBUTE_PREFIX = 'data-customary-expression-';
-const EXPRESSION_TYPE_ATTRIBUTE_PREFIX = 'data-customary-expression_type-';
+const EXPRESSION_NAME_ATTRIBUTE_PREFIX = 'data-customary-expression-name';
+const EXPRESSION_DATA_ATTRIBUTE_PREFIX = 'data-customary-expression-data';
+const EXPRESSION_TYPE_ATTRIBUTE_PREFIX = 'data-customary-expression-type';
