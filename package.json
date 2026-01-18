@@ -4,20 +4,52 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "// ---- public ---- //": "//",
+    "compile": "wireit",
+    "build": "wireit",
+    "test": "wireit",
     "// ---- make ---- //": "//",
     "dist": "wireit",
-    "clean": "wireit",
     "// ---- dev ---- //": "//",
     "dev": "wireit",
     "compile:watch": "wireit",
+    "clean": "wireit",
     "// ---- command ---- //": "//",
     "dist:*": "wireit",
-    "compile": "wireit"
+    "test:in-src-dir": "wireit",
+    "test:in-____-dir": "wireit",
+    "// ---- help ---- //": "//",
+    "help": "wireit"
   },
   "wireit": {
+    "help": {
+      "command": "echo WIREIT_LOGGER=metrics npm run dist"
+    },
+    "test": {
+      "dependencies": [
+        "test:in-src-dir",
+        "test:integration"
+      ]
+    },
+    "test:in-src-dir": {
+      "command": "____IN_DIR=src npm run test:in-____-dir",
+      "dependencies": [
+        "compile"
+      ]
+    },
+    "test:in-____-dir": {
+      "command": "cd ${____IN_DIR} && echo 'cd ../customary-cookbook && npm test'"
+    },
     "dist": {
       "command": "npm run dist:*",
       "dependencies": ["build"]
+    },
+    "dist:without:test": {
+      "command": "npm run dist:*",
+      "dependencies": [
+        "clean:dist",
+        "dist:participants:then:build"
+      ]
     },
     "dist:*": {
       "dependencies": ["dist:bundles", "dist:library"]
@@ -29,18 +61,36 @@
     "dist:library": {
       "command": "npx webpack"
     },
+    "clean:dist": {
+      "command": "rimraf .dist .parcel-cache"
+    },
+    "test:in-dist-dir": {
+      "command": "____IN_DIR=.dist/$(cat package-json-dist-what.txt) npm run test:in-____-dir"
+    },
+    "test:integration": {
+      "dependencies": [
+        "../customary-cookbook:test"
+      ]
+    },
     "build": {
       "command": "npm run compile",
-      "dependencies": ["clean"]
+      "dependencies": [
+        "clean:src"
+      ]
+    },
+    "dist:participants:then:build": {
+      "command": "npm run build",
+      "dependencies": [
+        "dist:participants"
+      ]
     },
     "compile": {
       "command": "tsc --build --pretty --verbose"
     },
     "clean": {
-      "dependencies": ["clean:dist", "clean:src"]
-    },
-    "clean:dist": {
-      "command": "rimraf .dist .parcel-cache"
+      "dependencies": [
+        "clean:src"
+      ]
     },
     "clean:src": {
       "command": "rimraf --glob src/**/*.{d.ts,js.map,js} --glob tsconfig.tsbuildinfo"
@@ -52,6 +102,10 @@
     "compile:watch": {
       "command": "tsc --build --pretty --verbose --watch",
       "service": true
+    },
+    "dist:participants": {
+      "dependencies": [
+      ]
     }
   },
   "dependencies": {
@@ -113,9 +167,6 @@
   },
   "@parcel/resolver-default": {
     "packageExports": true
-  },
-  "engines": {
-    "node": "22.11.0"
   },
   "license": "MIT",
   "author": "Andre de Oliveira"
