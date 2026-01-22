@@ -9,7 +9,7 @@
     // ---- BEGIN lit decorators: @property @state @query
     // https://lit.dev/docs/components/decorators/#decorators-typescript
     "experimentalDecorators": true,
-    "useDefineForClassFields": false,
+    // "useDefineForClassFields": false, // ONLY WHEN: Property 'declaration' is used before its initialization
     // ---- END lit decorators: @property @state @query
     // ---- CODING STANDARDS TYPICAL FOR ALL PROJECTS START HERE ----
     "allowJs": false,
