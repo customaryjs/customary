@@ -129,8 +129,11 @@ export class CustomaryDefine<T extends HTMLElement> {
 		}
 	}
 
-	constructor(private readonly declaration: CustomaryDeclaration<any>) {}
-	private readonly name: string = this.declaration.name!;
+	constructor(private readonly declaration: CustomaryDeclaration<any>)
+	{
+		this.name = declaration.name!;
+	}
+	private readonly name: string;
 
 	private get externalLoader(): Promise<ExternalLoader> {
 		return this._externalLoader ??= createExternalLoader(
