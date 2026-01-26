@@ -5,6 +5,7 @@ import {FetchText, FetchText_DOM_singleton} from "#customary/fetch/FetchText.js"
 import {Markup_for} from "#customary/markup/Markup_for.js";
 import {Markup_if} from "#customary/markup/Markup_if.js";
 import {Markup_inside} from "#customary/markup/Markup_inside.js";
+import {Markup_classMap} from "#customary/markup/Markup_classMap.js";
 import {Markup_switch} from "#customary/markup/Markup_switch.js";
 import {AttributeProperties} from "#customary/attributes/AttributeProperties.js";
 import {StateProperties} from "#customary/state/StateProperties.js";
@@ -106,6 +107,7 @@ export class CustomaryDefine<T extends HTMLElement> {
 		Markup_for.hydrate(template);
 		Markup_if.hydrate(template);
 		Markup_switch.hydrate(template);
+		Markup_classMap.hydrate(template);
 
 		// must be last to accommodate all others
 		Markup_inside.hydrate(template);
