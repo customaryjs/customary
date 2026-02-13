@@ -1,32 +1,19 @@
 import {LitElement} from "#customary/lit";
-import {addEventListenersForBindings} from "#customary/bind/Mixin_addEventListenersForBindings.js";
-import {addEventListeners} from "#customary/events/Mixin_addEventListeners.js";
-import {Mixin_adoptStyleSheet} from "#customary/style/Mixin_adoptStyleSheet.js";
-import {Mixin_attributeChangedCallback} from "#customary/attributes/Mixin_attributeChangedCallback.js";
-import {execute_hook_connected} from "#customary/lifecycle/connected/Mixin_connected.js";
-import {Mixin_disconnected} from "#customary/lifecycle/disconnected/Mixin_disconnected.js";
-import {Mixin_firstUpdated} from "#customary/lifecycle/firstUpdated/Mixin_firstUpdated.js";
-import {Mixin_renderFromTemplate} from "#customary/render/Mixin_renderFromTemplate.js";
-import {Mixin_slotChange} from "#customary/slots/Mixin_slotChange.js";
-import {Mixin_state} from "#customary/state/Mixin_state.js";
-import {Mixin_updated} from "#customary/lifecycle/updated/Mixin_updated.js";
-import {Mixin_willUpdate} from "#customary/lifecycle/willUpdate/Mixin_willUpdate.js";
-import {getDefinition} from "#customary/CustomaryDefinition.js";
+import {CustomaryBind} from "#customary/bind/CustomaryBind.js";
+import {CustomaryChanges_firstUpdated} from "#customary/changes/CustomaryChanges_firstUpdated.js";
+import {CustomaryChanges_updated} from "#customary/changes/CustomaryChanges_updated.js";
+import {CustomaryChanges_willUpdate} from "#customary/changes/CustomaryChanges_willUpdate.js";
+import {CustomaryDefinition, getDefinition} from "#customary/CustomaryDefinition.js";
+import {CustomaryEvents} from "#customary/events/CustomaryEvents.js";
+import {CustomaryHooks} from "#customary/CustomaryHooks.js";
+import {CustomaryRender} from "#customary/render/CustomaryRender.js";
+import {CustomarySlots} from "#customary/slots/CustomarySlots.js";
+import {CustomaryState} from "#customary/state/CustomaryState.js";
+import {CustomaryStylesheets} from "#customary/style/CustomaryStylesheets.js";
+import {CustomaryValues} from "#customary/values/CustomaryValues.js";
+import {PropertyValues} from "#customary/lifecycle/changedProperties/PropertyValues.js";
 
-export class CustomaryElement
-		extends
-				Mixin_adoptStyleSheet(
-				Mixin_attributeChangedCallback(
-				Mixin_disconnected(
-				Mixin_firstUpdated(
-				Mixin_renderFromTemplate(
-				Mixin_slotChange(
-				Mixin_state(
-				Mixin_updated(
-				Mixin_willUpdate(
-						LitElement
-				)))))))))
-{
+export class CustomaryElement extends LitElement {
 	constructor() {
 		try {
 			super();
@@ -44,25 +31,107 @@ export class CustomaryElement
 			}
 			throw error;
 		}
+
+		const definition = getDefinition(this);
+
+		this._definition = definition;
+
+		const hooks = definition.declaration.hooks;
+
+		this.bind = new CustomaryBind(this);
+		this.changes_firstUpdated = new CustomaryChanges_firstUpdated(this, hooks);
+		this.changes_updated = new CustomaryChanges_updated(this, hooks);
+		this.changes_willUpdate = new CustomaryChanges_willUpdate(this, hooks);
+		this.events = new CustomaryEvents(this, hooks);
+		this._render = new CustomaryRender(this);
+		this.slots = new CustomarySlots(this, hooks);
+		this.stylesheets = new CustomaryStylesheets(this);
+		this.values = new CustomaryValues(this);
+
+		this.hooks = hooks;
+	}
+	private readonly _definition: CustomaryDefinition<this>;
+	private readonly changes_firstUpdated: CustomaryChanges_firstUpdated;
+	private readonly bind: CustomaryBind;
+	private readonly changes_updated: CustomaryChanges_updated;
+	private readonly changes_willUpdate: CustomaryChanges_willUpdate;
+	private readonly events: CustomaryEvents;
+	private readonly hooks: CustomaryHooks<this> | undefined;
+	private readonly _render: CustomaryRender;
+	private readonly slots: CustomarySlots;
+	private readonly stylesheets: CustomaryStylesheets;
+	private readonly values: CustomaryValues;
+
+	// noinspection JSUnusedGlobalSymbols
+	setState(state_or_fn: any) {
+		new CustomaryState(this)
+			.create_or_modify_state_property(state_or_fn);
+	}
+
+	override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
+		super.attributeChangedCallback(name, oldValue, newValue);
+
+		this.hooks?.dom?.attributeChangedCallback?.(this, name, oldValue, newValue);
 	}
 
 	override createRenderRoot() {
-		const definition = getDefinition(this);
-
-		if (definition.declaration.config?.construct?.shadowRootDont) {
+		if (this._definition.declaration.config?.construct?.shadowRootDont) {
 			return this;
 		}
 
 		return super.createRenderRoot();
 	}
 
-    // noinspection JSUnusedGlobalSymbols
     override connectedCallback() {
-        super.connectedCallback?.();
+        super.connectedCallback();
 
-        addEventListeners(this);
-        addEventListenersForBindings(this);
+		this.stylesheets.link_external_css_and_link_fonts(this._definition);
 
-        execute_hook_connected(this);
+		this.events.installEventListeners();
+
+		this.bind.installEventListenersForBindings(this._definition.attributes.attributes);
+
+		this.values.install_values(this._definition);
+
+		this.hooks?.lifecycle?.connected?.(this);
     }
+
+	override disconnectedCallback() {
+		super.disconnectedCallback();
+
+		this.hooks?.lifecycle?.disconnected?.(this);
+	}
+
+	protected override firstUpdated(changedProperties: PropertyValues) {
+		super.firstUpdated(changedProperties);
+
+		this.hooks?.lifecycle?.firstUpdated?.(this, changedProperties);
+
+		this.changes_firstUpdated.execute_hooks_changes_firstUpdated(changedProperties);
+
+		this.slots.install_slotchange();
+	}
+
+	protected override render(): unknown {
+		return this._render.render_lit_html_TemplateResult(
+			{htmlString: this._definition.immutable_htmlString,
+			state: (this as any).state}
+		);
+	}
+
+	protected override updated(changedProperties: PropertyValues) {
+		super.updated(changedProperties);
+
+		this.hooks?.lifecycle?.updated?.(this, changedProperties);
+
+		this.changes_updated.execute_hooks_changes_updated(changedProperties);
+	}
+
+	protected override willUpdate(changedProperties: PropertyValues) {
+		super.willUpdate(changedProperties);
+
+		this.hooks?.lifecycle?.willUpdate?.(this, changedProperties);
+
+		this.changes_willUpdate.execute_hooks_changes_willUpdate(changedProperties);
+	}
 }

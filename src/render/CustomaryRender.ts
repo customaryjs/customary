@@ -1,6 +1,21 @@
-import {choose, classMap, html, map, repeat, styleMap, when} from "#customary/lit";
 import {UncompiledTemplateResult} from "lit-html";
+import {choose, classMap, html, map, repeat, styleMap, when} from "#customary/lit";
 import {reuse_immutable_TemplateStringsArray} from "#customary/render/reuse_immutable_TemplateStringsArray.js";
+
+export class CustomaryRender {
+    constructor(
+        element: HTMLElement
+    ) {
+        this.element = element;
+    }
+    private readonly element: HTMLElement;
+
+    render_lit_html_TemplateResult(
+        {htmlString, state}: {htmlString: string, state: any}
+    ) {
+        return render_lit_html_TemplateResult(this.element, htmlString, state);
+    }
+}
 
 /**
  lit "html" is a tag function.
@@ -9,7 +24,7 @@ import {reuse_immutable_TemplateStringsArray} from "#customary/render/reuse_immu
  so we need JS compilation to happen at runtime.
  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates
  */
-export function render_lit_html_TemplateResult(
+function render_lit_html_TemplateResult(
     element: HTMLElement,
     htmlString: string,
     state: any,

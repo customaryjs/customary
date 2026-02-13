@@ -1,5 +1,6 @@
 import {PropertyDeclaration} from "@lit/reactive-element";
-import {dom_ElementDefinitionOptions} from "#customary/dom/dom_ElementDefinitionOptions";
+import {dom_ElementDefinitionOptions} from "#customary/dom/dom_ElementDefinitionOptions.js";
+import {PropertyValues} from "#customary/lifecycle/changedProperties/PropertyValues.js";
 
 export type CustomaryHooks<T extends HTMLElement> = {
 	properties?:
@@ -63,8 +64,3 @@ export type CustomaryHooks<T extends HTMLElement> = {
 		attributeChangedCallback?: (el: T, name: string, oldValue: string | null, newValue: string | null) => void;
 	}
 }
-
-type PropertyValues = Map<PropertyKey, unknown>;
-
-type State = any;
-type View = any;
