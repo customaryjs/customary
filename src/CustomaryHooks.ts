@@ -57,6 +57,18 @@ export type CustomaryHooks<T extends HTMLElement> = {
 		import_meta?: ImportMeta;
 		css_dont?: boolean;
 	}
+	derive?:
+			Array<
+					{
+						name: string,
+						willUpdate: (el: T) => any,
+					}
+			>
+			|
+			Record<
+					string,
+					(el: T) => any
+			>;
 	dom?: {
 		define?: {
 			options?: dom_ElementDefinitionOptions,

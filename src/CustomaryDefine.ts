@@ -9,6 +9,7 @@ import {Markup_classMap} from "#customary/markup/Markup_classMap.js";
 import {Markup_styleMap} from "#customary/markup/Markup_styleMap.js";
 import {Markup_switch} from "#customary/markup/Markup_switch.js";
 import {AttributeProperties} from "#customary/attributes/AttributeProperties.js";
+import {DeriveProperties} from "#customary/derive/DeriveProperties.js";
 import {StateProperties} from "#customary/state/StateProperties.js";
 import {PropertiesProperties} from "#customary/properties/PropertiesProperties.js";
 import {LitElement} from "#customary/lit";
@@ -89,6 +90,7 @@ export class CustomaryDefine<T extends HTMLElement> {
 	)
 	{
 		AttributeProperties.addProperties(constructor, customaryDefinition.attributes);
+		DeriveProperties.addProperties(constructor, customaryDefinition.declaration);
 		StateProperties.addProperties(constructor, customaryDefinition.declaration);
 		PropertiesProperties.addProperties(constructor, customaryDefinition.declaration);
 	}

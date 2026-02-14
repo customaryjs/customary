@@ -4,6 +4,7 @@ import {CustomaryChanges_firstUpdated} from "#customary/changes/CustomaryChanges
 import {CustomaryChanges_updated} from "#customary/changes/CustomaryChanges_updated.js";
 import {CustomaryChanges_willUpdate} from "#customary/changes/CustomaryChanges_willUpdate.js";
 import {CustomaryDefinition, getDefinition} from "#customary/CustomaryDefinition.js";
+import {CustomaryDerive} from "#customary/derive/CustomaryDerive.js";
 import {CustomaryEvents} from "#customary/events/CustomaryEvents.js";
 import {CustomaryHooks} from "#customary/CustomaryHooks.js";
 import {CustomaryRender} from "#customary/render/CustomaryRender.js";
@@ -42,6 +43,7 @@ export class CustomaryElement extends LitElement {
 		this.changes_firstUpdated = new CustomaryChanges_firstUpdated(this, hooks);
 		this.changes_updated = new CustomaryChanges_updated(this, hooks);
 		this.changes_willUpdate = new CustomaryChanges_willUpdate(this, hooks);
+		this.derive = new CustomaryDerive(this, hooks);
 		this.events = new CustomaryEvents(this, hooks);
 		this._render = new CustomaryRender(this);
 		this.slots = new CustomarySlots(this, hooks);
@@ -55,6 +57,7 @@ export class CustomaryElement extends LitElement {
 	private readonly bind: CustomaryBind;
 	private readonly changes_updated: CustomaryChanges_updated;
 	private readonly changes_willUpdate: CustomaryChanges_willUpdate;
+	private readonly derive: CustomaryDerive;
 	private readonly events: CustomaryEvents;
 	private readonly hooks: CustomaryHooks<this> | undefined;
 	private readonly _render: CustomaryRender;
@@ -131,6 +134,8 @@ export class CustomaryElement extends LitElement {
 		super.willUpdate(changedProperties);
 
 		this.hooks?.lifecycle?.willUpdate?.(this, changedProperties);
+
+		this.derive.execute_hooks_derive();
 
 		this.changes_willUpdate.execute_hooks_changes_willUpdate(changedProperties);
 	}
