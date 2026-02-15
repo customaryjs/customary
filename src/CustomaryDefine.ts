@@ -1,22 +1,11 @@
+import {LitElement} from "#customary/lit";
 import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
 import {CustomaryDeclaration} from "#customary/CustomaryDeclaration.js";
 import {ExternalLoader} from "#customary/external/ExternalLoader.js";
 import {FetchText, FetchText_DOM_singleton} from "#customary/fetch/FetchText.js";
-import {Markup_for} from "#customary/markup/Markup_for.js";
-import {Markup_if} from "#customary/markup/Markup_if.js";
-import {Markup_inside} from "#customary/markup/Markup_inside.js";
-import {Markup_classMap} from "#customary/markup/Markup_classMap.js";
-import {Markup_styleMap} from "#customary/markup/Markup_styleMap.js";
-import {Markup_switch} from "#customary/markup/Markup_switch.js";
-import {AttributeProperties} from "#customary/attributes/AttributeProperties.js";
-import {DeriveProperties} from "#customary/derive/DeriveProperties.js";
-import {StateProperties} from "#customary/state/StateProperties.js";
-import {PropertiesProperties} from "#customary/properties/PropertiesProperties.js";
-import {LitElement} from "#customary/lit";
-import {Attribute_bind} from "#customary/bind/Attribute_bind.js";
+import {CustomaryHtml} from "#customary/html/CustomaryHtml.js";
 import {AttributesDefinition, detectAttributes} from "#customary/attributes/AttributesDefinition.js";
-import {ExpressionAttributes} from "#customary/expressions/ExpressionAttributes.js";
-import {Expressions_recode} from "#customary/expressions/Expressions_recode.js";
+import {CustomaryProperties} from "#customary/CustomaryProperties.js";
 
 export class CustomaryDefine<T extends HTMLElement> {
 
@@ -38,10 +27,10 @@ export class CustomaryDefine<T extends HTMLElement> {
 			declaration: this.declaration,
 			attributes: attributes,
 			templateInDocument: !!templateInDocument,
-			immutable_htmlString: this.getHtmlString(template),
+			immutable_htmlString: CustomaryHtml.getHtmlString(template),
 		};
 
-		CustomaryDefine.addProperties(constructor as typeof LitElement, customaryDefinition);
+		CustomaryProperties.addProperties(constructor as typeof LitElement, customaryDefinition);
 
 		return customaryDefinition;
 	}
@@ -82,39 +71,6 @@ export class CustomaryDefine<T extends HTMLElement> {
                 templateInDocument: templatePlaceholder,
             }
 		}
-	}
-
-	private static addProperties<T extends HTMLElement>(
-			constructor: typeof LitElement,
-			customaryDefinition: CustomaryDefinition<T>,
-	)
-	{
-		AttributeProperties.addProperties(constructor, customaryDefinition.attributes);
-		DeriveProperties.addProperties(constructor, customaryDefinition.declaration);
-		StateProperties.addProperties(constructor, customaryDefinition.declaration);
-		PropertiesProperties.addProperties(constructor, customaryDefinition.declaration);
-	}
-
-	private getHtmlString(template: HTMLTemplateElement): string
-	{
-		encodeExpressionPlaceholders(template);
-		this.hydrateMarkup(template);
-
-		const s = template.innerHTML;
-
-		const s1 = decodeExpressionPlaceholders(s);
-		return restoreArrowFunctionsEncodedByTemplateInnerHtml(s1);
-	}
-
-	private hydrateMarkup(template: HTMLTemplateElement) {
-		Markup_for.hydrate(template);
-		Markup_if.hydrate(template);
-		Markup_switch.hydrate(template);
-		Markup_classMap.hydrate(template);
-		Markup_styleMap.hydrate(template);
-
-		// must be last to accommodate all others
-		Markup_inside.hydrate(template);
 	}
 
 	private async findHTMLTemplateElementInExternalFile(
@@ -180,26 +136,6 @@ async function loadFetchText(): Promise<FetchText> {
 
 function findHTMLTemplateElement(name: string, node: ParentNode): HTMLTemplateElement | undefined {
 	return node.querySelector(`template[data-customary-name='${name}']`) as HTMLTemplateElement ?? undefined;
-}
-
-function encodeExpressionPlaceholders(template: HTMLTemplateElement) {
-    ExpressionAttributes.encodeExpressionPlaceholders(template);
-    Attribute_bind.encodeExpressionPlaceholders(template);
-}
-
-function decodeExpressionPlaceholders(s1: string) {
-    return Expressions_recode.decodeExpressionPlaceholders(s1);
-}
-
-/**
- innerHTML encodes some characters used by lit directives,
- so we must decode them back into the HTML string.
- over time the need to do this should disappear,
- as we add directive markup for a larger number of lit directives.
- */
-function restoreArrowFunctionsEncodedByTemplateInnerHtml(htmlString: string) {
-	// lit directives expressed as arrow functions
-	return htmlString.replaceAll('=&gt;', '=>');
 }
 
 export function get_import_meta(declaration: CustomaryDeclaration<any>) {

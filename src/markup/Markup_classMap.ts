@@ -1,4 +1,5 @@
 import {toSelector} from "./toSelector.js";
+import {expandMarkupExpression} from "#customary/html/CustomaryHtml.js";
 
 export class Markup_classMap
 {
@@ -19,10 +20,10 @@ export class Markup_classMap
                     throw Error(`Attribute "target" is required for "${classMap_markup}" markup`)
                 })();
 
-            const classInfo = tag.getAttribute('classInfo') ??
+            const classInfo = expandMarkupExpression(tag.getAttribute('classInfo') ??
                 (() => {
                     throw Error(`Attribute "classInfo" is required for "${classMap_markup}" markup`)
-                })();
+                })());
 
             const target = node.querySelector(targetSelector);
             if (!target) {

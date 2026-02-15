@@ -9,7 +9,6 @@ import {CustomaryEvents} from "#customary/events/CustomaryEvents.js";
 import {CustomaryHooks} from "#customary/CustomaryHooks.js";
 import {CustomaryRender} from "#customary/render/CustomaryRender.js";
 import {CustomarySlots} from "#customary/slots/CustomarySlots.js";
-import {CustomaryState} from "#customary/state/CustomaryState.js";
 import {CustomaryStylesheets} from "#customary/style/CustomaryStylesheets.js";
 import {CustomaryValues} from "#customary/values/CustomaryValues.js";
 import {PropertyValues} from "#customary/lifecycle/changedProperties/PropertyValues.js";
@@ -67,12 +66,6 @@ export class CustomaryElement extends LitElement {
 	private readonly stylesheets: CustomaryStylesheets;
 	private readonly values: CustomaryValues;
 
-	// noinspection JSUnusedGlobalSymbols
-	setState(state_or_fn: any) {
-		new CustomaryState(this)
-			.create_or_modify_state_property(state_or_fn);
-	}
-
 	override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
 		super.attributeChangedCallback(name, oldValue, newValue);
 
@@ -117,8 +110,7 @@ export class CustomaryElement extends LitElement {
 
 	protected override render(): unknown {
 		return this._render.render_lit_html_TemplateResult(
-			{htmlString: this._definition.immutable_htmlString,
-			state: (this as any).state}
+			{htmlString: this._definition.immutable_htmlString}
 		);
 	}
 

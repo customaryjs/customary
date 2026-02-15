@@ -39,17 +39,19 @@ export class CustomaryDetector {
 	}
 
 	private detectValues(name: string): Record<string, object | object[]> | undefined {
-		const elements = this.document.querySelectorAll(
-				`script[type="application/json"][data-customary-name='${name}']`
-		);
+		const selectors = `script[type="application/json"][data-customary-name='${name}']`;
+		const elements = this.document.querySelectorAll(selectors);
 		if (elements.length === 0) {
 			return undefined;
 		}
 		const result: Record<string, object | object[]> = {};
 		for (const element of elements) {
 			if (element.textContent) {
-				// TODO Require a key and retire default 'state'
-				const key = element.getAttribute('data-customary-value') ?? 'state';
+				const qualifiedName = 'data-customary-value';
+				const key = element.getAttribute(qualifiedName) ??
+					(() => {
+						throw Error(`Attribute "${qualifiedName}" is required for "${selectors}"`)
+					})();
 				result[key] = JSON.parse(element.textContent);
 			}
 		}

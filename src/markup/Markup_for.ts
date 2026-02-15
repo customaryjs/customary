@@ -1,5 +1,6 @@
 import {set_outerHTML} from "./set_outerHTML.js";
 import {toSelector} from "#customary/markup/toSelector.js";
+import {expandMarkupExpression} from "#customary/html/CustomaryHtml.js";
 
 export class Markup_for
 {
@@ -15,10 +16,12 @@ export class Markup_for
 
 			this.hydrateTree(tag, template);
 
-			const items = tag.getAttribute('items') ??
+			const items_raw = tag.getAttribute('items') ??
 					(()=>{
 						throw Error(`Attribute "items" is required for "${for_markup}" markup`)
 					})();
+
+			const items = expandMarkupExpression(items_raw);
 
 			const value = tag.getAttribute('value') ?? 'value';
 
@@ -38,3 +41,5 @@ export class Markup_for
 	}
 }
 const for_markup = 'customary:for';
+
+

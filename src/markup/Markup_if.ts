@@ -1,5 +1,6 @@
 import {set_outerHTML} from "./set_outerHTML.js";
 import {toSelector} from "#customary/markup/toSelector.js";
+import {expandMarkupExpression} from "#customary/html/CustomaryHtml.js";
 
 export class Markup_if
 {
@@ -15,10 +16,10 @@ export class Markup_if
 
 			this.hydrateTree(tag, template);
 
-			const condition = tag.getAttribute('condition') ??
+			const condition = expandMarkupExpression(tag.getAttribute('condition') ??
 					(()=>{
 						throw Error(`Attribute "condition" is required for "${if_markup}" markup`)
-					})();
+					})());
 
 			const trueElements = [...tag.querySelectorAll(`:scope > ${toSelector(true_markup)}`)];
 			if (trueElements.length > 1) {

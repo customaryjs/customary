@@ -18,6 +18,7 @@
     "dist:*": "wireit",
     "test:in-src-dir": "wireit",
     "test:in-____-dir": "wireit",
+    "test:integration:_command_:run-the-tests": "wireit",
     "// ---- help ---- //": "//",
     "help": "wireit"
   },
@@ -38,7 +39,7 @@
       ]
     },
     "test:in-____-dir": {
-      "command": "cd ${____IN_DIR} && echo 'cd ../customary-cookbook && npm test'"
+      "command": "cd ${____IN_DIR} && echo 'suppressed: npm test (all integration tests)'"
     },
     "dist": {
       "command": "npm run dist:*",
@@ -68,6 +69,12 @@
       "command": "____IN_DIR=.dist/$(cat package-json-dist-what.txt) npm run test:in-____-dir"
     },
     "test:integration": {
+      "command": "npm run test:integration:_command_:run-the-tests",
+      "dependencies": [
+        "compile"
+      ]
+    },
+    "test:integration:_command_:run-the-tests": {
       "dependencies": [
         "../customary-cookbook:test"
       ]

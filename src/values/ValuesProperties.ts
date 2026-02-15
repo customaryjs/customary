@@ -1,19 +1,16 @@
 import {LitElement} from "#customary/lit";
-import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
 import {PropertiesInjector} from "#customary/properties/PropertiesInjector.js";
 import {CustomaryDeclaration} from "#customary/CustomaryDeclaration";
 
-export class StateProperties {
-
+export class ValuesProperties
+{
 	static addProperties<T extends HTMLElement>(
 			constructor: typeof LitElement,
 			declaration: CustomaryDeclaration<T>
 	)
 	{
-		const fromDeclaration = declaration.config?.state ?? [];
-		const names = [...new Set([...fromDeclaration])];
+		const names = Object.keys(declaration.values ?? {});
 		PropertiesInjector.injectProperties(constructor,
-			{ propertyDeclaration: {state: true}, names });
+			{ propertyDeclaration: {state: true}, names, skipExisting: true });
 	}
-
 }

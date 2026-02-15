@@ -21,9 +21,13 @@ export class PropertiesProperties
 
 		for (const key of names) {
 			PropertiesInjector.injectProperties(constructor,
-					hooksArray.find(value => value.name === key)?.propertyDeclaration
-					?? hooksRecord[key],
-					[key]);
+				{
+					propertyDeclaration:
+						hooksArray.find(value => value.name === key)?.propertyDeclaration
+							?? hooksRecord[key],
+					names: [key]
+				}
+			);
 		}
 	}
 }

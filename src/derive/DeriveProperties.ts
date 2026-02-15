@@ -16,7 +16,8 @@ export class DeriveProperties {
 			derive.map(entry => entry.name)
 			: Object.keys(derive);
 
-		PropertiesInjector.injectProperties(constructor, {state: true}, names);
+		PropertiesInjector.injectProperties(constructor,
+			{ propertyDeclaration: {state: true}, names });
 	}
 
 }

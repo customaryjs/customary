@@ -11,9 +11,9 @@ export class CustomaryRender {
     private readonly element: HTMLElement;
 
     render_lit_html_TemplateResult(
-        {htmlString, state}: {htmlString: string, state: any}
+        {htmlString}: {htmlString: string}
     ) {
-        return render_lit_html_TemplateResult(this.element, htmlString, state);
+        return render_lit_html_TemplateResult(this.element, htmlString);
     }
 }
 
@@ -27,7 +27,6 @@ export class CustomaryRender {
 function render_lit_html_TemplateResult(
     element: HTMLElement,
     htmlString: string,
-    state: any,
 ): UncompiledTemplateResult
 {
     function customary_lit_html_track(html_output: UncompiledTemplateResult): UncompiledTemplateResult {
@@ -38,12 +37,12 @@ function render_lit_html_TemplateResult(
     const thisArg: HTMLElement = element;
     const fn = new Function(
         'customary_lit_html_track',
-        'state', 'html', 'choose', 'classMap', 'map', 'repeat', 'styleMap', 'when',
+        'html', 'choose', 'classMap', 'map', 'repeat', 'styleMap', 'when',
         '"use strict"; return customary_lit_html_track( html\`' + htmlString + '\`' + ' )'
     );
     return fn.call(
         thisArg,
         customary_lit_html_track,
-        state, html, choose, classMap, map, repeat, styleMap, when
+        html, choose, classMap, map, repeat, styleMap, when
     );
 }

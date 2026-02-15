@@ -1,5 +1,6 @@
 import {set_outerHTML} from "./set_outerHTML.js";
 import {toSelector} from "#customary/markup/toSelector.js";
+import {expandMarkupExpression} from "#customary/html/CustomaryHtml.js";
 
 export class Markup_switch
 {
@@ -16,10 +17,10 @@ export class Markup_switch
 
 			this.hydrateTree(tag, template);
 
-			const value = tag.getAttribute('value') ??
+			const value = expandMarkupExpression(tag.getAttribute('value') ??
 					(() => {
 						throw Error(`Attribute "value" is required for "${switch_markup}" markup`)
-					})();
+					})());
 
 			const cases = this.toCases([...tag.querySelectorAll(`:scope > ${toSelector(case_markup)}`)]);
 
