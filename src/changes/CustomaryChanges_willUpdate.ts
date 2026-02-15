@@ -16,9 +16,16 @@ export class CustomaryChanges_willUpdate {
 		changedProperties: PropertyValues
 	) {
 		const changes = this.hooks?.changes;
-		if (!(changes instanceof Array)) return;
+		if (!changes) return;
 
-		for (const change of changes) {
+		const changesArray = changes instanceof Array ?
+			changes
+			: Object.entries(changes).map(
+				([name, willUpdate]) =>
+					({name, willUpdate})
+			);
+
+		for (const change of changesArray) {
 			const {name, willUpdate} = change;
 			if (willUpdate && changedProperties.has(name)) {
 				willUpdate(

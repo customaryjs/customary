@@ -51,6 +51,8 @@ export class CustomaryElement extends LitElement {
 		this.values = new CustomaryValues(this);
 
 		this.hooks = hooks;
+
+		this.values.install_values(this._definition);
 	}
 	private readonly _definition: CustomaryDefinition<this>;
 	private readonly changes_firstUpdated: CustomaryChanges_firstUpdated;
@@ -93,8 +95,6 @@ export class CustomaryElement extends LitElement {
 		this.events.installEventListeners();
 
 		this.bind.installEventListenersForBindings(this._definition.attributes.attributes);
-
-		this.values.install_values(this._definition);
 
 		this.hooks?.lifecycle?.connected?.(this);
     }
