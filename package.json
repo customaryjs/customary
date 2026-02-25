@@ -16,9 +16,7 @@
     "clean": "wireit",
     "// ---- command ---- //": "//",
     "dist:*": "wireit",
-    "test:in-src-dir": "wireit",
-    "test:in-____-dir": "wireit",
-    "test:integration:_command_:run-the-tests": "wireit",
+    "test:integration": "wireit",
     "// ---- help ---- //": "//",
     "help": "wireit"
   },
@@ -27,19 +25,15 @@
       "command": "echo WIREIT_LOGGER=metrics npm run dist"
     },
     "test": {
-      "dependencies": [
-        "test:in-src-dir",
-        "test:integration"
-      ]
-    },
-    "test:in-src-dir": {
-      "command": "____IN_DIR=src npm run test:in-____-dir",
+      "command": "npm run test:integration",
       "dependencies": [
         "compile"
       ]
     },
-    "test:in-____-dir": {
-      "command": "cd ${____IN_DIR} && echo 'suppressed: npm test (all integration tests)'"
+    "test:integration": {
+      "dependencies": [
+        "../customary-cookbook:test"
+      ]
     },
     "dist": {
       "command": "npm run dist:*",
@@ -64,20 +58,6 @@
     },
     "clean:dist": {
       "command": "rimraf .dist .parcel-cache"
-    },
-    "test:in-dist-dir": {
-      "command": "____IN_DIR=.dist/$(cat package-json-dist-what.txt) npm run test:in-____-dir"
-    },
-    "test:integration": {
-      "command": "npm run test:integration:_command_:run-the-tests",
-      "dependencies": [
-        "compile"
-      ]
-    },
-    "test:integration:_command_:run-the-tests": {
-      "dependencies": [
-        "../customary-cookbook:test"
-      ]
     },
     "build": {
       "command": "npm run compile",
