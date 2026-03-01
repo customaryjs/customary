@@ -28,7 +28,23 @@ export class Markup_for
 			const index = tag.getAttribute('index');
 			const args = index ? `(${value}, ${index})` : value;
 
-			const body = tag.innerHTML;
+			const for_body = tag.querySelector(`:scope > ${toSelector(for_body_markup)}`);
+
+			let body: string;
+			if (for_body) {
+				const selectors = for_body.getAttribute('target') ??
+						(()=>{ throw Error(`Attribute "target" is required for "${for_body_markup}" markup`) })();
+				const source = template.content.querySelector(selectors) ??
+						(()=>{ throw Error(`No element matching ${selectors}`) })();
+				body = source.outerHTML
+					.replaceAll('<tr>', '&lt;tr&gt;')
+					.replaceAll('</tr>', '&lt;/tr&gt;')
+					.replaceAll('<td>', '&lt;td&gt;')
+					.replaceAll('</td>', '&lt;/td&gt;');
+				source.remove();
+			} else {
+				body = tag.innerHTML;
+			}
 
 			const use_repeat_instead_of_map = true;
 			const directive = use_repeat_instead_of_map
@@ -41,5 +57,6 @@ export class Markup_for
 	}
 }
 const for_markup = 'customary:for';
+const for_body_markup = 'customary:for-body';
 
 

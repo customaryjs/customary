@@ -18,7 +18,8 @@ export class CustomaryHtml {
 
         const s1 = decodeExpressionPlaceholders(s);
         const s2 = restoreArrowFunctionsEncodedByTemplateInnerHtml(s1);
-        return expandStringInterpolation(s2);
+        const s3 = restoreTableTagsEncodedByForBody(s2);
+        return expandStringInterpolation(s3);
     }
 }
 
@@ -51,6 +52,14 @@ function decodeExpressionPlaceholders(s1: string) {
 function restoreArrowFunctionsEncodedByTemplateInnerHtml(htmlString: string) {
     // lit directives expressed as arrow functions
     return htmlString.replaceAll('=&gt;', '=>');
+}
+
+function restoreTableTagsEncodedByForBody(htmlString: string): string {
+    return htmlString
+        .replaceAll('&lt;tr&gt;', '<tr>')
+        .replaceAll('&lt;/tr&gt;', '</tr>')
+        .replaceAll('&lt;td&gt;', '<td>')
+        .replaceAll('&lt;/td&gt;', '</td>');
 }
 
 function expandStringInterpolation(htmlString: string): string {
