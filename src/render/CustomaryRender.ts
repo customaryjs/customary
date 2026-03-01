@@ -40,9 +40,27 @@ function render_lit_html_TemplateResult(
         'html', 'choose', 'classMap', 'map', 'repeat', 'styleMap', 'when',
         '"use strict"; return customary_lit_html_track( html\`' + htmlString + '\`' + ' )'
     );
-    return fn.call(
-        thisArg,
-        customary_lit_html_track,
-        html, choose, classMap, map, repeat, styleMap, when
-    );
+    try
+    {
+        return fn.call(
+            thisArg,
+            customary_lit_html_track,
+            html, choose, classMap, map, repeat, styleMap, when
+        );
+    }
+    catch (error: any)
+    {
+        console.error(
+`\
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+!!!!!!!! html function unable to compile template !!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+${htmlString}
+
+${error}
+ 
+`);
+        throw error;
+    }
 }
