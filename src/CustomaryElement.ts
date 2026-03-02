@@ -127,8 +127,8 @@ export class CustomaryElement extends LitElement {
 
 		this.hooks?.lifecycle?.willUpdate?.(this, changedProperties);
 
-		this.derive.execute_hooks_derive();
-
 		this.changes_willUpdate.execute_hooks_changes_willUpdate(changedProperties);
+
+		this.derive.execute_hooks_derive();
 	}
 }
