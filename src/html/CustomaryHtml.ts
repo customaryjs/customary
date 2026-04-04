@@ -3,7 +3,7 @@ import {ExpressionAttributes} from "#customary/expressions/ExpressionAttributes.
 import {Expressions_recode} from "#customary/expressions/Expressions_recode.js";
 import {Markup_for} from "#customary/markup/Markup_for.js";
 import {Markup_if} from "#customary/markup/Markup_if.js";
-import {Markup_inside} from "#customary/markup/Markup_inside.js";
+import {Markup_move_into} from "#customary/markup/Markup_move_into.js";
 import {Markup_classMap} from "#customary/markup/Markup_classMap.js";
 import {Markup_styleMap} from "#customary/markup/Markup_styleMap.js";
 import {Markup_switch} from "#customary/markup/Markup_switch.js";
@@ -31,7 +31,7 @@ function hydrateMarkup(template: HTMLTemplateElement) {
     Markup_styleMap.hydrate(template);
 
     // must be last to accommodate all others
-    Markup_inside.hydrate(template);
+    Markup_move_into.hydrate(template);
 }
 
 function encodeExpressionPlaceholders(template: HTMLTemplateElement) {

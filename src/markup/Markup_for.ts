@@ -32,8 +32,8 @@ export class Markup_for
 
 			let body: string;
 			if (for_body) {
-				const selectors = for_body.getAttribute('target') ??
-						(()=>{ throw Error(`Attribute "target" is required for "${for_body_markup}" markup`) })();
+				const selectors = for_body.getAttribute('selector') ??
+						(()=>{ throw Error(`Attribute "selector" is required for "${for_body_markup}" markup`) })();
 				const source = template.content.querySelector(selectors) ??
 						(()=>{ throw Error(`No element matching ${selectors}`) })();
 				body = source.outerHTML
@@ -57,6 +57,6 @@ export class Markup_for
 	}
 }
 const for_markup = 'customary:for';
-const for_body_markup = 'customary:for-body';
+const for_body_markup = 'customary:move-here';
 
 
