@@ -1,8 +1,8 @@
 import {set_outerHTML} from "./set_outerHTML.js";
-import {toSelector} from "#customary/markup/toSelector.js";
-import {expandMarkupExpression} from "#customary/html/CustomaryHtml.js";
+import {toSelector} from "#customary/logic/toSelector.js";
+import {expandCustomaryInterpolation} from "#customary/html/CustomaryHtml.js";
 
-export class Markup_for
+export class LogicTag_for
 {
 	static hydrate(template: HTMLTemplateElement) {
 		this.hydrateTree(template.content, template);
@@ -11,29 +11,29 @@ export class Markup_for
 	private static hydrateTree(node: ParentNode, template: HTMLTemplateElement)
 	{
 		while (true) {
-			const tag = node.querySelector(toSelector(for_markup));
+			const tag = node.querySelector(toSelector(tag_name));
 			if (!tag) return;
 
 			this.hydrateTree(tag, template);
 
 			const items_raw = tag.getAttribute('items') ??
 					(()=>{
-						throw Error(`Attribute "items" is required for "${for_markup}" markup`)
+						throw Error(`Attribute "items" is required for "${tag_name}" tag`)
 					})();
 
-			const items = expandMarkupExpression(items_raw);
+			const items = expandCustomaryInterpolation(items_raw);
 
 			const value = tag.getAttribute('value') ?? 'value';
 
 			const index = tag.getAttribute('index');
 			const args = index ? `(${value}, ${index})` : value;
 
-			const for_body = tag.querySelector(`:scope > ${toSelector(for_body_markup)}`);
+			const for_body = tag.querySelector(`:scope > ${toSelector(move_here_tag_name)}`);
 
 			let body: string;
 			if (for_body) {
 				const selectors = for_body.getAttribute('selector') ??
-						(()=>{ throw Error(`Attribute "selector" is required for "${for_body_markup}" markup`) })();
+						(()=>{ throw Error(`Attribute "selector" is required for "${move_here_tag_name}" tag`) })();
 				const source = template.content.querySelector(selectors) ??
 						(()=>{ throw Error(`No element matching ${selectors}`) })();
 				body = source.outerHTML
@@ -56,7 +56,7 @@ export class Markup_for
 		}
 	}
 }
-const for_markup = 'customary:for';
-const for_body_markup = 'customary:move-here';
+const tag_name = 'customary:for';
+const move_here_tag_name = 'customary:move-here';
 
 

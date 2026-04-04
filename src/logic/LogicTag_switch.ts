@@ -1,8 +1,8 @@
 import {set_outerHTML} from "./set_outerHTML.js";
-import {toSelector} from "#customary/markup/toSelector.js";
-import {expandMarkupExpression} from "#customary/html/CustomaryHtml.js";
+import {toSelector} from "#customary/logic/toSelector.js";
+import {expandCustomaryInterpolation} from "#customary/html/CustomaryHtml.js";
 
-export class Markup_switch
+export class LogicTag_switch
 {
 	static hydrate(template: HTMLTemplateElement)
 	{
@@ -12,17 +12,17 @@ export class Markup_switch
 	private static hydrateTree(node: ParentNode, template: HTMLTemplateElement)
 	{
 		while (true) {
-			const tag = node.querySelector(toSelector(switch_markup));
+			const tag = node.querySelector(toSelector(tag_name));
 			if (!tag) return;
 
 			this.hydrateTree(tag, template);
 
-			const value = expandMarkupExpression(tag.getAttribute('value') ??
+			const value = expandCustomaryInterpolation(tag.getAttribute('value') ??
 					(() => {
-						throw Error(`Attribute "value" is required for "${switch_markup}" markup`)
+						throw Error(`Attribute "value" is required for "${tag_name}" tag`)
 					})());
 
-			const cases = this.toCases([...tag.querySelectorAll(`:scope > ${toSelector(case_markup)}`)]);
+			const cases = this.toCases([...tag.querySelectorAll(`:scope > ${toSelector(case_tag_name)}`)]);
 
 			const valueCases = cases.valueCases.join(',\n');
 
@@ -39,13 +39,13 @@ export class Markup_switch
 		defaultCase?: string
 	} {
 		if (cases.length === 0) {
-			throw Error(`At least one "${case_markup}" is required for "${switch_markup}" markup`);
+			throw Error(`At least one "${case_tag_name}" is required for "${tag_name}" tag`);
 		}
 
 		const defaultElements =
 				cases.filter(caseElement => !caseElement.hasAttribute('value'));
 		if (defaultElements.length > 1) {
-			throw Error(`Only one default "${case_markup}" is allowed for "${switch_markup}" markup`);
+			throw Error(`Only one default "${case_tag_name}" is allowed for "${tag_name}" tag`);
 		}
 		const defaultElement = defaultElements[0];
 		const defaultCase = `() => customary_lit_html_track( html\`${defaultElement?.innerHTML}\` )`;
@@ -60,5 +60,5 @@ export class Markup_switch
 		return {valueCases, defaultCase};
 	}
 }
-const switch_markup = 'customary:switch';
-const case_markup = 'customary:case';
+const tag_name = 'customary:switch';
+const case_tag_name = 'customary:case';

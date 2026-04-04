@@ -1,18 +1,18 @@
 import {Attribute_bind} from "#customary/bind/Attribute_bind.js";
 import {ExpressionAttributes} from "#customary/expressions/ExpressionAttributes.js";
 import {Expressions_recode} from "#customary/expressions/Expressions_recode.js";
-import {Markup_for} from "#customary/markup/Markup_for.js";
-import {Markup_if} from "#customary/markup/Markup_if.js";
-import {Markup_move_into} from "#customary/markup/Markup_move_into.js";
-import {Markup_classMap} from "#customary/markup/Markup_classMap.js";
-import {Markup_styleMap} from "#customary/markup/Markup_styleMap.js";
-import {Markup_switch} from "#customary/markup/Markup_switch.js";
+import {LogicTag_for} from "#customary/logic/LogicTag_for.js";
+import {LogicTag_if} from "#customary/logic/LogicTag_if.js";
+import {LogicTag_move_into} from "#customary/logic/LogicTag_move_into.js";
+import {LogicTag_classMap} from "#customary/logic/LogicTag_classMap.js";
+import {LogicTag_styleMap} from "#customary/logic/LogicTag_styleMap.js";
+import {LogicTag_switch} from "#customary/logic/LogicTag_switch.js";
 
 export class CustomaryHtml {
     static getHtmlString(template: HTMLTemplateElement): string
     {
         encodeExpressionPlaceholders(template);
-        hydrateMarkup(template);
+        hydrateLogicTags(template);
 
         const s = template.innerHTML;
 
@@ -23,15 +23,15 @@ export class CustomaryHtml {
     }
 }
 
-function hydrateMarkup(template: HTMLTemplateElement) {
-    Markup_for.hydrate(template);
-    Markup_if.hydrate(template);
-    Markup_switch.hydrate(template);
-    Markup_classMap.hydrate(template);
-    Markup_styleMap.hydrate(template);
+function hydrateLogicTags(template: HTMLTemplateElement) {
+    LogicTag_for.hydrate(template);
+    LogicTag_if.hydrate(template);
+    LogicTag_switch.hydrate(template);
+    LogicTag_classMap.hydrate(template);
+    LogicTag_styleMap.hydrate(template);
 
     // must be last to accommodate all others
-    Markup_move_into.hydrate(template);
+    LogicTag_move_into.hydrate(template);
 }
 
 function encodeExpressionPlaceholders(template: HTMLTemplateElement) {
@@ -47,7 +47,7 @@ function decodeExpressionPlaceholders(s1: string) {
  innerHTML encodes some characters used by lit directives,
  so we must decode them back into the HTML string.
  over time the need to do this should disappear,
- as we add directive markup for a larger number of lit directives.
+ as we add logic tags for a larger number of lit directives.
  */
 function restoreArrowFunctionsEncodedByTemplateInnerHtml(htmlString: string) {
     // lit directives expressed as arrow functions
@@ -78,7 +78,7 @@ function expandStringInterpolation(htmlString: string): string {
 }
 
 
-export function expandMarkupExpression(expression: string): string {
+export function expandCustomaryInterpolation(expression: string): string {
     const curl_curley = /^\{\{([a-zA-Z_][\w-]*(?:\.[a-zA-Z_][\w-]*)*)}}$/;
     const curl_square = /^\{\[([a-zA-Z_][\w-]*(?:\.[a-zA-Z_][\w-]*)*)]}$/;
 

@@ -1,7 +1,7 @@
 import {toSelector} from "./toSelector.js";
-import {expandMarkupExpression} from "#customary/html/CustomaryHtml.js";
+import {expandCustomaryInterpolation} from "#customary/html/CustomaryHtml.js";
 
-export class Markup_styleMap
+export class LogicTag_styleMap
 {
     static hydrate(template: HTMLTemplateElement) {
         this.hydrateTree(template.content);
@@ -10,24 +10,24 @@ export class Markup_styleMap
     private static hydrateTree(node: ParentNode)
     {
         while (true) {
-            const tag = node.querySelector(toSelector(styleMap_markup));
+            const tag = node.querySelector(toSelector(tag_name));
             if (!tag) return;
 
             this.hydrateTree(tag);
 
             const targetSelector = tag.getAttribute('target') ??
                 (() => {
-                    throw Error(`Attribute "target" is required for "${styleMap_markup}" markup`)
+                    throw Error(`Attribute "target" is required for "${tag_name}" tag`)
                 })();
 
-            const styleInfo = expandMarkupExpression(tag.getAttribute('styleInfo') ??
+            const styleInfo = expandCustomaryInterpolation(tag.getAttribute('styleInfo') ??
                 (() => {
-                    throw Error(`Attribute "styleInfo" is required for "${styleMap_markup}" markup`)
+                    throw Error(`Attribute "styleInfo" is required for "${tag_name}" tag`)
                 })());
 
             const target = node.querySelector(targetSelector);
             if (!target) {
-                throw Error(`Target element "${targetSelector}" not found for "${styleMap_markup}" markup`);
+                throw Error(`Target element "${targetSelector}" not found for "${tag_name}" tag`);
             }
 
             const existingStyle = target.getAttribute('style');
@@ -44,4 +44,4 @@ export class Markup_styleMap
         }
     }
 }
-const styleMap_markup = 'customary:styleMap';
+const tag_name = 'customary:styleMap';

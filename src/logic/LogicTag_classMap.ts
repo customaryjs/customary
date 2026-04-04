@@ -1,7 +1,7 @@
 import {toSelector} from "./toSelector.js";
-import {expandMarkupExpression} from "#customary/html/CustomaryHtml.js";
+import {expandCustomaryInterpolation} from "#customary/html/CustomaryHtml.js";
 
-export class Markup_classMap
+export class LogicTag_classMap
 {
     static hydrate(template: HTMLTemplateElement) {
         this.hydrateTree(template.content);
@@ -10,24 +10,24 @@ export class Markup_classMap
     private static hydrateTree(node: ParentNode)
     {
         while (true) {
-            const tag = node.querySelector(toSelector(classMap_markup));
+            const tag = node.querySelector(toSelector(tag_name));
             if (!tag) return;
 
             this.hydrateTree(tag);
 
             const targetSelector = tag.getAttribute('target') ??
                 (() => {
-                    throw Error(`Attribute "target" is required for "${classMap_markup}" markup`)
+                    throw Error(`Attribute "target" is required for "${tag_name}" tag`)
                 })();
 
-            const classInfo = expandMarkupExpression(tag.getAttribute('classInfo') ??
+            const classInfo = expandCustomaryInterpolation(tag.getAttribute('classInfo') ??
                 (() => {
-                    throw Error(`Attribute "classInfo" is required for "${classMap_markup}" markup`)
+                    throw Error(`Attribute "classInfo" is required for "${tag_name}" tag`)
                 })());
 
             const target = node.querySelector(targetSelector);
             if (!target) {
-                throw Error(`Target element "${targetSelector}" not found for "${classMap_markup}" markup`);
+                throw Error(`Target element "${targetSelector}" not found for "${tag_name}" tag`);
             }
 
             const existingClass = target.getAttribute('class');
@@ -44,4 +44,4 @@ export class Markup_classMap
         }
     }
 }
-const classMap_markup = 'customary:classMap';
+const tag_name = 'customary:classMap';
