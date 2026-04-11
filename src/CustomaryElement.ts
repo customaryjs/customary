@@ -6,6 +6,7 @@ import {CustomaryChanges_willUpdate} from "#customary/changes/CustomaryChanges_w
 import {CustomaryDefinition, getDefinition} from "#customary/CustomaryDefinition.js";
 import {CustomaryDerive} from "#customary/derive/CustomaryDerive.js";
 import {CustomaryEvents} from "#customary/events/CustomaryEvents.js";
+import {CustomaryFonts} from "#customary/fonts/CustomaryFonts.js";
 import {CustomaryHooks} from "#customary/CustomaryHooks.js";
 import {CustomaryRender} from "#customary/render/CustomaryRender.js";
 import {CustomarySlots} from "#customary/slots/CustomarySlots.js";
@@ -83,7 +84,9 @@ export class CustomaryElement extends LitElement {
     override connectedCallback() {
         super.connectedCallback();
 
-		this.stylesheets.link_external_css_and_link_fonts(this._definition);
+		this.stylesheets.link_external_css(this._definition);
+
+		CustomaryFonts.link_fonts(this._definition);
 
 		this.events.installEventListeners();
 

@@ -145,13 +145,3 @@ export function get_import_meta(declaration: CustomaryDeclaration<any>) {
 			'(document did not have a named template element, and an html string was not provided.)')
 	})();
 }
-
-export function collect_font_locations(declaration: CustomaryDeclaration<any>): string[] | undefined {
-	return ((a: string[]) => a.length > 0 ? a : undefined)(
-		[
-			declaration.config?.define?.fontLocation,
-			...(declaration.config?.define?.fontLocations ?? []),
-		]
-			.filter(location => location != undefined)
-	);
-}

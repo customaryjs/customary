@@ -1,5 +1,5 @@
 import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
-import {collect_font_locations, get_import_meta} from "#customary/CustomaryDefine.js";
+import {get_import_meta} from "#customary/CustomaryDefine.js";
 import {resolveLocation} from "#customary/external/ExternalLoader.js";
 
 export class CustomaryStylesheets {
@@ -8,78 +8,91 @@ export class CustomaryStylesheets {
 	}
 	private readonly element: HTMLElement;
 
-	link_external_css_and_link_fonts(
-		definition: CustomaryDefinition<any>
-	) {
-		link_external_css(definition, this.element);
+	link_external_css(definition: CustomaryDefinition<any>) {
+		if (definition.templateInDocument) return;
 
-		link_fonts(definition);
+		const declaration = definition.declaration;
+
+		if (declaration.hooks?.externalLoader?.css_dont) return;
+
+		const import_meta = get_import_meta(declaration);
+		const name = declaration.name!;
+
+		const location: string = resolveLocation({
+			import_meta,
+			name,
+			extension: 'css',
+		});
+
+		const shadowRoot: ShadowRoot | null = findNearestShadowRoot(this.element);
+		const rel = 'stylesheet';
+		function linkElementFn(link: HTMLLinkElement) {link.type = 'text/css'}
+
+		if (shadowRoot)
+		{
+			appendLinkElement_to_ShadowRoot(shadowRoot, {href: location, rel, linkElementFn});
+		}
+		else
+		{
+			appendLinkElement_to_Document({href: location, rel, linkElementFn});
+		}
 	}
 }
 
-function link_external_css(
-	definition: CustomaryDefinition<any>, element: HTMLElement
-) {
-	if (definition.templateInDocument) return;
-
-	const declaration = definition.declaration;
-
-	if (declaration.hooks?.externalLoader?.css_dont) return;
-
-	const import_meta = get_import_meta(declaration);
-	const name = declaration.name!;
-
-	const location: string = resolveLocation({
-		import_meta,
-		name,
-		extension: 'css',
-	});
-
-	const shadowRoot: ShadowRoot | null = findNearestShadowRoot(element);
-
-	appendLinkElement(shadowRoot || document, {href: location, id: name});
-}
-
-/**
- * adopter of font stylesheets can only be the root document dom, not the shadow dom.
- * @see https://github.com/microsoft/vscode/issues/159877#issuecomment-1262843952
- * @see https://github.com/mdn/interactive-examples/issues/887#issuecomment-432606925
- */
-function link_fonts(definition: CustomaryDefinition<any>) {
-	const declaration = definition.declaration;
-
-	const locations = collect_font_locations(declaration);
-
-	if (!locations) return;
-
-	for (const location of locations) {
-		appendLinkElement(document, {href: location, id: `customary-fontLocation-${location}`});
-	}
-}
-
-function appendLinkElement(
-	host: ShadowRoot | Document,
+function appendLinkElement_to_ShadowRoot(
+	shadowRoot: ShadowRoot,
 	options: {
 		href: string,
-		id: string,
+		rel: string,
+		linkElementFn: (linkElement: HTMLLinkElement) => void,
+	}
+) {
+	const node: ParentNode = shadowRoot;
+
+	appendLinkElement(node, {
+		href: options.href,
+		rel: options.rel,
+		linkElementFn: options.linkElementFn,
+	});
+}
+
+export function appendLinkElement_to_Document(
+	options: {
+		href: string,
+		rel: string,
+		linkElementFn?: (linkElement: HTMLLinkElement) => void,
+	}
+) {
+	const node: ParentNode = document.head;
+
+	appendLinkElement(node, {
+		href: options.href,
+		rel: options.rel,
+		linkElementFn: options.linkElementFn,
+	});
+}
+
+export function appendLinkElement(
+	parentNode: ParentNode,
+	options: {
+		href: string,
+		rel: string,
+		linkElementFn?: (linkElement: HTMLLinkElement) => void | undefined,
 	}
 )
 {
-	const id = options.id;
+	if (exists_link_href(parentNode, options.href)) return;
 
-	const exists = host instanceof ShadowRoot ? host.getElementById(id) : host.getElementById(id);
-
-	if (exists) return;
-
-	const node = host instanceof ShadowRoot ? host : host.head;
-
-	const linkElement = document.createElement('link');
+	const linkElement: HTMLLinkElement = document.createElement('link');
 	linkElement.href = options.href;
-	linkElement.id = id;
-	linkElement.rel = 'stylesheet';
-	linkElement.type = 'text/css';
+	linkElement.rel = options.rel;
+	options.linkElementFn?.(linkElement);
 
-	node.appendChild(linkElement);
+	parentNode.appendChild(linkElement);
+}
+
+function exists_link_href(parentNode: ParentNode, href: string) {
+	return parentNode.querySelector(`link[href="${href}"]`);
 }
 
 function findNearestShadowRoot(element: Element): ShadowRoot | null {
