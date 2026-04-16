@@ -14,7 +14,7 @@
     // ---- CODING STANDARDS TYPICAL FOR ALL PROJECTS START HERE ----
     "allowJs": false,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "sourceMap": true,
