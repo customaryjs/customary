@@ -1,6 +1,8 @@
 import {CustomaryDefinition, hasDefinition, setDefinition} from "#customary/CustomaryDefinition.js";
 import {CustomaryDeclaration} from "#customary/CustomaryDeclaration.js";
 import {CustomaryDefine} from "#customary/CustomaryDefine.js";
+import {CustomaryProperties} from "#customary/CustomaryProperties";
+import {LitElement} from "#customary/lit";
 
 const WAIT_TO_DEFINE_EVERYTHING_IN_THE_END = false;
 
@@ -70,9 +72,11 @@ export class CustomaryRegistry
         }
 
         const definition: CustomaryDefinition<T> =
-            await new CustomaryDefine(declaration).define(constructor);
+            await new CustomaryDefine(declaration).define();
 
         setDefinition(constructor, definition);
+
+        CustomaryProperties.addProperties(constructor as typeof LitElement, definition);
 
         this.dom_customElementRegistry.define(
             declaration.name!, constructor,

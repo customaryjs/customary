@@ -1,21 +1,17 @@
-import {LitElement} from "#customary/lit";
 import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
 import {CustomaryDeclaration} from "#customary/CustomaryDeclaration.js";
 import {ExternalLoader} from "#customary/external/ExternalLoader.js";
 import {FetchText, FetchText_DOM_singleton} from "#customary/fetch/FetchText.js";
 import {CustomaryHtml} from "#customary/html/CustomaryHtml.js";
 import {AttributesDefinition, detectAttributes} from "#customary/attributes/AttributesDefinition.js";
-import {CustomaryProperties} from "#customary/CustomaryProperties.js";
 
 export class CustomaryDefine<T extends HTMLElement> {
 
-	async define(constructor: CustomElementConstructor): Promise<CustomaryDefinition<T>> {
-		return await this.buildDefinition(constructor);
+	async define(): Promise<CustomaryDefinition<T>> {
+		return await this.buildDefinition();
 	}
 
-	private async buildDefinition(
-			constructor: CustomElementConstructor
-	): Promise<CustomaryDefinition<T>>
+	private async buildDefinition(): Promise<CustomaryDefinition<T>>
 	{
 		const {template, templateInDocument} =
 				await this.resolveHTMLTemplateElement(this.name);
@@ -23,16 +19,12 @@ export class CustomaryDefine<T extends HTMLElement> {
 		const attributes: AttributesDefinition =
 			detectAttributes({config: this.declaration.config, template});
 
-		const customaryDefinition: CustomaryDefinition<T> = {
+		return {
 			declaration: this.declaration,
 			attributes: attributes,
 			templateInDocument: !!templateInDocument,
 			immutable_htmlString: CustomaryHtml.getHtmlString(template),
 		};
-
-		CustomaryProperties.addProperties(constructor as typeof LitElement, customaryDefinition);
-
-		return customaryDefinition;
 	}
 
 	private async resolveHTMLTemplateElement(
