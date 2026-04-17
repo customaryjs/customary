@@ -3,17 +3,18 @@ import {CustomaryDefinition} from "#customary/CustomaryDefinition.js";
 import {PropertiesInjector} from "#customary/properties/PropertiesInjector.js";
 import {CustomaryDeclaration} from "#customary/CustomaryDeclaration";
 
-export class StateProperties {
-
+export class StateProperties
+{
 	static addProperties<T extends HTMLElement>(
 			constructor: typeof LitElement,
 			declaration: CustomaryDeclaration<T>
 	)
 	{
-		const fromDeclaration = declaration.config?.state ?? [];
-		const names = [...new Set([...fromDeclaration])];
-		PropertiesInjector.injectProperties(constructor,
-			{ propertyDeclaration: {state: true}, names });
-	}
+		const names = declaration.config?.state ?? [];
 
+		for (const name of names) {
+			PropertiesInjector.injectProperties(constructor,
+				{name, propertyDeclaration: {state: true}, skipExisting: true});
+		}
+	}
 }

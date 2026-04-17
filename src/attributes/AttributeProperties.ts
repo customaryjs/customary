@@ -9,7 +9,9 @@ export class AttributeProperties
 			attributesDefinition: AttributesDefinition,
 	)
 	{
-		PropertiesInjector.injectProperties(constructor,
-			{ propertyDeclaration: {reflect: true}, names: attributesDefinition.attributes });
+		for (const name of attributesDefinition.attributes) {
+			PropertiesInjector.injectProperties(constructor,
+				{ name, propertyDeclaration: {reflect: true} });
+		}
 	}
 }

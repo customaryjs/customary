@@ -4,21 +4,18 @@ import {PropertyDeclaration, PropertyDeclarations} from "@lit/reactive-element";
 export class PropertiesInjector {
 	static injectProperties(
 			constructor: typeof LitElement,
-			{propertyDeclaration, names, skipExisting}: {
+			{name, propertyDeclaration, skipExisting}: {
+				name: string,
 				propertyDeclaration: PropertyDeclaration,
-				names: string[],
 				skipExisting?: boolean,
 			}
 	) {
-		if (!names.length) return;
 		const properties: Writable<PropertyDeclarations> = constructor.properties ??= {};
-		for (const key of names) {
-			if (key in properties) {
-				if (skipExisting) continue;
-				throw new Error(`${key}: property already exists.`);
-			}
-			properties[key] = propertyDeclaration;
+		if (name in properties) {
+			if (skipExisting) return;
+			throw new Error(`${name}: property already exists.`);
 		}
+		properties[name] = propertyDeclaration;
 	}
 }
 

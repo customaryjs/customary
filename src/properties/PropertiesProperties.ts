@@ -19,15 +19,11 @@ export class PropertiesProperties
 
 		const names = [...new Set([...fromArray, ...fromRecord])];
 
-		for (const key of names) {
-			PropertiesInjector.injectProperties(constructor,
-				{
-					propertyDeclaration:
-						hooksArray.find(value => value.name === key)?.propertyDeclaration
-							?? hooksRecord[key],
-					names: [key]
-				}
-			);
+		for (const name of names) {
+			const propertyDeclaration =
+				hooksArray.find(value => value.name === name)?.propertyDeclaration
+				?? hooksRecord[name];
+			PropertiesInjector.injectProperties(constructor, {name, propertyDeclaration});
 		}
 	}
 }
