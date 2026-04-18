@@ -103,11 +103,11 @@
     "#customary/lit": "./src/lit/index.ts"
   },
   "help:main": "https://parceljs.org/features/targets/#library-targets",
-  "target:bundle:customary.mjs": ".dist/bundled/customary.mjs",
-  "target:bundle:customary-library.mjs": ".dist/bundled/customary-library.mjs",
+  "target:bundle:customary.mjs": ".dist/customary.mjs",
+  "target:bundle:customary-lit-dev.mjs": ".dist/customary-lit-dev.mjs",
   "targets": {
     "target:bundle:customary.mjs": {
-      "source": "./src/now.ts",
+      "source": "./src/index.ts",
       "context": "browser",
       "isLibrary": true,
       "optimize": false,
@@ -121,8 +121,8 @@
         "inline": true
       }
     },
-    "target:bundle:customary-library.mjs": {
-      "source": "./src/index.ts",
+    "target:bundle:customary-lit-dev.mjs": {
+      "source": "./src/lit/index.ts",
       "context": "browser",
       "isLibrary": true,
       "optimize": false,
