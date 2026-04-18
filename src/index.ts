@@ -6,5 +6,15 @@ import {CustomaryElement} from "#customary/CustomaryElement.js";
 // noinspection JSUnusedGlobalSymbols
 export type CustomaryDeclaration<T extends HTMLElement> = C<T>;
 
-export * from "#customary/lit";
 export {Customary, CustomaryElement};
+
+bootstrap();
+
+function bootstrap() {
+    document.addEventListener("DOMContentLoaded", Customary__DOMContentLoaded);
+}
+
+function Customary__DOMContentLoaded() {
+    if ((globalThis as any)[`customary-options:autodetect-dont`]) return;
+    void Customary.autodetect();
+}
