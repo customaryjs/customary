@@ -1,17 +1,11 @@
 import {CustomaryDefinition, hasDefinition, setDefinition} from "#customary/CustomaryDefinition.js";
 import {CustomaryDeclaration} from "#customary/CustomaryDeclaration.js";
 import {CustomaryDefine} from "#customary/CustomaryDefine.js";
-import {CustomaryProperties} from "#customary/CustomaryProperties";
+import {CustomaryProperties} from "#customary/CustomaryProperties.js";
 import {LitElement} from "#customary/lit";
-
-const WAIT_TO_DEFINE_EVERYTHING_IN_THE_END = false;
 
 export class CustomaryRegistry
 {
-    static singleton(): CustomaryRegistry {
-        return CustomaryRegistry.CustomaryRegistry_singleton
-    }
-
     async declare(
         constructor: CustomElementConstructor,
         declaration: CustomaryDeclaration<any>
@@ -20,35 +14,7 @@ export class CustomaryRegistry
             throw new Error('A name must be provided to define a custom element.');
         }
 
-        if (!WAIT_TO_DEFINE_EVERYTHING_IN_THE_END) {
-            await this.define(constructor, declaration);
-            return;
-        }
-
-        this.declarations.set(constructor, declaration);
-    }
-
-    async settle(): Promise<void> {
-        if (!WAIT_TO_DEFINE_EVERYTHING_IN_THE_END) {
-            return;
-        }
-
-        const entries = [...this.declarations.entries()];
-
-        const promises = entries.map(
-            entry =>
-            {
-                const
-                [
-                    constructor, declaration
-                ]: [
-                CustomElementConstructor, CustomaryDeclaration<any>
-            ] = entry;
-                return this.define(constructor, declaration)
-            }
-        );
-
-        await Promise.all(promises);
+        await this.define(constructor, declaration);
     }
 
     async untilDefined(constructor: CustomElementConstructor): Promise<CustomElementConstructor> {
@@ -67,8 +33,7 @@ export class CustomaryRegistry
     ): Promise<void>
     {
         if (hasDefinition(constructor)) {
-            console.debug(`${constructor.name}: element already defined, skipping...`);
-            return;
+            throw new Error(`${constructor.name}: element already defined`);
         }
 
         const definition: CustomaryDefinition<T> =
@@ -86,7 +51,4 @@ export class CustomaryRegistry
 
     constructor(private readonly dom_customElementRegistry: CustomElementRegistry) {}
 
-    private readonly declarations: Map<CustomElementConstructor, CustomaryDeclaration<any>> = new Map();
-
-    private static readonly CustomaryRegistry_singleton: CustomaryRegistry = new CustomaryRegistry(customElements);
 }
